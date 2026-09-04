@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/robot_simulator.dir/link.d CMakeFiles/robot_simulator.dir/Main.cpp.o -o robot_simulator  libsimulator.a
