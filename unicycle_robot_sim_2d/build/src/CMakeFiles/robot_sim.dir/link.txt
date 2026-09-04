@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/robot_sim.dir/link.d CMakeFiles/robot_sim.dir/Main.cpp.o -o robot_sim  librobot.a
