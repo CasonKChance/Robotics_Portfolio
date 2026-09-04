@@ -55,7 +55,7 @@ void Simulator::step(double timeStep) {
 }
 
 std::string Simulator::prepareLogPath() const {
-    std::filesystem::path logPath = std::filesystem::path(PROJECT_BINARY_DIR) / "output" / "SimulationDataLog.csv";
+    std::filesystem::path logPath = std::filesystem::path(PROJECT_BINARY_DIR) / "output" / "SimulatorDataLog.csv";
     std::filesystem::create_directories(logPath.parent_path());
     return logPath.string();
 }

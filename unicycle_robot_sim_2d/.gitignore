@@ -1,3 +1,17 @@
 .vscode/*
 
+# Python Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & generated files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Generated simulation outputs
 build/
+data_analysis/simulation_analysis_plot.png
