@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/TestRobot.dir/link.d CMakeFiles/TestRobot.dir/TestRobot.cpp.o -o TestRobot  ../src/libsimulator.a
