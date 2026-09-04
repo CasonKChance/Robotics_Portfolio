@@ -2,7 +2,7 @@
 #define SIMULATOR_H
 
 #include "Robot.h"
-#include "logger/SimulatorDataLogger.h"
+#include "SimulatorDataLogger.h"
 
 /**
  * @brief Manages simulation time and steps a target Robot through discrete kinematic updates.

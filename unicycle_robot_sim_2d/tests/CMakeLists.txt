@@ -5,7 +5,6 @@ add_executable(TestRobot TestRobot.cpp)
 target_link_libraries(TestRobot
     PRIVATE
         simulator
-        logger
 )
 
 add_test(NAME RunRobotTests COMMAND TestRobot)
@@ -17,7 +16,6 @@ add_executable(TestSimulator TestSimulator.cpp)
 target_link_libraries(TestSimulator
     PRIVATE
         simulator
-        logger
 )
 
 add_test(NAME RunSimulatorTests COMMAND TestSimulator)

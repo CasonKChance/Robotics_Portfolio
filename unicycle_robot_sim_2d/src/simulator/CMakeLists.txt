@@ -4,6 +4,7 @@ target_sources(simulator
     PRIVATE
         Robot.cpp
         Simulator.cpp
+        SimulatorDataLogger.cpp
         
     PUBLIC
         FILE_SET HEADERS
@@ -13,6 +14,7 @@ target_sources(simulator
             ${CMAKE_SOURCE_DIR}/include/simulator/VelocityCommand.h
             ${CMAKE_SOURCE_DIR}/include/simulator/Robot.h
             ${CMAKE_SOURCE_DIR}/include/simulator/Simulator.h
+            ${CMAKE_SOURCE_DIR}/include/simulator/SimulatorDataLogger.h
 )
 
 target_compile_definitions(simulator PRIVATE
