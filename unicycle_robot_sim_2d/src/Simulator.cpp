@@ -12,7 +12,7 @@ Simulator::Simulator(Robot& robot, double timeStep) :
     currentTime_{ 0.0 }
 {
     if (timeStep_ <= 0.0) {
-        std::invalid_argument("timeStep must be a positive value. Provided: " + std::to_string(timeStep));
+        throw std::invalid_argument("timeStep must be a positive value. Provided: " + std::to_string(timeStep));
     }
 }
 
@@ -34,11 +34,13 @@ void Simulator::runFor(double duration) {
         return;
     }
 
-    const int totalCompleteSteps = static_cast<int>(std::round(duration / timeStep_));
-    for (int i{ 0 }; i < totalCompleteSteps; ++i) {
-        step();
+    double remainingTime = duration;
+    while (remainingTime >= timeStep_) {
+        step(timeStep_);
+        remainingTime -= timeStep_;
     }
 
-    const double finalPartialTimeStep = std::fmod(duration, timeStep_);
-    step(finalPartialTimeStep);
+    if (remainingTime > 0) {
+        step(remainingTime);
+    }
 }
