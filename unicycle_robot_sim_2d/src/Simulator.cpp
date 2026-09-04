@@ -16,19 +16,6 @@ Simulator::Simulator(Robot& robot, double timeStep) :
     }
 }
 
-void Simulator::step() {
-    robot_.update(timeStep_);
-    currentTime_ += timeStep_;
-}
-
-void Simulator::step(double timeStep) {
-    if (timeStep <= 0.0) {
-        throw std::invalid_argument("timeStep must be a positive value. Provided: " + std::to_string(timeStep));
-    }
-    robot_.update(timeStep);
-    currentTime_ += timeStep;
-}
-
 void Simulator::runFor(double duration) {
     if (duration <= 0.0) {
         return;
@@ -43,4 +30,20 @@ void Simulator::runFor(double duration) {
     if (remainingTime > 0) {
         step(remainingTime);
     }
+}
+
+/* Private Member Functions */
+
+void Simulator::step() {
+    robot_.update(timeStep_);
+    currentTime_ += timeStep_;
+}
+
+void Simulator::step(double timeStep) {
+    if (timeStep <= 0.0) {
+        throw std::invalid_argument("timeStep must be a positive value. Provided: " + std::to_string(timeStep));
+    }
+    
+    robot_.update(timeStep);
+    currentTime_ += timeStep;
 }

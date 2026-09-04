@@ -22,16 +22,6 @@ class Simulator {
         );
 
         /**
-        * @brief Advances the simulation by a single discrete time step (dt).
-        */
-        void step();
-
-        /**
-        * @brief Advances the simulation by a single discrete time step (dt).
-        */
-        void step(double timeStep);
-
-        /**
         * @brief Advances the simulation continuously for a target duration in seconds.
         * 
         * @param duration Total time span to simulate in seconds.
@@ -46,9 +36,19 @@ class Simulator {
 
     private:
 
-    Robot& robot_;              // Reference to the managed robot model.
-    double timeStep_{ 0.01 };   // Fixed integration step size dt in seconds.
-    double currentTime_{ 0.0 }; // Accumulated simulation clock time in seconds.
+        Robot& robot_;              // Reference to the managed robot model.
+        double timeStep_{ 0.01 };   // Fixed integration step size dt in seconds.
+        double currentTime_{ 0.0 }; // Accumulated simulation clock time in seconds.
+
+        /**
+        * @brief Advances the simulation by a single discrete time step (dt).
+        */
+        void step();
+
+        /**
+        * @brief Advances the simulation by a single discrete time step (dt).
+        */
+        void step(double timeStep);
 };
 
 #endif
