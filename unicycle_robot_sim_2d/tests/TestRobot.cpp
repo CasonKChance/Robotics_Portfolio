@@ -5,6 +5,29 @@
 #include <cmath>
 #include <iostream>
 #include <numbers>
+#include <string>
+
+// Helper to print a Pose nicely
+std::string to_string(const Pose& p) {
+    return "Pose[x: " + std::to_string(p.x) + 
+           ", y: " + std::to_string(p.y) + 
+           ", theta: " + std::to_string(p.theta) + "]";
+}
+
+// Custom assertion macro that supports dynamic string streaming
+#ifndef NDEBUG
+#define assert_msg(condition, stream_expression) \
+    do { \
+        if (!(condition)) { \
+            std::cerr << "Assertion failed: (" #condition ")\n" \
+                      << "Message: " << stream_expression \
+                      << "\nFile: " << __FILE__ << ", Line: " << __LINE__ << "\n"; \
+            std::terminate(); \
+        } \
+    } while (false)
+#else
+#define assert_msg(condition, stream_expression) do { } while (false)
+#endif
 
 // Helper to safely compare floating-point values
 constexpr double EPSILON = 1e-6;
@@ -43,7 +66,9 @@ void testStationary() {
         robot.update(1);
     }
 
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, 0.0}));
+    Pose expected{0.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestStationary - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testStationary\n";
 }
 
@@ -62,7 +87,9 @@ void testMoveForward() {
         robot.update(1);
     }
 
-    assert(isPoseClose(robot.getPose(), Pose{10.0, 0.0, 0.0}));
+    Pose expected{10.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestMoveForward - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testMoveForward\n";
 }
 
@@ -84,7 +111,9 @@ void testRotateInPlace() {
     }
 
     // Checking against normalized result (±π)
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, std::numbers::pi}));
+    Pose expected{0.0, 0.0, std::numbers::pi};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestRotateInPlace - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testRotateInPlace\n";
 }
 
@@ -110,7 +139,9 @@ void testCircularMotion() {
     }
 
     // With dt=0.01s, numerical drift is small (~0.03m tolerance needed)
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, 0.0}, 0.05));
+    Pose expected{0.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected, 0.03), 
+                "TestCircularMotion - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testCircularMotion\n";
 }
 
@@ -136,7 +167,9 @@ void testMoveInASquare() {
         robot.update(1.0);
     }
 
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, 0.0}));
+    Pose expected{0.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestMoveInASquare - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testMoveInASquare\n";
 }
 

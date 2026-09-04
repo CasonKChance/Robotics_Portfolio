@@ -7,6 +7,28 @@
 #include <iostream>
 #include <numbers>
 
+// Helper to print a Pose nicely
+std::string to_string(const Pose& p) {
+    return "Pose[x: " + std::to_string(p.x) + 
+           ", y: " + std::to_string(p.y) + 
+           ", theta: " + std::to_string(p.theta) + "]";
+}
+
+// Custom assertion macro that supports dynamic string streaming
+#ifndef NDEBUG
+#define assert_msg(condition, stream_expression) \
+    do { \
+        if (!(condition)) { \
+            std::cerr << "Assertion failed: (" #condition ")\n" \
+                      << "Message: " << stream_expression \
+                      << "\nFile: " << __FILE__ << ", Line: " << __LINE__ << "\n"; \
+            std::terminate(); \
+        } \
+    } while (false)
+#else
+#define assert_msg(condition, stream_expression) do { } while (false)
+#endif
+
 // Helper to safely compare floating-point values
 constexpr double EPSILON = 1e-6;
 
@@ -28,6 +50,7 @@ bool isPoseClose(const Pose& p1, const Pose& p2, double tol = EPSILON) {
            isClose(p1.y, p2.y, tol) && 
            (isAngleClose(p1.theta, p2.theta, tol));
 }
+
 /**
  * @brief Tests that a stationary robot remains at the origin when given zero velocity.
  */
@@ -45,7 +68,9 @@ void testStationary() {
         simulator.runFor(1.0);
     }
 
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, 0.0}));
+    Pose expected{0.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestStationary - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testStationary\n";
 }
 
@@ -66,7 +91,9 @@ void testMoveForward() {
         simulator.runFor(1.0);
     }
 
-    assert(isPoseClose(robot.getPose(), Pose{10.0, 0.0, 0.0}));
+    Pose expected{10.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestMoveForward - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testMoveForward\n";
 }
 
@@ -90,7 +117,9 @@ void testRotateInPlace() {
     }
 
     // Checking against normalized result (±π)
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, std::numbers::pi}));
+    Pose expected{0.0, 0.0, std::numbers::pi};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestRotateInPlace - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testRotateInPlace\n";
 }
 
@@ -117,7 +146,9 @@ void testCircularMotion() {
     }
 
     // With dt=0.01s, numerical drift is small (~0.03m tolerance needed)
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, 0.0}, 0.05));
+    Pose expected{0.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected, 0.03), 
+                "TestCircularMotion - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testCircularMotion\n";
 }
 
@@ -145,7 +176,9 @@ void testMoveInASquare() {
         simulator.runFor(1.0);
     }
 
-    assert(isPoseClose(robot.getPose(), Pose{0.0, 0.0, 0.0}));
+    Pose expected{0.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestMoveInASquare - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testMoveInASquare\n";
 }
 
@@ -157,16 +190,24 @@ void testTime() {
 
     Simulator simulator(robot, 0.01);
 
-    assert(isClose(simulator.getCurrentTime(), 0.0));
+    assert_msg(isClose(simulator.getCurrentTime(), 0.0), 
+                "TestTime - Expected: 0.0. Actual: " << simulator.getCurrentTime());
 
     simulator.runFor(1.0);
-    assert(isClose(simulator.getCurrentTime(), 1.0));
+    assert_msg(isClose(simulator.getCurrentTime(), 1.0), 
+                "TestTime - Expected: 1.0. Actual: " << simulator.getCurrentTime());
 
     simulator.runFor(2.5);
-    assert(isClose(simulator.getCurrentTime(), 3.5));
+    assert_msg(isClose(simulator.getCurrentTime(), 3.5), 
+                "TestTime - Expected: 3.5. Actual: " << simulator.getCurrentTime());
 
     simulator.runFor(0.5);
-    assert(isClose(simulator.getCurrentTime(), 4.0));
+    assert_msg(isClose(simulator.getCurrentTime(), 4.0), 
+                "TestTime - Expected: 4.0. Actual: " << simulator.getCurrentTime());
+
+    simulator.runFor(1000.0);
+    assert_msg(isClose(simulator.getCurrentTime(), 1004.0), 
+                "TestTime - Expected: 104.0. Actual: " << simulator.getCurrentTime());
 
     std::cout << "[PASS] testTime\n";
 }
