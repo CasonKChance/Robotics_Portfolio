@@ -9,14 +9,23 @@
 // Helper to safely compare floating-point values
 constexpr double EPSILON = 1e-6;
 
-bool isClose(double a, double b, double tol = EPSILON) {
+double normalizeAngle(double angle) {
+    // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
+    return std::atan2(std::sin(angle), std::cos(angle));
+}
+
+bool isPositionClose(double a, double b, double tol = EPSILON) {
     return std::abs(a - b) < tol;
 }
 
+bool isAngleClose(double a, double b, double tol = EPSILON) {
+    return std::abs(normalizeAngle(a - b)) < tol;
+}
+
 bool isPoseClose(const Pose& p1, const Pose& p2, double tol = EPSILON) {
-    return isClose(p1.x, p2.x, tol) && 
-           isClose(p1.y, p2.y, tol) && 
-           (isClose(p1.theta, p2.theta, tol) || isClose(std::abs(p1.theta - p2.theta), 2 * std::numbers::pi, tol));
+    return isPositionClose(p1.x, p2.x, tol) && 
+           isPositionClose(p1.y, p2.y, tol) && 
+           (isAngleClose(p1.theta, p2.theta, tol));
 }
 
 /**

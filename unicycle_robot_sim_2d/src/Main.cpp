@@ -18,8 +18,8 @@ int main() {
 
         robot.setVelocityCommand({
             .linearVelocity = 0.0,
-            .angularVelocity = std::numbers::pi / 2;
-        })
+            .angularVelocity = std::numbers::pi / 2
+        });
 
         simulator.runFor(1);
     }

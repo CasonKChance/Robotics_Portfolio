@@ -27,6 +27,11 @@ class Simulator {
         void step();
 
         /**
+        * @brief Advances the simulation by a single discrete time step (dt).
+        */
+        void step(double timeStep);
+
+        /**
         * @brief Advances the simulation continuously for a target duration in seconds.
         * 
         * @param duration Total time span to simulate in seconds.
