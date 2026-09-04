@@ -14,3 +14,7 @@ target_sources(simulator
             ${CMAKE_SOURCE_DIR}/include/simulator/Robot.h
             ${CMAKE_SOURCE_DIR}/include/simulator/Simulator.h
 )
+
+target_compile_definitions(simulator PRIVATE
+    PROJECT_BINARY_DIR="${PROJECT_BINARY_DIR}"
+)

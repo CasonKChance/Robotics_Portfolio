@@ -3,11 +3,13 @@
 #include <cmath>
 #include <stdexcept>
 #include <string>
+#include <filesystem>
 
 /* Public Member Functions */
 
 Simulator::Simulator(Robot& robot, double timeStep) :
     robot_{ robot },
+    logger_{ prepareLogPath() },
     timeStep_{ timeStep },
     currentTime_{ 0.0 }
 {
@@ -37,6 +39,8 @@ void Simulator::runFor(double duration) {
 void Simulator::step() {
     robot_.update(timeStep_);
     currentTime_ += timeStep_;
+
+    logger_.logData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
 }
 
 void Simulator::step(double timeStep) {
@@ -46,4 +50,12 @@ void Simulator::step(double timeStep) {
     
     robot_.update(timeStep);
     currentTime_ += timeStep;
+
+    logger_.logData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+}
+
+std::string Simulator::prepareLogPath() const {
+    std::filesystem::path logPath = std::filesystem::path(PROJECT_BINARY_DIR) / "output" / "SimulationDataLog.csv";
+    std::filesystem::create_directories(logPath.parent_path());
+    return logPath.string();
 }
