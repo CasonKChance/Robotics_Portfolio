@@ -6,13 +6,15 @@
 #include <string>
 #include <stdexcept>
 
+static constexpr int kDefaultPrecision = 6;  // Default floating-point precision for logged coordinates
+
 /* Public Member Functions */
 
 SimulatorDataLogger::SimulatorDataLogger(const std::string& filePath) :
     outputFile_(filePath, std::ios::out)
 {
     // Set default floating-point formatting precision for logged coordinates
-    outputFile_.precision(6);
+    outputFile_.precision(kDefaultPrecision);
 
     if (!outputFile_.is_open()) {
         throw std::runtime_error("Error: Could not open log file: " + filePath);
