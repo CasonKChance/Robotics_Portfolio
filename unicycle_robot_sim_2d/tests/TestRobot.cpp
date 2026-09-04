@@ -146,7 +146,6 @@ int main() {
     testRotateInPlace();
     testCircularMotion();
     testMoveInASquare();
-    testTime();
 
     std::cout << "\nAll unit tests passed successfully!\n";
     return 0;

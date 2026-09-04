@@ -15,7 +15,7 @@ double normalizeAngle(double angle) {
     return std::atan2(std::sin(angle), std::cos(angle));
 }
 
-bool isPositionClose(double a, double b, double tol = EPSILON) {
+bool isClose(double a, double b, double tol = EPSILON) {
     return std::abs(a - b) < tol;
 }
 
@@ -24,8 +24,8 @@ bool isAngleClose(double a, double b, double tol = EPSILON) {
 }
 
 bool isPoseClose(const Pose& p1, const Pose& p2, double tol = EPSILON) {
-    return isPositionClose(p1.x, p2.x, tol) && 
-           isPositionClose(p1.y, p2.y, tol) && 
+    return isClose(p1.x, p2.x, tol) && 
+           isClose(p1.y, p2.y, tol) && 
            (isAngleClose(p1.theta, p2.theta, tol));
 }
 /**
