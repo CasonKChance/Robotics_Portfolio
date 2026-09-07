@@ -46,6 +46,12 @@ class Robot {
         const VelocityCommand& getVelocityCommand() const { return velocityCommand_; }
 
         /**
+         * @brief Gets the current actual velocity of the robot.
+         * @return Imutable reference to the robot's current actual velocity.
+         */
+        const VelocityCommand& getActualVelocity() const { return actualVelocity_; }
+
+        /**
          * @brief Gets the maximum linear velocity of the robot.
          * @return The maximum linear velocity of the robot.
          */
@@ -59,9 +65,10 @@ class Robot {
 
     private:
 
-        Pose pose_;                                     // Current state [x, y, θ]ᵀ in the World frame.
-        VelocityCommand velocityCommand_;               // Current active velocity command [v, ω]ᵀ.
-        const double maximumLinearVelocity_{ 5.0 };        // Maximum linear velocity of robot
+        Pose pose_;                                                  // Current state [x, y, θ]ᵀ in the World frame.
+        VelocityCommand velocityCommand_;                            // Current active velocity command [v, ω]ᵀ.
+        VelocityCommand actualVelocity_;                             // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command.
+        const double maximumLinearVelocity_{ 5.0 };                  // Maximum linear velocity of robot
         const double maximumAngularVelocity_{ std::numbers::pi };    // Maximum angular velocity of robot
 
         /**
@@ -70,6 +77,12 @@ class Robot {
          * @return Equivalent angle wrapped within [-π, π].
          */
         double normalizeAngle(double angle) const;
+
+        /**
+         * @brief Sets the robot's actual velocity ([v, ω]ᵀ) taking maximum velocity into account.
+         * @param command Linear (m/s) and angular (rad/s) velocity inputs.
+         */
+        void setActualVelocity(const VelocityCommand& command);
 };
 
 #endif

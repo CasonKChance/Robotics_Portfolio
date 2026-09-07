@@ -8,24 +8,18 @@
 
 Robot::Robot(const Pose& initialPose) :
     pose_{ initialPose },
-    velocityCommand_{ VelocityCommand{ 0.0, 0.0 } }
+    velocityCommand_{ VelocityCommand{ 0.0, 0.0 } },
+    actualVelocity_{ VelocityCommand{ 0.0, 0.0 } }
 {
-    // Clamp linear velocity and angular velocity to their respective maximums
-    if (velocityCommand_.linearVelocity < -maximumLinearVelocity_ || velocityCommand_.linearVelocity > maximumLinearVelocity_) {
-        velocityCommand_.linearVelocity = std::clamp(velocityCommand_.linearVelocity, maximumLinearVelocity_, maximumLinearVelocity_);
-    }
-    if (velocityCommand_.angularVelocity < -maximumAngularVelocity_ || velocityCommand_.angularVelocity > maximumAngularVelocity_) {
-        velocityCommand_.angularVelocity = std::clamp(velocityCommand_.angularVelocity, maximumAngularVelocity_, maximumAngularVelocity_);
-    }
-    
     // Ensure initial heading is properly normalized to [-π, π]
     pose_.theta = normalizeAngle(pose_.theta);
 }
 
 void Robot::setVelocityCommand(const VelocityCommand& command) {
-    // Clamp linear velocity and angular velocity to their respective maximums
-    velocityCommand_.linearVelocity = std::clamp(command.linearVelocity, -maximumLinearVelocity_, maximumLinearVelocity_);
-    velocityCommand_.angularVelocity = std::clamp(command.angularVelocity, -maximumAngularVelocity_, maximumAngularVelocity_);
+    velocityCommand_.linearVelocity = command.linearVelocity;
+    velocityCommand_.angularVelocity = command.angularVelocity;
+
+    setActualVelocity(velocityCommand_);
 }
 
 void Robot::update(double dt) {
@@ -33,8 +27,8 @@ void Robot::update(double dt) {
         return;
     }
 
-    double v = velocityCommand_.linearVelocity;
-    double omega = velocityCommand_.angularVelocity;
+    double v = actualVelocity_.linearVelocity;
+    double omega = actualVelocity_.angularVelocity;
 
     pose_.x += v * std::cos(pose_.theta) * dt;
     pose_.y += v * std::sin(pose_.theta) * dt;
@@ -46,4 +40,10 @@ void Robot::update(double dt) {
 double Robot::normalizeAngle(double angle) const {
     // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
     return std::atan2(std::sin(angle), std::cos(angle));
+}
+
+void Robot::setActualVelocity(const VelocityCommand& command) {
+    // Set the actual velocity of the robot by clamping the command to the robot's maximum velocities
+    actualVelocity_.linearVelocity = std::clamp(command.linearVelocity, -maximumLinearVelocity_, maximumLinearVelocity_);
+    actualVelocity_.angularVelocity = std::clamp(command.angularVelocity, -maximumAngularVelocity_, maximumAngularVelocity_);
 }

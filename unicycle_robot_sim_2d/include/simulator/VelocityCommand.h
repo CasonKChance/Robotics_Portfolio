@@ -2,7 +2,7 @@
 #define VELOCITY_COMMAND_H
 
 /**
- * @brief Represents a 2D velocity command vector [v, ω]ᵀ for a unicycle/differential drive robot.
+ * @brief Represents a 2D velocity command vector [v, ω]ᵀ for a unicycle drive robot.
  * 
  * - linearVelocity (v): Forward velocity along the robot's local x-axis (m/s).
  * - angularVelocity (ω): Rotational velocity counter-clockwise around the z-axis (rad/s).

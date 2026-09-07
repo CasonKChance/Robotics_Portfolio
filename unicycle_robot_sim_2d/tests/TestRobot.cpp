@@ -184,36 +184,36 @@ void testMaximumVelocities() {
         .angularVelocity = 0.0,
     });
 
-    assert_msg((std::abs(robot.getVelocityCommand().linearVelocity) == robot.getMaximumLinearVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().linearVelocity) == robot.getMaximumLinearVelocity()),
                 "TestMaximumVelocities - Expected Linear Velocity: " << robot.getMaximumLinearVelocity()
-                << ". Actual: " << robot.getVelocityCommand().linearVelocity);
+                << ". Actual: " << robot.getActualVelocity().linearVelocity);
 
     robot.setVelocityCommand({
         .linearVelocity = -100.0,
         .angularVelocity = 0.0,
     });
 
-    assert_msg((std::abs(robot.getVelocityCommand().linearVelocity) == robot.getMaximumLinearVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().linearVelocity) == robot.getMaximumLinearVelocity()),
                 "TestMaximumVelocities - Expected Linear Velocity: " << robot.getMaximumLinearVelocity()
-                << ". Actual: " << robot.getVelocityCommand().linearVelocity);
+                << ". Actual: " << robot.getActualVelocity().linearVelocity);
 
     robot.setVelocityCommand({
         .linearVelocity = 0.0,
         .angularVelocity = 100.0,
     });
 
-    assert_msg((std::abs(robot.getVelocityCommand().angularVelocity) == robot.getMaximumAngularVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().angularVelocity) == robot.getMaximumAngularVelocity()),
                 "TestMaximumVelocities - Expected Angular Velocity: " << robot.getMaximumAngularVelocity()
-                << ". Actual: " << robot.getVelocityCommand().angularVelocity);
+                << ". Actual: " << robot.getActualVelocity().angularVelocity);
 
     robot.setVelocityCommand({
         .linearVelocity = 0.0,
         .angularVelocity = -100.0,
     });
 
-    assert_msg((std::abs(robot.getVelocityCommand().angularVelocity) == robot.getMaximumAngularVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().angularVelocity) == robot.getMaximumAngularVelocity()),
                 "TestMaximumVelocities - Expected Angular Velocity: " << robot.getMaximumAngularVelocity()
-                << ". Actual: " << robot.getVelocityCommand().angularVelocity);
+                << ". Actual: " << robot.getActualVelocity().angularVelocity);
 
     
     std::cout << "[PASS] testMaximumVelocities\n";
