@@ -1,8 +1,7 @@
 #ifndef SIMULATOR_DATA_LOGGER_H
 #define SIMULATOR_DATA_LOGGER_H
 
-#include <simulator/Pose.h>
-#include <simulator/VelocityCommand.h>
+#include <simulator/Robot.h>
 #include <simulator/World.h>
 
 #include <string>
@@ -41,12 +40,11 @@ class SimulatorDataLogger {
          * 
          * Formats the entry as: time, x, y, theta, linear_velocity, angular_velocity
          * 
-         * @param pose Current 2D spatial pose [x, y, θ]ᵀ of the robot.
-         * @param command Current active velocity command [v, ω]ᵀ applied to the robot.
+         * @param robot Reference to the robot
          * @param currentTime Current total elapsed simulation time in seconds.
          * @throws std::runtime_error If called while the file stream is not open.
          */
-        void logRobotData(const Pose& pose, const VelocityCommand& command, double currentTime);
+        void logRobotData(const Robot& robot, double currentTime);
 
         /**
          * @brief Logs the current world state, including obstacles and goal region.

@@ -26,7 +26,7 @@ SimulatorDataLogger::SimulatorDataLogger(const std::string& robotDataFilePath, c
     }
 
     // Write initial CSV column headers
-    robotDataOutputFile_ << "time,x,y,theta,linear_velocity,angular_velocity\n";
+    robotDataOutputFile_ << "time,x,y,theta,command_linear_velocity,actual_linear_velocity,command_angular_velocity,actual_angular_velocity\n";
     worldDataOutputFile_ << "x,y,radius,is_goal,is_world_bounds\n";
 }
 
@@ -39,14 +39,16 @@ SimulatorDataLogger::~SimulatorDataLogger() {
     }
 }
 
-void SimulatorDataLogger::logRobotData(const Pose& pose, const VelocityCommand& command, double currentTime) {
+void SimulatorDataLogger::logRobotData(const Robot& robot, double currentTime) {
     if (robotDataOutputFile_.is_open()) {
         robotDataOutputFile_ << currentTime << "," 
-                             << pose.x << "," 
-                             << pose.y << "," 
-                             << pose.theta << "," 
-                             << command.linearVelocity << "," 
-                             << command.angularVelocity << "\n";
+                             << robot.getPose().x << "," 
+                             << robot.getPose().y << "," 
+                             << robot.getPose().theta << "," 
+                             << robot.getVelocityCommand().linearVelocity << "," 
+                             << robot.getActualVelocity().linearVelocity << ","
+                             << robot.getVelocityCommand().angularVelocity << ","
+                             << robot.getActualVelocity().angularVelocity << "\n";
     } else {
         throw std::runtime_error("Error: Robot data log file is not open for writing.");
     }

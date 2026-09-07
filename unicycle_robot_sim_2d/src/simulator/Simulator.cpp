@@ -23,7 +23,7 @@ Simulator::Simulator(Robot& robot, World& world, double timeStep) :
     status_ = checkCollision();
 
     // Log the initial state of the robot and world to the respective CSV files
-    logger_.logRobotData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+    logger_.logRobotData(robot_, currentTime_);
     logger_.logWorldData(world_);
 }
 
@@ -57,7 +57,7 @@ void Simulator::step() {
     robot_.update(timeStep_);
     currentTime_ += timeStep_;
 
-    logger_.logRobotData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+    logger_.logRobotData(robot_, currentTime_);
 }
 
 void Simulator::step(double timeStep) {
@@ -68,7 +68,7 @@ void Simulator::step(double timeStep) {
     robot_.update(timeStep);
     currentTime_ += timeStep;
 
-    logger_.logRobotData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+    logger_.logRobotData(robot_, currentTime_);
 }
 
 SimulationStatus Simulator::checkCollision() const {
