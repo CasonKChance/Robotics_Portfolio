@@ -218,6 +218,66 @@ void testTime() {
     std::cout << "[PASS] testTime\n";
 }
 
+void testRobotCollisionWithObstacle() {
+    Robot robot(Pose{5.0, 5.0, 0.0});
+    World world(10, 10, {Obstacle{7.0, 5.0, 1.0}});
+
+    Simulator simulator(robot, world, 0.01);
+
+    // The robot starts outside the obstacle, but will move directly into it.
+    robot.setVelocityCommand({
+        .linearVelocity = 1.0,
+        .angularVelocity = 0.0
+    });
+
+    try {
+        simulator.runFor(3.0);
+        assert_msg(false, "Expected collision with obstacle not detected.");
+    } catch (const std::runtime_error& e) {
+        std::cout << "[PASS] testRobotCollisionWithObstacle - Caught expected exception: " << e.what() << "\n";
+    }
+}
+
+void testRobotCollisionWithGoal() {
+    Robot robot(Pose{5.0, 5.0, 0.0});
+    World world(10, 10, {}, Obstacle{7.0, 5.0, 1.0});
+
+    Simulator simulator(robot, world, 0.01);
+
+    // The robot starts outside the goal, but will move directly into it.
+    robot.setVelocityCommand({
+        .linearVelocity = 1.0,
+        .angularVelocity = 0.0
+    });
+
+    try {
+        simulator.runFor(3.0);
+        assert_msg(false, "Expected collision with goal not detected.");
+    } catch (const std::runtime_error& e) {
+        std::cout << "[PASS] testRobotCollisionWithGoal - Caught expected exception: " << e.what() << "\n";
+    }
+}
+
+void testRobotOutOfBounds() {
+    Robot robot(Pose{9.0, 9.0, 0.0});
+    World world(10, 10);
+
+    Simulator simulator(robot, world, 0.01);
+
+    // The robot starts inside the bounds, but will move outside.
+    robot.setVelocityCommand({
+        .linearVelocity = 1.0,
+        .angularVelocity = 0.0
+    });
+
+    try {
+        simulator.runFor(2.0);
+        assert_msg(false, "Expected out-of-bounds error not detected.");
+    } catch (const std::runtime_error& e) {
+        std::cout << "[PASS] testRobotOutOfBounds - Caught expected exception: " << e.what() << "\n";
+    }
+}
+
 int main() {
     testStationary();
     testMoveForward();
@@ -225,6 +285,9 @@ int main() {
     testCircularMotion();
     testMoveInASquare();
     testTime();
+    testRobotCollisionWithObstacle();
+    testRobotCollisionWithGoal();
+    testRobotOutOfBounds();
 
     std::cout << "\nAll unit tests passed successfully!\n";
     return 0;
