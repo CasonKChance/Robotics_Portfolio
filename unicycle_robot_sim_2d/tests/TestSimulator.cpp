@@ -230,12 +230,12 @@ void testRobotCollisionWithObstacle() {
         .angularVelocity = 0.0
     });
 
-    try {
-        simulator.runFor(3.0);
-        assert_msg(false, "Expected collision with obstacle not detected.");
-    } catch (const std::runtime_error& e) {
-        std::cout << "[PASS] testRobotCollisionWithObstacle - Caught expected exception: " << e.what() << "\n";
-    }
+    simulator.runFor(3.0);
+    assert_msg(simulator.getStatus() == SimulationStatus::ObstacleCollision, 
+                "Expected obstacle collision status. Actual: " << static_cast<int>(simulator.getStatus())
+                << ". Robot Pose: " << to_string(robot.getPose())
+                << ". Obstacle Position: (7.0, 5.0) with radius 1.0");
+    std::cout << "[PASS] testRobotCollisionWithObstacle\n";
 }
 
 void testRobotCollisionWithGoal() {
@@ -250,12 +250,12 @@ void testRobotCollisionWithGoal() {
         .angularVelocity = 0.0
     });
 
-    try {
-        simulator.runFor(3.0);
-        assert_msg(false, "Expected collision with goal not detected.");
-    } catch (const std::runtime_error& e) {
-        std::cout << "[PASS] testRobotCollisionWithGoal - Caught expected exception: " << e.what() << "\n";
-    }
+    simulator.runFor(3.0);
+    assert_msg(simulator.getStatus() == SimulationStatus::GoalReached, 
+                "Expected goal reached status. Actual: " << static_cast<int>(simulator.getStatus())
+                << ". Robot Pose: " << to_string(robot.getPose())
+                << ". Goal Position: (7.0, 5.0) with radius 1.0");
+    std::cout << "[PASS] testRobotCollisionWithGoal\n";
 }
 
 void testRobotOutOfBounds() {
@@ -270,12 +270,12 @@ void testRobotOutOfBounds() {
         .angularVelocity = 0.0
     });
 
-    try {
-        simulator.runFor(2.0);
-        assert_msg(false, "Expected out-of-bounds error not detected.");
-    } catch (const std::runtime_error& e) {
-        std::cout << "[PASS] testRobotOutOfBounds - Caught expected exception: " << e.what() << "\n";
-    }
+    simulator.runFor(2.0);
+    assert_msg(simulator.getStatus() == SimulationStatus::OutOfBounds,
+                "Expected out of bounds status. Actual: " << static_cast<int>(simulator.getStatus())
+                << ". Robot Pose: " << to_string(robot.getPose())
+                << ". World Bounds: (0, 0) to (10, 10)");
+    std::cout << "[PASS] testRobotOutOfBounds\n";
 }
 
 int main() {

@@ -6,6 +6,16 @@
 #include "World.h"
 
 /**
+ * @brief Represents the current operational state or termination reason of the simulation.
+ */
+enum class SimulationStatus {
+    Running,           // Simulation is progressing normally
+    GoalReached,       // Robot successfully reached the target goal region
+    ObstacleCollision, // Robot collided with an environmental obstacle
+    OutOfBounds        // Robot moved outside the valid map boundaries
+};
+
+/**
  * @brief Manages simulation time, advances a Robot through discrete kinematic updates,
  *        logs telemetry data, and evaluates environmental safety checks.
  */
@@ -32,8 +42,9 @@ class Simulator {
         /**
          * @brief Advances the simulation continuously for a specified time duration.
          * 
-         * Executes discrete steps of timeStep size and performs a final partial step 
-         * if the remaining duration is less than timeStep.
+         * Executes discrete integration steps, logging state at each step and checking
+         * environmental status. Exits gracefully if a terminal state (goal, obstacle, 
+         * out-of-bounds) is encountered or when duration completes.
          * 
          * @param duration Total time span to simulate in seconds (ignored if <= 0.0).
          */
@@ -45,13 +56,20 @@ class Simulator {
          */
         double getCurrentTime() const { return currentTime_; }
 
+        /**
+         * @brief Gets the current operational or termination status of the simulation.
+         * @return Active SimulationStatus enum value.
+         */
+        SimulationStatus getStatus() const { return status_; }
+
     private:
 
-        Robot& robot_;                      // Reference to the managed robot model.
-        World& world_;                      // Reference to the simulation world (obstacles, boundaries, etc.).
-        SimulatorDataLogger logger_;        // Logger instance for recording simulation data.
-        double timeStep_{ 0.01 };           // Fixed integration step size dt in seconds.
-        double currentTime_{ 0.0 };         // Accumulated simulation clock time in seconds.
+        Robot& robot_;                                         // Reference to the managed robot model.
+        World& world_;                                         // Reference to the simulation world (obstacles, boundaries, etc.).
+        SimulatorDataLogger logger_;                           // Logger instance for recording simulation data.
+        double timeStep_{ 0.01 };                              // Fixed integration step size dt in seconds.
+        double currentTime_{ 0.0 };                            // Accumulated simulation clock time in seconds.
+        SimulationStatus status_{ SimulationStatus::Running }; // Active simulation state tracker
 
         /**
          * @brief Advances the simulation by the default stored integration time step (timeStep_).
@@ -67,11 +85,10 @@ class Simulator {
         void step(double timeStep);
 
         /**
-         * @brief Validates current robot pose against world boundaries, obstacles, and goal states.
-         * 
-         * @throws std::runtime_error If robot exceeds boundaries, hits an obstacle, or reaches the goal.
+         * @brief Evaluates current robot pose against world boundaries, obstacles, and goals.
+         * @return The resulting SimulationStatus based on current pose overlap.
          */
-        void checkCollision() const;
+        SimulationStatus checkCollision() const;
 
         /**
          * @brief Prepares the log file path and ensures the output directory exists.   

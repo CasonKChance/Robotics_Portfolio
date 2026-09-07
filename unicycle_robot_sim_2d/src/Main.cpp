@@ -3,26 +3,41 @@
 #include <simulator/Simulator.h>
 
 #include <numbers>
+#include <iostream>
 
 int main() {
-    Robot robot({0.0, 0.0, 0.0});
-    World  world(10, 10, {Obstacle{2.5, 2.5, 0.5}}, Obstacle{5.0, 5.0, 0.5});
+    Robot robot({1.0, 1.0, 0.0});
+    World  world(10, 10, {}, Obstacle{5.0, 5.0, 1.0});
 
     Simulator simulator = Simulator(robot, world, 0.01);
 
-    for (int i{ 0 }; i < 4; ++i) {
+    while (simulator.getStatus() == SimulationStatus::Running) {
+        robot.setVelocityCommand({
+            .linearVelocity = 0.0,
+            .angularVelocity = std::numbers::pi / 4.0
+        });
+
+        simulator.runFor(1.0);
+
         robot.setVelocityCommand({
             .linearVelocity = 1.0,
             .angularVelocity = 0.0
         });
 
-        simulator.runFor(10);
+        simulator.runFor(5);
+    }
 
-        robot.setVelocityCommand({
-            .linearVelocity = 0.0,
-            .angularVelocity = std::numbers::pi / 2
-        });
-
-        simulator.runFor(1);
+    switch(simulator.getStatus()) {
+        case SimulationStatus::GoalReached:
+            std::cout << "Robot reached the goal!\n";
+            break;
+        case SimulationStatus::ObstacleCollision:
+            std::cout << "Robot collided with an obstacle!\n";
+            break;
+        case SimulationStatus::OutOfBounds:
+            std::cout << "Robot went out of bounds!\n";
+            break;
+        default:
+            std::cout << "Simulation ended with unknown status.\n";
     }
 }

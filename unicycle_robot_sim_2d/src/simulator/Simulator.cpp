@@ -12,18 +12,20 @@ Simulator::Simulator(Robot& robot, World& world, double timeStep) :
     world_{ world },
     logger_{ prepareLogPath() },
     timeStep_{ timeStep },
-    currentTime_{ 0.0 }
+    currentTime_{ 0.0 },
+    status_{ SimulationStatus::Running }
 {
     if (timeStep_ <= 0.0) {
         throw std::invalid_argument("timeStep must be a positive value. Provided: " + std::to_string(timeStep));
     }
 
-    // Initial collision check to ensure the robot starts in a valid state.
-    checkCollision();
+    // Evaluate initial spatial condition without throwing an exception
+    status_ = checkCollision();
 }
 
 void Simulator::runFor(double duration) {
-    if (duration <= 0.0) {
+    // Immediate return if duration is invalid or simulation already hit a terminal state
+    if (duration <= 0.0 || status_ != SimulationStatus::Running) {
         return;
     }
 
@@ -32,13 +34,16 @@ void Simulator::runFor(double duration) {
         step(timeStep_);
         remainingTime -= timeStep_;
 
-        checkCollision();
+        status_ = checkCollision();
+        if (status_ != SimulationStatus::Running) {
+            break;
+        }
     }
 
-    if (remainingTime > 0) {
+    if (remainingTime > 0 && status_ == SimulationStatus::Running) {
         step(remainingTime);
 
-        checkCollision();
+        status_ = checkCollision();
     }
 }
 
@@ -62,20 +67,22 @@ void Simulator::step(double timeStep) {
     logger_.logData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
 }
 
-void Simulator::checkCollision() const {
+SimulationStatus Simulator::checkCollision() const {
     const Pose& pose = robot_.getPose();
 
     if (!world_.isWithinBounds(pose.x, pose.y)) {
-        throw std::runtime_error("Robot is out of bounds at position (" + std::to_string(pose.x) + ", " + std::to_string(pose.y) + ").");
+        return SimulationStatus::OutOfBounds;
     }
 
     if (world_.isCollisionWithObstacle(pose.x, pose.y)) {
-        throw std::runtime_error("Robot collided with an obstacle at position (" + std::to_string(pose.x) + ", " + std::to_string(pose.y) + ").");
+        return SimulationStatus::ObstacleCollision;
     }
 
     if (world_.isCollisionWithGoal(pose.x, pose.y)) {
-        throw std::runtime_error("Robot reached the goal at position (" + std::to_string(pose.x) + ", " + std::to_string(pose.y) + ").");
+        return SimulationStatus::GoalReached;
     }
+
+    return SimulationStatus::Running;
 }
 
 std::string Simulator::prepareLogPath() const {
