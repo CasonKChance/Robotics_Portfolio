@@ -46,6 +46,30 @@ class World {
          */
         bool isWithinBounds(double x, double y) const;
 
+        /**
+         * @brief Gets the maximum X-coordinate of the world.
+         * @return Maximum X-coordinate.
+         */
+        int getMaxX() const { return maxX_; }
+
+        /**
+         * @brief Gets the maximum Y-coordinate of the world.
+         * @return Maximum Y-coordinate.
+         */
+        int getMaxY() const { return maxY_; }
+
+        /**
+         * @brief Gets the list of obstacles in the world.
+         * @return Reference to the vector of obstacles.
+         */
+        const std::vector<Obstacle>& getObstacles() const { return obstacles_; }
+
+        /**
+         * @brief Gets the goal region, if it exists.
+         * @return Reference to the optional goal region.
+         */
+        const std::optional<Obstacle>& getGoal() const { return goal_; }
+
     private:
 
         int maxX_{ 10 };                                    // Map upper bound along the X-axis

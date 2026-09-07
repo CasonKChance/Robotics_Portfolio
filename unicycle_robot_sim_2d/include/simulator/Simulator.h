@@ -91,10 +91,16 @@ class Simulator {
         SimulationStatus checkCollision() const;
 
         /**
-         * @brief Prepares the log file path and ensures the output directory exists.   
-         * @return Full path to the log file as a string.
+         * @brief Prepares the robot data log file path and ensures the output directory exists.   
+         * @return Full path to the robot data log file as a string.
          */
-        std::string prepareLogPath() const;
+        std::string prepareRobotLogPath() const;
+
+        /**
+         * @brief Prepares the world data log file path and ensures the output directory exists.   
+         * @return Full path to the world data log file as a string.
+         */
+        std::string prepareWorldLogPath() const;
 
 };
 

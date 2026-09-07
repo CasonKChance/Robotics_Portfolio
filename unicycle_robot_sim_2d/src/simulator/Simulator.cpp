@@ -10,7 +10,7 @@
 Simulator::Simulator(Robot& robot, World& world, double timeStep) :
     robot_{ robot },
     world_{ world },
-    logger_{ prepareLogPath() },
+    logger_{ prepareRobotLogPath(), prepareWorldLogPath() },
     timeStep_{ timeStep },
     currentTime_{ 0.0 },
     status_{ SimulationStatus::Running }
@@ -21,6 +21,10 @@ Simulator::Simulator(Robot& robot, World& world, double timeStep) :
 
     // Evaluate initial spatial condition without throwing an exception
     status_ = checkCollision();
+
+    // Log the initial state of the robot and world to the respective CSV files
+    logger_.logRobotData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+    logger_.logWorldData(world_);
 }
 
 void Simulator::runFor(double duration) {
@@ -53,7 +57,7 @@ void Simulator::step() {
     robot_.update(timeStep_);
     currentTime_ += timeStep_;
 
-    logger_.logData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+    logger_.logRobotData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
 }
 
 void Simulator::step(double timeStep) {
@@ -64,7 +68,7 @@ void Simulator::step(double timeStep) {
     robot_.update(timeStep);
     currentTime_ += timeStep;
 
-    logger_.logData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
+    logger_.logRobotData(robot_.getPose(), robot_.getVelocityCommand(), currentTime_);
 }
 
 SimulationStatus Simulator::checkCollision() const {
@@ -85,8 +89,14 @@ SimulationStatus Simulator::checkCollision() const {
     return SimulationStatus::Running;
 }
 
-std::string Simulator::prepareLogPath() const {
+std::string Simulator::prepareRobotLogPath() const {
     std::filesystem::path logPath = std::filesystem::path(PROJECT_BINARY_DIR) / "output" / "SimulatorDataLog.csv";
+    std::filesystem::create_directories(logPath.parent_path());
+    return logPath.string();
+}
+
+std::string Simulator::prepareWorldLogPath() const {
+    std::filesystem::path logPath = std::filesystem::path(PROJECT_BINARY_DIR) / "output" / "WorldDataLog.csv";
     std::filesystem::create_directories(logPath.parent_path());
     return logPath.string();
 }

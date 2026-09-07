@@ -16,3 +16,4 @@ __pycache__/
 build/
 data_analysis/simulation_analysis_plot.png
 data_analysis/simulation_analysis_report.txt
+data_analysis/trajectory.png

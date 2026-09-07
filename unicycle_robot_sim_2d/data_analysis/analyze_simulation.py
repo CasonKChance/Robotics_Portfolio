@@ -10,6 +10,7 @@ matplotlib.use('Agg')
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 # Apply aesthetic style
 plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
@@ -20,9 +21,9 @@ def normalize_angle(angle_rad):
     """Normalize angles to the range [-pi, pi]."""
     return (angle_rad + np.pi) % (2 * np.pi) - np.pi
 
-def analyze_simulation(csv_path: str, output_image_path: str, trajectory_image_path: str, output_text_path: str):
+def analyze_simulation(csv_path: str, world_csv_path: str, output_image_path: str, trajectory_image_path: str, output_text_path: str):
     # -------------------------------------------------------------------------
-    # 1. Load Data
+    # 1. Load Telemetry Data
     # -------------------------------------------------------------------------
     if not os.path.exists(csv_path):
         sys.exit(1)
@@ -128,22 +129,97 @@ def analyze_simulation(csv_path: str, output_image_path: str, trajectory_image_p
     # -------------------------------------------------------------------------
     # 4. Generate Standalone Trajectory Plot (trajectory.png)
     # -------------------------------------------------------------------------
-    # Extract indices corresponding to full second intervals (t = 1.0, 2.0, ...)
-    second_indices = [i for i, time_val in enumerate(t) if np.isclose(time_val % 1.0, 0.0, atol=1e-5) and time_val > 0.0]
+    fig_traj, ax_traj = plt.subplots(figsize=(8, 8), dpi=120)
 
-    fig_traj, ax_traj = plt.subplots(figsize=(7, 7), dpi=120)
+    # --- Load World Data Log (Obstacles, Goal, World Bounds) ---
+    world_bounds = None
+    if os.path.exists(world_csv_path):
+        world_df = pd.read_csv(world_csv_path)
+        world_df.columns = world_df.columns.str.strip()
+
+        obstacle_labeled = False
+        goal_labeled = False
+
+        for _, row in world_df.iterrows():
+            wx, wy = row['x'], row['y']
+            r = row['radius']
+            is_goal = int(row['is_goal'])
+            is_bounds = int(row['is_world_bounds'])
+
+            if is_bounds == 1:
+                world_bounds = (wx, wy)
+            elif is_goal == 1:
+                label = 'Goal Region' if not goal_labeled else None
+                goal_circle = patches.Circle((wx, wy), r, color='gold', alpha=0.6, ec='darkgoldenrod', lw=2, label=label)
+                ax_traj.add_patch(goal_circle)
+                goal_labeled = True
+            else:
+                label = 'Obstacle' if not obstacle_labeled else None
+                obs_circle = patches.Circle((wx, wy), r, color='red', alpha=0.4, ec='darkred', lw=1.5, label=label)
+                ax_traj.add_patch(obs_circle)
+                obstacle_labeled = True
+
+    # --- Plot Continuous Trajectory Line ---
+    ax_traj.plot(x, y, color=c_primary, linestyle='-', linewidth=1.5, alpha=0.4, label='Path Trajectory')
+
+    # --- Extract 1-Second Interval Indices ---
+    second_indices = [
+        i for i, time_val in enumerate(t) 
+        if np.isclose(time_val % 1.0, 0.0, atol=1e-5) or np.isclose(time_val % 1.0, 1.0, atol=1e-5)
+    ]
     
-    # Plot 1-second interval blue dots
-    if second_indices:
-        ax_traj.plot(x[second_indices], y[second_indices], 'o', color=c_primary, markersize=5, label='1s Interval Marks')
+    intermediate_indices = [idx for idx in second_indices if idx != 0 and idx != len(t) - 1]
 
-    ax_traj.plot(x[0], y[0], 'go', markersize=8, label='Start')
-    ax_traj.plot(x[-1], y[-1], 'ro', markersize=8, label='End')
-    ax_traj.set_title("2D Spatial Trajectory (1-Second Timesteps)", fontweight='bold')
+    # Shared arrow styling properties
+    arrow_scale = 3.5
+    arrow_width = 0.005
+    arrow_headwidth = 4
+    arrow_headlength = 5
+    arrow_headaxislength = 4.5
+
+    # --- Plot Intermediate 1-Second Pose Arrows (Blue) ---
+    if intermediate_indices:
+        u_inter = np.cos(theta[intermediate_indices])
+        v_inter = np.sin(theta[intermediate_indices])
+
+        ax_traj.quiver(
+            x[intermediate_indices], y[intermediate_indices], u_inter, v_inter,
+            color=c_primary, angles='xy', scale_units='xy', scale=arrow_scale,
+            width=arrow_width, headwidth=arrow_headwidth, headlength=arrow_headlength,
+            headaxislength=arrow_headaxislength, label='1s Interval Pose'
+        )
+
+    # --- Plot Start Position Arrow (Green) ---
+    ax_traj.quiver(
+        x[0], y[0], np.cos(theta[0]), np.sin(theta[0]),
+        color='green', angles='xy', scale_units='xy', scale=arrow_scale,
+        width=arrow_width, headwidth=arrow_headwidth, headlength=arrow_headlength,
+        headaxislength=arrow_headaxislength, zorder=5, label='Start Pose'
+    )
+
+    # --- Plot End Position Arrow (Red) ---
+    ax_traj.quiver(
+        x[-1], y[-1], np.cos(theta[-1]), np.sin(theta[-1]),
+        color='red', angles='xy', scale_units='xy', scale=arrow_scale,
+        width=arrow_width, headwidth=arrow_headwidth, headlength=arrow_headlength,
+        headaxislength=arrow_headaxislength, zorder=5, label='End Pose'
+    )
+
+    # --- Apply World Limits and Boundary Box ---
+    if world_bounds:
+        max_x, max_y = world_bounds
+        ax_traj.set_xlim([0, max_x])
+        ax_traj.set_ylim([0, max_y])
+        
+        # Draw solid black world boundary box
+        rect = patches.Rectangle((0, 0), max_x, max_y, linewidth=2, edgecolor='black', facecolor='none', linestyle='-', label='World Boundary')
+        ax_traj.add_patch(rect)
+
+    ax_traj.set_title("2D Spatial Trajectory with Obstacles and Orientation", fontweight='bold')
     ax_traj.set_xlabel("X Position [m]")
     ax_traj.set_ylabel("Y Position [m]")
-    ax_traj.axis('equal')
-    ax_traj.legend(loc='best', frameon=True)
+    ax_traj.set_aspect('equal', adjustable='box')
+    ax_traj.legend(loc='upper right', frameon=True, fontsize=8)
     ax_traj.grid(True, linestyle='--', alpha=0.6)
 
     plt.tight_layout()
@@ -172,7 +248,7 @@ def analyze_simulation(csv_path: str, output_image_path: str, trajectory_image_p
 
     # --- Plot 2: Velocity Commands vs Time ---
     ax2 = axs[0, 1]
-    ax2.plot(t, v, color=c_primary, linewidth=1.8, label='Linear Speed (v) [m/s]')
+    ax2.plot(t, v, color=c_primary, linestyle='--', linewidth=1.8, label='Linear Speed (v) [m/s]')
     ax2_twin = ax2.twinx()
     ax2_twin.plot(t, w, color=c_accent, linestyle='--', linewidth=1.5, label='Angular Speed (ω) [rad/s]')
     ax2.set_title("Command Velocities vs. Time", fontweight='bold')
@@ -218,8 +294,9 @@ if __name__ == "__main__":
     project_root = os.path.abspath(os.path.join(script_dir, ".."))
     
     csv_file = os.path.join(project_root, "build", "output", "SimulatorDataLog.csv")
+    world_csv_file = os.path.join(project_root, "build", "output", "WorldDataLog.csv")
     output_plot = os.path.join(script_dir, "simulation_analysis_plot.png")
     trajectory_plot = os.path.join(script_dir, "trajectory.png")
     output_text = os.path.join(script_dir, "simulation_analysis_report.txt")
 
-    analyze_simulation(csv_file, output_plot, trajectory_plot, output_text)
+    analyze_simulation(csv_file, world_csv_file, output_plot, trajectory_plot, output_text)
