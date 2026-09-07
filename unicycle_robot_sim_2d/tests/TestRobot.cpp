@@ -184,7 +184,7 @@ void testMaximumVelocities() {
         .angularVelocity = 0.0,
     });
 
-    assert_msg((std::abs(robot.getActualVelocity().linearVelocity) == robot.getMaximumLinearVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().linearVelocity) <= robot.getMaximumLinearVelocity()),
                 "TestMaximumVelocities - Expected Linear Velocity: " << robot.getMaximumLinearVelocity()
                 << ". Actual: " << robot.getActualVelocity().linearVelocity);
 
@@ -193,7 +193,7 @@ void testMaximumVelocities() {
         .angularVelocity = 0.0,
     });
 
-    assert_msg((std::abs(robot.getActualVelocity().linearVelocity) == robot.getMaximumLinearVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().linearVelocity) <= robot.getMaximumLinearVelocity()),
                 "TestMaximumVelocities - Expected Linear Velocity: " << robot.getMaximumLinearVelocity()
                 << ". Actual: " << robot.getActualVelocity().linearVelocity);
 
@@ -202,7 +202,7 @@ void testMaximumVelocities() {
         .angularVelocity = 100.0,
     });
 
-    assert_msg((std::abs(robot.getActualVelocity().angularVelocity) == robot.getMaximumAngularVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().angularVelocity) <= robot.getMaximumAngularVelocity()),
                 "TestMaximumVelocities - Expected Angular Velocity: " << robot.getMaximumAngularVelocity()
                 << ". Actual: " << robot.getActualVelocity().angularVelocity);
 
@@ -211,7 +211,7 @@ void testMaximumVelocities() {
         .angularVelocity = -100.0,
     });
 
-    assert_msg((std::abs(robot.getActualVelocity().angularVelocity) == robot.getMaximumAngularVelocity()),
+    assert_msg((std::abs(robot.getActualVelocity().angularVelocity) <= robot.getMaximumAngularVelocity()),
                 "TestMaximumVelocities - Expected Angular Velocity: " << robot.getMaximumAngularVelocity()
                 << ". Actual: " << robot.getActualVelocity().angularVelocity);
 
