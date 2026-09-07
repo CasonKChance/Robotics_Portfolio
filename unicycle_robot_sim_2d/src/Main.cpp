@@ -1,12 +1,14 @@
 #include <simulator/Robot.h>
+#include <simulator/World.h>
 #include <simulator/Simulator.h>
 
 #include <numbers>
 
 int main() {
     Robot robot({0.0, 0.0, 0.0});
+    World  world(10, 10, {Obstacle{2.5, 2.5, 0.5}}, Obstacle{5.0, 5.0, 0.5});
 
-    Simulator simulator = Simulator(robot, 0.01);
+    Simulator simulator = Simulator(robot, world, 0.01);
 
     for (int i{ 0 }; i < 4; ++i) {
         robot.setVelocityCommand({

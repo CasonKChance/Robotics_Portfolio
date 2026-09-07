@@ -5,6 +5,8 @@ target_sources(simulator
         Robot.cpp
         Simulator.cpp
         SimulatorDataLogger.cpp
+        World.cpp
+        Obstacle.cpp
         
     PUBLIC
         FILE_SET HEADERS
@@ -15,6 +17,8 @@ target_sources(simulator
             ${CMAKE_SOURCE_DIR}/include/simulator/Robot.h
             ${CMAKE_SOURCE_DIR}/include/simulator/Simulator.h
             ${CMAKE_SOURCE_DIR}/include/simulator/SimulatorDataLogger.h
+            ${CMAKE_SOURCE_DIR}/include/simulator/World.h
+            ${CMAKE_SOURCE_DIR}/include/simulator/Obstacle.h
 )
 
 target_compile_definitions(simulator PRIVATE
