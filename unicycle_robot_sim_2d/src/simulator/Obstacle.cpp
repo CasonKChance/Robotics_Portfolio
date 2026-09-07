@@ -14,5 +14,5 @@ bool Obstacle::isCollision(double posX, double posY) const {
     double dy{ y - posY };
     double distanceSquared{ dx * dx + dy * dy };
 
-    return distanceSquared < radius * radius;
+    return distanceSquared <= radius * radius;
 }

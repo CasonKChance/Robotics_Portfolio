@@ -19,3 +19,14 @@ target_link_libraries(TestSimulator
 )
 
 add_test(NAME RunSimulatorTests COMMAND TestSimulator)
+
+# TestWorld.cpp
+
+add_executable(TestWorld TestWorld.cpp)
+
+target_link_libraries(TestWorld
+    PRIVATE
+        simulator
+)
+
+add_test(NAME RunWorldTests COMMAND TestWorld)
