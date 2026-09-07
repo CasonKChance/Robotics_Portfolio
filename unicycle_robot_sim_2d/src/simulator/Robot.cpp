@@ -4,9 +4,6 @@
 #include <iostream>
 #include <algorithm>
 
-static constexpr double kMaximumLinearVelocity = 2.0; // Maximum linear velocity (m/s)
-static constexpr double kMaximumAngularVelocity = 1.0; // Maximum angular velocity (rad/s)
-
 /* Public Member Functions */
 
 Robot::Robot(const Pose& initialPose) :
@@ -14,11 +11,11 @@ Robot::Robot(const Pose& initialPose) :
     velocityCommand_{ VelocityCommand{ 0.0, 0.0 } }
 {
     // Clamp linear velocity and angular velocity to their respective maximums
-    if (velocityCommand_.linearVelocity < -kMaximumLinearVelocity || velocityCommand_.linearVelocity > kMaximumLinearVelocity) {
-        velocityCommand_.linearVelocity = std::clamp(velocityCommand_.linearVelocity, -kMaximumLinearVelocity, kMaximumLinearVelocity);
+    if (velocityCommand_.linearVelocity < -maximumLinearVelocity_ || velocityCommand_.linearVelocity > maximumLinearVelocity_) {
+        velocityCommand_.linearVelocity = std::clamp(velocityCommand_.linearVelocity, maximumLinearVelocity_, maximumLinearVelocity_);
     }
-    if (velocityCommand_.angularVelocity < -kMaximumAngularVelocity || velocityCommand_.angularVelocity > kMaximumAngularVelocity) {
-        velocityCommand_.angularVelocity = std::clamp(velocityCommand_.angularVelocity, -kMaximumAngularVelocity, kMaximumAngularVelocity);
+    if (velocityCommand_.angularVelocity < -maximumAngularVelocity_ || velocityCommand_.angularVelocity > maximumAngularVelocity_) {
+        velocityCommand_.angularVelocity = std::clamp(velocityCommand_.angularVelocity, maximumAngularVelocity_, maximumAngularVelocity_);
     }
     
     // Ensure initial heading is properly normalized to [-π, π]
@@ -27,12 +24,8 @@ Robot::Robot(const Pose& initialPose) :
 
 void Robot::setVelocityCommand(const VelocityCommand& command) {
     // Clamp linear velocity and angular velocity to their respective maximums
-    velocityCommand_.linearVelocity = command.linearVelocity < -kMaximumLinearVelocity || command.linearVelocity > kMaximumLinearVelocity
-                                    ? std::clamp(velocityCommand_.linearVelocity, -kMaximumLinearVelocity, kMaximumLinearVelocity)
-                                    : command.linearVelocity;
-    velocityCommand_.angularVelocity = command.angularVelocity < -kMaximumAngularVelocity || command.linearVelocity > kMaximumAngularVelocity
-                                     ? std::clamp(velocityCommand_.angularVelocity, -kMaximumAngularVelocity, kMaximumAngularVelocity)
-                                     : command.angularVelocity;
+    velocityCommand_.linearVelocity = std::clamp(command.linearVelocity, -maximumLinearVelocity_, maximumLinearVelocity_);
+    velocityCommand_.angularVelocity = std::clamp(command.angularVelocity, -maximumAngularVelocity_, maximumAngularVelocity_);
 }
 
 void Robot::update(double dt) {

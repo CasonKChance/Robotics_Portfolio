@@ -173,12 +173,59 @@ void testMoveInASquare() {
     std::cout << "[PASS] testMoveInASquare\n";
 }
 
+/**
+ * @brief Tests that robot's linear and angular velocities are clamped to a specified maximum regardless of input.
+ */
+void testMaximumVelocities() {
+    Robot robot(Pose{0.0, 0.0, 0.0});
+
+    robot.setVelocityCommand({
+        .linearVelocity = 100.0,
+        .angularVelocity = 0.0,
+    });
+
+    assert_msg((std::abs(robot.getVelocityCommand().linearVelocity) == robot.getMaximumLinearVelocity()),
+                "TestMaximumVelocities - Expected Linear Velocity: " << robot.getMaximumLinearVelocity()
+                << ". Actual: " << robot.getVelocityCommand().linearVelocity);
+
+    robot.setVelocityCommand({
+        .linearVelocity = -100.0,
+        .angularVelocity = 0.0,
+    });
+
+    assert_msg((std::abs(robot.getVelocityCommand().linearVelocity) == robot.getMaximumLinearVelocity()),
+                "TestMaximumVelocities - Expected Linear Velocity: " << robot.getMaximumLinearVelocity()
+                << ". Actual: " << robot.getVelocityCommand().linearVelocity);
+
+    robot.setVelocityCommand({
+        .linearVelocity = 0.0,
+        .angularVelocity = 100.0,
+    });
+
+    assert_msg((std::abs(robot.getVelocityCommand().angularVelocity) == robot.getMaximumAngularVelocity()),
+                "TestMaximumVelocities - Expected Angular Velocity: " << robot.getMaximumAngularVelocity()
+                << ". Actual: " << robot.getVelocityCommand().angularVelocity);
+
+    robot.setVelocityCommand({
+        .linearVelocity = 0.0,
+        .angularVelocity = -100.0,
+    });
+
+    assert_msg((std::abs(robot.getVelocityCommand().angularVelocity) == robot.getMaximumAngularVelocity()),
+                "TestMaximumVelocities - Expected Angular Velocity: " << robot.getMaximumAngularVelocity()
+                << ". Actual: " << robot.getVelocityCommand().angularVelocity);
+
+    
+    std::cout << "[PASS] testMaximumVelocities\n";
+}
+
 int main() {
     testStationary();
     testMoveForward();
     testRotateInPlace();
     testCircularMotion();
     testMoveInASquare();
+    testMaximumVelocities();
 
     std::cout << "\nAll unit tests passed successfully!\n";
     return 0;

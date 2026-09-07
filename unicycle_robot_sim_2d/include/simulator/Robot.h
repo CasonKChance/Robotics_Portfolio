@@ -4,6 +4,8 @@
 #include "Pose.h"
 #include "VelocityCommand.h"
 
+#include <numbers>
+
 /**
  * @brief Simulates a unicycle-style mobile robot.
  * 
@@ -43,10 +45,24 @@ class Robot {
          */
         const VelocityCommand& getVelocityCommand() const { return velocityCommand_; }
 
+        /**
+         * @brief Gets the maximum linear velocity of the robot.
+         * @return The maximum linear velocity of the robot.
+         */
+        double getMaximumLinearVelocity() const { return maximumLinearVelocity_; }
+
+        /**
+         * @brief Gets the maximum angular velocity of the robot.
+         * @return The maximum angular velocity of the robot.
+         */
+        double getMaximumAngularVelocity() const { return maximumAngularVelocity_; }
+
     private:
 
-        Pose pose_;                       // Current state [x, y, θ]ᵀ in the World frame.
-        VelocityCommand velocityCommand_; // Current active velocity command [v, ω]ᵀ.
+        Pose pose_;                                     // Current state [x, y, θ]ᵀ in the World frame.
+        VelocityCommand velocityCommand_;               // Current active velocity command [v, ω]ᵀ.
+        const double maximumLinearVelocity_{ 5.0 };        // Maximum linear velocity of robot
+        const double maximumAngularVelocity_{ std::numbers::pi };    // Maximum angular velocity of robot
 
         /**
          * @brief Normalizes an angle into the range [-π, π] radians.

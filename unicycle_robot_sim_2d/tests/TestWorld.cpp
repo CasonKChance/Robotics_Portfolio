@@ -3,6 +3,12 @@
 #include <iostream>
 #include <cassert>
 
+/**
+ * @brief Tests collision detection logic against the goal region.
+ * 
+ * Verifies that coordinates within the goal's boundary radius are correctly 
+ * flagged as collisions, while points outside the radius are recognized as clear.
+ */
 void testGoalCollisionChecking() {
     // Create a world with a goal at (5, 5) with radius 1.0
     World world(10, 10, {}, Obstacle{5.0, 5.0, 1.0});
@@ -20,6 +26,12 @@ void testGoalCollisionChecking() {
     std::cout << "[PASS] testGoalCollisionChecking\n";
 }
 
+/**
+ * @brief Tests collision detection logic against circular obstacles.
+ * 
+ * Ensures point-obstacle collision checks accurately distinguish between 
+ * interior/boundary collision points and safe exterior points.
+ */
 void testObstacleCollisionChecking() {
     // Create a world with an obstacle at (3, 3) with radius 1.0
     World world(10, 10, {Obstacle{3.0, 3.0, 1.0}});
@@ -37,6 +49,12 @@ void testObstacleCollisionChecking() {
     std::cout << "[PASS] testObstacleCollisionChecking\n";
 }
 
+/**
+ * @brief Tests world boundary limits (0 <= x < maxX, 0 <= y < maxY).
+ * 
+ * Verifies valid internal coordinates as well as edge cases including negative 
+ * coordinates and exact boundary limit thresholds.
+ */
 void testBoundaryChecking() {
     World world(10, 10);
 
