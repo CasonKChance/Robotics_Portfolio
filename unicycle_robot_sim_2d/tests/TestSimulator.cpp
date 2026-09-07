@@ -56,8 +56,9 @@ bool isPoseClose(const Pose& p1, const Pose& p2, double tol = EPSILON) {
  */
 void testStationary() {
     Robot robot(Pose{0.0, 0.0, 0.0});
+    World world(10, 10);
 
-    Simulator simulator(robot, 0.01);
+    Simulator simulator(robot, world, 0.01);
 
     robot.setVelocityCommand({
         .linearVelocity = 0.0,
@@ -79,8 +80,9 @@ void testStationary() {
  */
 void testMoveForward() {
     Robot robot(Pose{0.0, 0.0, 0.0});
+    World world(10, 10);
 
-    Simulator simulator(robot, 0.01);
+    Simulator simulator(robot, world, 0.01);
 
     robot.setVelocityCommand({
         .linearVelocity = 1.0,
@@ -102,8 +104,9 @@ void testMoveForward() {
  */
 void testRotateInPlace() {
     Robot robot(Pose{0.0, 0.0, 0.0});
+    World world(10, 10);
 
-    Simulator simulator(robot, 0.01);
+    Simulator simulator(robot, world, 0.01);
 
     // Rotate at π/2 rad/s for 10 seconds -> 5π radians total.
     // 5π wraps around to π (or -π) in normalized range.
@@ -129,9 +132,10 @@ void testRotateInPlace() {
  * Using smaller dt yields closer convergence.
  */
 void testCircularMotion() {
-    Robot robot(Pose{0.0, 0.0, 0.0});
+    Robot robot(Pose{10.0, 10.0, 0.0});
+    World world(50, 50);
 
-    Simulator simulator(robot, 0.01);
+    Simulator simulator(robot, world, 0.01);
 
     robot.setVelocityCommand({
         .linearVelocity = 1.0,
@@ -146,7 +150,7 @@ void testCircularMotion() {
     }
 
     // With dt=0.01s, numerical drift is small (~0.03m tolerance needed)
-    Pose expected{0.0, 0.0, 0.0};
+    Pose expected{10.0, 10.0, 0.0};
     assert_msg(isPoseClose(robot.getPose(), expected, 0.03), 
                 "TestCircularMotion - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testCircularMotion\n";
@@ -156,9 +160,10 @@ void testCircularMotion() {
  * @brief Tests execution of a 4-leg square trajectory returning to starting pose.
  */
 void testMoveInASquare() {
-    Robot robot(Pose{0.0, 0.0, 0.0});
+    Robot robot(Pose{20.0, 20.0, 0.0});
+    World world(50, 50);
 
-    Simulator simulator(robot, 0.01);
+    Simulator simulator(robot, world, 0.01);
 
     for (int i = 0; i < 4; ++i) {
         // Move forward 10m
@@ -176,7 +181,7 @@ void testMoveInASquare() {
         simulator.runFor(1.0);
     }
 
-    Pose expected{0.0, 0.0, 0.0};
+    Pose expected{20.0, 20.0, 0.0};
     assert_msg(isPoseClose(robot.getPose(), expected), 
                 "TestMoveInASquare - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testMoveInASquare\n";
@@ -187,8 +192,9 @@ void testMoveInASquare() {
  */
 void testTime() {
     Robot robot(Pose{0.0, 0.0, 0.0});
+    World world(10, 10);
 
-    Simulator simulator(robot, 0.01);
+    Simulator simulator(robot, world, 0.01);
 
     assert_msg(isClose(simulator.getCurrentTime(), 0.0), 
                 "TestTime - Expected: 0.0. Actual: " << simulator.getCurrentTime());
