@@ -1,6 +1,4 @@
 #include <simulator/Robot.h>
-#include <simulator/Pose.h>
-#include <simulator/VelocityCommand.h>
 
 #include <cmath>
 #include <iostream>
