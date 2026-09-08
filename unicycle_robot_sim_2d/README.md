@@ -492,7 +492,7 @@ cmake --build build
 After building, run the generated simulator executable from the build directory.
 
 ```bash
-./build/src/robot_simualtor
+./build/src/robot_simulator
 ```
 
 The simulation writes its output logs to:
