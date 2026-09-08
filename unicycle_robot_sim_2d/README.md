@@ -10,11 +10,22 @@ This project was built as the first project in my robotics software portfolio to
 
 The simulator models a mobile robot whose state is represented by its planar position and orientation:
 
-$$\begin{pmatrix} x \\ y \\ θ \end{pmatrix}$$
+$$
+\begin{bmatrix} 
+    x \\\\ 
+    y \\\\
+    θ 
+\end{bmatrix}
+$$
 
 The robot accepts commanded linear and angular velocities:
 
-$$\begin{bmatrix} v \\ ω \end{bmatrix}$$
+$$
+\begin{bmatrix} 
+    v \\\\ 
+    ω 
+\end{bmatrix}
+$$
 
 and updates its state according to the unicycle model:
 
