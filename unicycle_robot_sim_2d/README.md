@@ -181,7 +181,7 @@ The simulator contains a 2D world that can represent:
 
 After each simulation step, the simulator checks the robot's current position against the world.
 
-The simulation can enter one of several terminal states:
+The simulation can enter one of several states:
 
 ```text
 Running
