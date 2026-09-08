@@ -5,6 +5,7 @@
 #include <numbers>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <filesystem>
 
 std::string getTrajectoryInputPath() {
