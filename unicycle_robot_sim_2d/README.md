@@ -407,6 +407,51 @@ data_analysis/simulation_analysis_report.txt
 
 These files contain analysis of the simulation, and trajectory.png will show a visualization of the simulation.
 
+<table>
+  <tr>
+    <th align="center">trajectory.png</th>
+    <th align="center">simulation_analysis_plots.png</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="2400" height="2400" alt="trajectory" src="https://github.com/user-attachments/assets/98615335-1073-4ab9-aef5-0f325e29e484" />
+    </td>
+    <td align="center">
+      <img width="3900" height="2850" alt="simulation_analysis_plots" src="https://github.com/user-attachments/assets/14d5f76e-82ec-4baf-8982-06aff6de6233" />
+    </td>
+  </tr>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">simulation_analysis_report.txt</th>
+    </tr>
+  </thead>
+  <tbody align="center">
+    <tr>
+      <td>
+        <pre>
+=======================================================
+        SIMULATION METRICS & PERFORMANCE REPORT        
+=======================================================
+ Simulation Duration      : 12.5100 s
+ Total Distance Traveled  : 11.3150 m
+ Final Position (X, Y)    : (8.3540 m, 7.0686 m)
+ Final Position Error     : 0.2051 m (vs target ref)
+ Final Heading (Theta)    : 1.5708 rad (90.00°)
+ Final Heading Error      : 0.0000 rad (0.00°)
+ Maximum Linear Speed     : 1.0000 m/s
+ Average Linear Speed     : 0.9039 m/s
+ Maximum Angular Speed    : 0.7854 rad/s
+ Numerical Integration Err: 9.997139e-03 m
+=======================================================
+        </pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ---
 
 # Build
@@ -463,14 +508,14 @@ WorldDataLog.csv
 
 The exact executable location is determined by the CMake configuration in the repository.
 
-To make the robot actually move, input/Trajectory.csv will need to be given commands which the robot will recieve.
+To make the robot actually move, input/Trajectory.csv will need to be given commands to send to the robot.
 
 Trajectory.csv:
 ```text
 linear_velocity_command,angular_velocity_command,time
 ```
 
-linear_velocity_command will give the robot it's linear velocity command, angular_velocity_command it's angular velocity command, and time will tell the simulator how long to run the command for.
+linear_velocity_command will give the robot it's linear velocity command, angular_velocity_command it's angular velocity command, and time will tell the simulator how long to run the command for. Multiple commands will be necessary for the robot to reach the goal location.
 
 ---
 
