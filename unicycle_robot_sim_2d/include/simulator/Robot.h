@@ -70,6 +70,8 @@ class Robot {
         VelocityCommand actualVelocity_;                             // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command.
         const double maximumLinearVelocity_{ 5.0 };                  // Maximum linear velocity of robot
         const double maximumAngularVelocity_{ std::numbers::pi };    // Maximum angular velocity of robot
+        const double linearAcceleration_{ 2.5 };                     // Linear acceleration of robot
+        const double angularAcceleration_{ std::numbers::pi / 2 };   // Angular acceleration of robot
 
         /**
          * @brief Normalizes an angle into the range [-π, π] radians.
@@ -79,10 +81,9 @@ class Robot {
         double normalizeAngle(double angle) const;
 
         /**
-         * @brief Sets the robot's actual velocity ([v, ω]ᵀ) taking maximum velocity into account.
-         * @param command Linear (m/s) and angular (rad/s) velocity inputs.
+         * @brief Updates the robot's actual velocity ([v, ω]ᵀ) taking acceleration into account.
          */
-        void setActualVelocity(const VelocityCommand& command);
+        void updateActualVelocity(double dt);
 };
 
 #endif

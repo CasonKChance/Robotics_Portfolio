@@ -41,6 +41,6 @@ bool World::isCollisionWithGoal(double x, double y) const {
 }
 
 bool World::isWithinBounds(double x, double y) const {
-    return x >= 0 && x < maxX_ 
-        && y >= 0 && y < maxY_;
+    return x >= 0 && x <= maxX_ 
+        && y >= 0 && y <= maxY_;
 }

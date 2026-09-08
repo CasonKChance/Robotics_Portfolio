@@ -66,8 +66,8 @@ void testBoundaryChecking() {
     // Test positions outside bounds
     assert(!world.isWithinBounds(-1.0, 5.0)); // Negative X
     assert(!world.isWithinBounds(5.0, -1.0)); // Negative Y
-    assert(!world.isWithinBounds(10.0, 5.0)); // X equal to maxX
-    assert(!world.isWithinBounds(5.0, 10.0)); // Y equal to maxY
+    assert(!world.isWithinBounds(10.1, 5.0)); // X greater than maxX
+    assert(!world.isWithinBounds(5.0, 10.1)); // Y greater than maxY
 
     std::cout << "[PASS] testBoundaryChecking\n";
 }

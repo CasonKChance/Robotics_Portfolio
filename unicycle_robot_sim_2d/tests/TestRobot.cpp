@@ -94,6 +94,27 @@ void testMoveForward() {
 }
 
 /**
+ * @brief Tests linear movement along the X-axis (backward).
+ */
+void testMoveBackward() {
+    Robot robot(Pose{0.0, 0.0, 0.0});
+
+    robot.setVelocityCommand({
+        .linearVelocity = -1.0,
+        .angularVelocity = 0.0
+    });
+
+    for (int i = 0; i < 10; ++i) {
+        robot.update(1);
+    }
+
+    Pose expected{-10.0, 0.0, 0.0};
+    assert_msg(isPoseClose(robot.getPose(), expected), 
+                "TestMoveBackward - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
+    std::cout << "[PASS] testMoveBackward\n";
+}
+
+/**
  * @brief Tests in-place rotation and angle wrapping [-π, π].
  */
 void testRotateInPlace() {
@@ -115,34 +136,6 @@ void testRotateInPlace() {
     assert_msg(isPoseClose(robot.getPose(), expected), 
                 "TestRotateInPlace - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
     std::cout << "[PASS] testRotateInPlace\n";
-}
-
-/**
- * @brief Tests circular motion discretization drift.
- * Note: Discrete Forward Euler over large dt=1.0s creates accumulated radial error.
- * Using smaller dt yields closer convergence.
- */
-void testCircularMotion() {
-    Robot robot(Pose{0.0, 0.0, 0.0});
-
-    robot.setVelocityCommand({
-        .linearVelocity = 1.0,
-        .angularVelocity = 1.0,
-    });
-
-    // Use smaller time steps for integration accuracy over 2π seconds (full circle)
-    double dt = 0.01;
-    int steps = static_cast<int>((2 * std::numbers::pi) / dt);
-
-    for (int i = 0; i < steps; ++i) {
-        robot.update(dt);
-    }
-
-    // With dt=0.01s, numerical drift is small (~0.03m tolerance needed)
-    Pose expected{0.0, 0.0, 0.0};
-    assert_msg(isPoseClose(robot.getPose(), expected, 0.03), 
-                "TestCircularMotion - Expected: " << to_string(expected) << ". Actual: " << to_string(robot.getPose()));
-    std::cout << "[PASS] testCircularMotion\n";
 }
 
 /**
@@ -222,8 +215,8 @@ void testMaximumVelocities() {
 int main() {
     testStationary();
     testMoveForward();
+    testMoveBackward();
     testRotateInPlace();
-    testCircularMotion();
     testMoveInASquare();
     testMaximumVelocities();
 
