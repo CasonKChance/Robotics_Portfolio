@@ -425,10 +425,10 @@ These files contain analysis of the simulation, and trajectory.png will show a v
 <table>
   <thead>
     <tr>
-      <th align="left">simulation_analysis_report.txt</th>
+      <th align="center">simulation_analysis_report.txt</th>
     </tr>
   </thead>
-  <tbody align="center">
+  <tbody>
     <tr>
       <td>
         <pre>
