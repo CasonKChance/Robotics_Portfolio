@@ -397,6 +397,16 @@ This separation makes it possible to:
 3. Analyze the data independently.
 4. Experiment with different visualization or analysis techniques without modifying the simulator.
 
+The script generates three files:
+
+```text
+data_analysis/simulation_analysis_plots.png
+data_analysis/trajectory.png
+data_analysis/simulation_analysis_report.txt
+```
+
+These files contain analysis of the simulation, and trajectory.png will show a visualization of the simulation.
+
 ---
 
 # Build
@@ -452,6 +462,15 @@ WorldDataLog.csv
 ```
 
 The exact executable location is determined by the CMake configuration in the repository.
+
+To make the robot actually move, input/Trajectory.csv will need to be given commands which the robot will recieve.
+
+Trajectory.csv:
+```text
+linear_velocity_command,angular_velocity_command,time
+```
+
+linear_velocity_command will give the robot it's linear velocity command, angular_velocity_command it's angular velocity command, and time will tell the simulator how long to run the command for.
 
 ---
 
