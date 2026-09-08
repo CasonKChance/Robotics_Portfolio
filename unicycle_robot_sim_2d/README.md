@@ -315,13 +315,13 @@ unicycle_robot_sim_2d/
 │
 ├── src/
 │   ├── simulator/
-|   |   ├── CMakeLists.txt
-|   |   ├── Obstacle.cpp
-|   |   ├── Robot.cpp
-|   |   ├── Simulator.cpp
-|   |   ├── SimulatorDataLogger.cpp
-|   |   └── World.cpp
-|   |
+│   │   ├── CMakeLists.txt
+│   │   ├── Obstacle.cpp
+│   │   ├── Robot.cpp
+│   │   ├── Simulator.cpp
+│   │   ├── SimulatorDataLogger.cpp
+│   │   └── World.cpp
+│   │
 │   ├── CMakeLists.txt
 │   └── Main.cpp
 │
