@@ -419,16 +419,13 @@ cd Robotics_Portfolio/unicycle_robot_sim_2d
 ## Configure
 
 ```bash
-mkdir build
-cd build
-
-cmake ..
+cmake -B build
 ```
 
 ## Build
 
 ```bash
-cmake --build .
+cmake --build build
 ```
 
 ---
@@ -438,7 +435,7 @@ cmake --build .
 After building, run the generated simulator executable from the build directory.
 
 ```bash
-./robot_simualtor
+./build/src/robot_simualtor
 ```
 
 The simulation writes its output logs to:
