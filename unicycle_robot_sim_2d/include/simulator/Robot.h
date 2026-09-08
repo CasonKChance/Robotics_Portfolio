@@ -10,7 +10,7 @@
  * @brief Simulates a unicycle-style mobile robot.
  * 
  * Tracks the current 2D pose [x, y, θ]ᵀ and updates state using discrete 
- * Forward Euler numerical integration given a linear and angular velocity command.
+ * Forward Euler numerical integration given a linear and angular velocity.
  */
 class Robot {
     public:
