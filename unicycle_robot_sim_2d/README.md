@@ -34,7 +34,7 @@ $$
     ẋ = v cos(θ) \\\\
     ẏ = v sin(θ) \\\\
     θ̇ = ω
-\end{matrix}
+\end{bmatrix}
 $$
 
 The continuous-time equations are integrated numerically using discrete simulation timesteps.
