@@ -33,7 +33,7 @@ $$
 \begin{bmatrix}
     ẋ = v cos(θ) \\\\
     ẏ = v sin(θ) \\\\
-    θ̇ = ω \\\\
+    θ̇ = ω
 \end{matrix}
 $$
 
