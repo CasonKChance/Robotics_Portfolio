@@ -159,7 +159,7 @@ Conceptually:
    actual velocity
           │
           ▼
-    robot kinematics
+   robot kinematics
           │
           ▼
        new pose
