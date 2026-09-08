@@ -151,7 +151,7 @@ def analyze_simulation(csv_path: str, world_csv_path: str, output_image_path: st
     plt.close(fig_traj)
 
     # -------------------------------------------------------------------------
-    # 5. Generate 2x2 Performance Metrics Grid (simulation_analysis_plot.png)
+    # 5. Generate 2x2 Performance Metrics Grid (simulation_analysis_plots.png)
     # -------------------------------------------------------------------------
     fig, axs = plt.subplots(2, 2, figsize=(13, 9.5), dpi=120)
     fig.suptitle("Robot Simulation Analysis", fontsize=14, fontweight='bold', y=0.99)
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     analyze_simulation(
         os.path.join(project_root, "build", "output", "SimulatorDataLog.csv"),
         os.path.join(project_root, "build", "output", "WorldDataLog.csv"),
-        os.path.join(script_dir, "simulation_analysis_plot.png"),
+        os.path.join(script_dir, "simulation_analysis_plots.png"),
         os.path.join(script_dir, "trajectory.png"),
         os.path.join(script_dir, "simulation_analysis_report.txt")
     )
