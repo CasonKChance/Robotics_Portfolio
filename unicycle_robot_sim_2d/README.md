@@ -10,14 +10,7 @@ This project was built as the first project in my robotics software portfolio to
 
 The simulator models a mobile robot whose state is represented by its planar position and orientation:
 
-[
-\mathbf{x} =
-\begin{bmatrix}
-x \
-y \
-\theta
-\end{bmatrix}
-]
+\begin{pmatrix} x \\ y \\ θ \end{pmatrix}
 
 The robot accepts commanded linear and angular velocities:
 
@@ -29,19 +22,15 @@ v \
 \end{bmatrix}
 ]
 
+\begin{pmatrix} v \\ ω \end{pmatrix}
+
 and updates its state according to the unicycle model:
 
-[
-\dot{x} = v\cos(\theta)
-]
+[ẋ = v cos(θ)]
 
-[
-\dot{y} = v\sin(\theta)
-]
+[ẏ = v sin(θ)]
 
-[
-\dot{\theta} = \omega
-]
+[θ̇ = ω]
 
 The continuous-time equations are integrated numerically using discrete simulation timesteps.
 
@@ -86,7 +75,7 @@ The robot pose is represented by:
 ```text
 x      Position along the world X-axis
 y      Position along the world Y-axis
-theta  Robot heading
+θ      Robot heading
 ```
 
 The orientation is normalized to the range:
