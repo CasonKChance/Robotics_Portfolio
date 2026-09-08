@@ -29,11 +29,13 @@ $$
 
 and updates its state according to the unicycle model:
 
-ẋ = v cos(θ)
-
-ẏ = v sin(θ)
-
-θ̇ = ω
+$$
+\begin{bmatrix}
+    ẋ = v cos(θ) \\\\
+    ẏ = v sin(θ) \\\\
+    θ̇ = ω \\\\
+\end{matrix}
+$$
 
 The continuous-time equations are integrated numerically using discrete simulation timesteps.
 
