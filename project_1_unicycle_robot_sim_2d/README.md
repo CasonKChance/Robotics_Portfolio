@@ -300,7 +300,7 @@ The simulator creates an `output` directory in the build tree and writes separat
 # Project Structure
 
 ```text
-unicycle_robot_sim_2d/
+project_1_unicycle_robot_sim_2d/
 ├── data_analysis/
 │   ├── analyze_simulation.py
 │   └── requirements.txt
@@ -470,7 +470,7 @@ The CMake project explicitly requires C++20 and CMake 3.23.
 
 ```bash
 git clone https://github.com/CasonKChance/Robotics_Portfolio.git
-cd Robotics_Portfolio/unicycle_robot_sim_2d
+cd Robotics_Portfolio/project_1_unicycle_robot_sim_2d
 ```
 
 ## Configure
