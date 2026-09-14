@@ -1,0 +1,17 @@
+simulator_node:
+  ros__parameters:
+    world:
+      bounds:
+        length: 10.0
+        width: 10.0
+
+      goal:
+        enabled: true
+        x: 8.0
+        y: 8.0
+        radius: 1.0
+
+      obstacles:
+        x: [2.0, 4.0, 6.0]
+        y: [4.0, 2.0, 6.0]
+        radius: [1.0, 1.0, 1.75]

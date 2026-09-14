@@ -1,6 +1,9 @@
 #include "project_2_ros_unicycle_robot_sim_2d/SimulatorNode.h"
 
 #include <iostream>
+#include <optional>
+#include <string>
+#include <vector>
 
 using namespace std::chrono_literals;
 
@@ -8,18 +11,19 @@ using namespace std::chrono_literals;
 
 SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 : Node("simulator_node", options),
-  robot_{Pose{1.0, 1.0, 0.0}},
-  world_{10, 10, {}, Obstacle{8.0, 8.0, 1.0}},
+  robot_(Pose{1.0, 1.0, 0.0}),
+  world_(10.0, 10.0),
   status_{SimulationStatus::Running}
 {
-    // Subscribe to command velocity topic
-  commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10,
+  buildWorld();
+
+  commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
+    "cmd_vel", 10,
     std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
 
-    // 100 Hz simulation timer loop (dt = 0.01 seconds)
-  timer_ = this->create_wall_timer(10ms, std::bind(&SimulatorNode::updateLoop, this));
+  timer_ = this->create_wall_timer(
+    10ms, std::bind(&SimulatorNode::updateLoop, this));
 
-    // Evaluate initial spatial condition
   status_ = checkCollision();
 }
 
@@ -32,7 +36,7 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
                                     "\tAngular: %.2f rad/s\n", message->linear.x,
                                                                message->angular.z);
 
-    // Update target velocity command on robot model
+  // Update target velocity command on robot model
   robot_.setVelocityCommand({
     .linearVelocity = message->linear.x,
     .angularVelocity = message->angular.z
@@ -73,4 +77,53 @@ SimulationStatus SimulatorNode::checkCollision() const
   }
 
   return SimulationStatus::Running;
+}
+
+void SimulatorNode::buildWorld()
+{
+  // Bounds
+  const double length = this->declare_parameter<double>("world.bounds.length", 10.0);
+  const double width = this->declare_parameter<double>("world.bounds.width", 10.0);
+
+  // Goal
+  const bool isGoalEnabled = this->declare_parameter<bool>("world.goal.enabled", false);
+
+  std::optional<Obstacle> goal = std::nullopt;
+  if (isGoalEnabled) {
+    const double goalX = this->declare_parameter<double>("world.goal.x", 0.0);
+    const double goalY = this->declare_parameter<double>("world.goal.y", 0.0);
+    const double goalRadius = this->declare_parameter<double>("world.goal.radius", 0.0);
+
+    goal = Obstacle{goalX, goalY, goalRadius};
+  }
+
+  // Obstacles
+  const auto obstacleXs = this->declare_parameter<std::vector<double>>("world.obstacles.x",
+    std::vector<double>{});
+  const auto obstacleYs = this->declare_parameter<std::vector<double>>("world.obstacles.y",
+    std::vector<double>{});
+  const auto obstacleRadii = this->declare_parameter<std::vector<double>>("world.obstacles.radius",
+    std::vector<double>{});
+
+  if (obstacleXs.size() != obstacleYs.size() ||
+    obstacleXs.size() != obstacleRadii.size())
+  {
+    throw std::runtime_error(
+      "world.obstacles.x, world.obstacles.y, and "
+      "world.obstacles.radius must have the same length.");
+  }
+
+  std::vector<Obstacle> obstacles;
+  obstacles.reserve(obstacleXs.size());
+
+  for (std::size_t i = 0; i < obstacleXs.size(); ++i) {
+    obstacles.push_back(
+      Obstacle{
+      obstacleXs[i],
+      obstacleYs[i],
+      obstacleRadii[i]
+      });
+  }
+
+  world_ = World(length, width, obstacles, goal);
 }

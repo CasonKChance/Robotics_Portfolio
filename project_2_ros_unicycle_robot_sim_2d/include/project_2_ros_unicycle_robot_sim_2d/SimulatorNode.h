@@ -66,6 +66,11 @@ private:
    * @return The resulting SimulationStatus based on spatial overlap.
    */
   SimulationStatus checkCollision() const;
+
+  /**
+   * @brief Builds the world from config/world.yaml
+   */
+  void buildWorld();
 };
 
 #endif
