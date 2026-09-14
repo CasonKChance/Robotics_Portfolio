@@ -10,8 +10,11 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions& options)
 : Node("simulator_node", options),
   status_{ SimulationStatus::Running }
 {
+    // Initialize robot at origin and default world state
     robot_ = Robot({0.0, 0.0, 0.0});
     world_ = World(10, 10, {}, Obstacle{8.0, 8.0, 1.0});
+
+    // Subscribe to command velocity topic
     commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
 
     // 100 Hz simulation timer loop (dt = 0.01 seconds)
@@ -29,6 +32,7 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
                                     "\tLinear: %.2f m/s\n"
                                     "\tAngular: %.2f rad/s\n", message.linear.x, message.angular.z);
 
+    // Update target velocity command on robot model
     robot_.setVelocityCommand({
         .linearVelocity = message.linear.x,
         .angularVelocity = message.angular.z
@@ -79,6 +83,7 @@ int main(int argc, char* argv[])
     auto simulatorNode = std::make_shared<SimulatorNode>();
     rclcpp::spin(simulatorNode);
 
+    // Log final simulation terminal state after spin loop exits
     switch(simulatorNode->getStatus()) {
         case SimulationStatus::GoalReached:
             std::cout << "Robot reached the goal!\n";

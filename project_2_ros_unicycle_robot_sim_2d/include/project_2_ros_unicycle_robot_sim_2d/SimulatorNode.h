@@ -21,13 +21,16 @@ enum class SimulationStatus {
 };
 
 /**
- * @brief Manages simulation time, advances a Robot through discrete kinematic updates,
- *        logs telemetry data, and evaluates environmental safety checks.
+ * @brief ROS 2 Node that manages the discrete 2D unicycle kinematic simulation loop.
+ *
+ * Subscribes to incoming Twist velocity commands on "cmd_vel", steps the kinematic model
+ * at a fixed rate, and evaluates environmental safety checks.
  */
 class SimulatorNode: public rclcpp::Node {
 public:
   /**
-   * @brief Constructs a Simulator instance holding a robot and world.
+   * @brief Constructs a Simulator instance holding a robot and world model.
+   * @param options Configuration options for Node initialization.
    */
   explicit SimulatorNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
@@ -38,19 +41,28 @@ public:
   SimulationStatus getStatus() const { return status_; }
 
 private:
-  Robot robot_;                                           // Robot model.
-  World world_;                                           // Simulation world (obstacles, boundaries, etc.).
-  SimulationStatus status_{ SimulationStatus::Running };  // Active simulation state tracker
+  Robot robot_;                                           // Robot state and kinematics model
+  World world_;                                           // Simulation environment definition
+  SimulationStatus status_{ SimulationStatus::Running };  // Simulation environment definition
+  
   rclcpp::Subscription< geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::TimerBase::SharedPtr timer_;
 
+  /**
+   * @brief Topic callback for incoming Twist messages.
+   * @param message Pointer to received geometry_msgs::msg::Twist command.
+   */
   void topicCallback(geometry_msgs::msg::Twist::UniquePtr message);
 
+  /**
+   * @brief Discrete simulation loop handler executed periodically by wall timer.
+   *        Advances time step, evaluates spatial conditions, and terminates on collision or goal.
+   */
   void updateLoop();
 
   /**
    * @brief Evaluates current robot pose against world boundaries, obstacles, and goals.
-   * @return The resulting SimulationStatus based on current pose overlap.
+   * @return The resulting SimulationStatus based on spatial overlap.
    */
   SimulationStatus checkCollision() const;
 };
