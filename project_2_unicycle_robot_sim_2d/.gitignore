@@ -1,0 +1,4 @@
+# Ignore folders created by `colcon build`
+/build
+/install
+/log
