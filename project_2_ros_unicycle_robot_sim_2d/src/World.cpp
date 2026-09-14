@@ -5,10 +5,10 @@
 /* Public Member Functions */
 
 World::World(int maxX, int maxY, std::vector<Obstacle> obstacles, std::optional<Obstacle> goal)
-:maxX_{maxX},
- maxY_{maxY},
- obstacles_{std::move(obstacles)},
- goal_{std::move(goal)}
+: maxX_{maxX},
+  maxY_{maxY},
+  obstacles_{std::move(obstacles)},
+  goal_{std::move(goal)}
 {
   // Ensure the goal and obstacles are within the bounds of the world
   if (goal_ && !isWithinBounds(goal_->x + goal_->radius, goal_->y + goal_->radius)) {

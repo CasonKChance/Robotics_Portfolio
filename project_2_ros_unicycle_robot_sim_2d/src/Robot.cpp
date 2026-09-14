@@ -7,9 +7,9 @@
 /* Public Member Functions */
 
 Robot::Robot(const Pose & initialPose)
-:pose_{initialPose},
- velocityCommand_{VelocityCommand{0.0, 0.0}},
- actualVelocity_{VelocityCommand{0.0, 0.0}}
+: pose_{initialPose},
+  velocityCommand_{VelocityCommand{0.0, 0.0}},
+  actualVelocity_{VelocityCommand{0.0, 0.0}}
 {
   // Ensure initial heading is properly normalized to [-π, π]
   pose_.theta = normalizeAngle(pose_.theta);

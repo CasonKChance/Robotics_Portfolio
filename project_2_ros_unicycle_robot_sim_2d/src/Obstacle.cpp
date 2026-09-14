@@ -1,9 +1,9 @@
 #include <project_2_ros_unicycle_robot_sim_2d/Obstacle.h>
 
 Obstacle::Obstacle(double x, double y, double radius)
-:x{x},
- y{y},
- radius{radius}
+: x{x},
+  y{y},
+  radius{radius}
 {
   // No-op
 }

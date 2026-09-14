@@ -1,41 +1,45 @@
 #include <project_2_ros_unicycle_robot_sim_2d/CommandVelocityPublisher.h>
 
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+
 #include <gtest/gtest.h>
 #include <memory>
 #include <chrono>
-
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/twist.hpp"
 
 using namespace std::chrono_literals;
 
 class CommandVelocityPublisherTest : public ::testing::Test {
 protected:
-    static void SetUpTestCase() {
-        rclcpp::init(0, nullptr);
-    }
+  static void SetUpTestCase()
+  {
+    rclcpp::init(0, nullptr);
+  }
 
-    static void TearDownTestCase() {
-        rclcpp::shutdown();
-    }
+  static void TearDownTestCase()
+  {
+    rclcpp::shutdown();
+  }
 };
 
 // Helper function to spin nodes until a condition is met or timeout occurs
-bool spinUntil(rclcpp::Node::SharedPtr node1, rclcpp::Node::SharedPtr node2, 
-               const std::function<bool()>& condition, std::chrono::milliseconds timeout = 500ms) {
-    auto start = std::chrono::steady_clock::now();
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node1);
-    executor.add_node(node2);
+bool spinUntil(
+  rclcpp::Node::SharedPtr node1, rclcpp::Node::SharedPtr node2,
+  const std::function<bool()> & condition, std::chrono::milliseconds timeout = 500ms)
+{
+  auto start = std::chrono::steady_clock::now();
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node1);
+  executor.add_node(node2);
 
-    while (std::chrono::steady_clock::now() - start < timeout) {
-        executor.spin_some();
-        if (condition()) {
-            return true;
-        }
-        std::this_thread::sleep_for(10ms);
+  while (std::chrono::steady_clock::now() - start < timeout) {
+    executor.spin_some();
+    if (condition()) {
+      return true;
     }
-    return false;
+    std::this_thread::sleep_for(10ms);
+  }
+  return false;
 }
 
 // Test 1: Verify default parameters publish zero velocity
@@ -48,13 +52,13 @@ TEST_F(CommandVelocityPublisherTest, TestDefaultPublishing) {
 
     auto sub = sub_node->create_subscription<geometry_msgs::msg::Twist>(
         "cmd_vel", 10,
-        [&](const geometry_msgs::msg::Twist::SharedPtr msg) {
-            received_msg = *msg;
-            message_received = true;
-        });
+    [&](const geometry_msgs::msg::Twist::SharedPtr msg) {
+      received_msg = *msg;
+      message_received = true;
+    });
 
     // Spin until timer triggers and publisher sends message
-    bool success = spinUntil(node, sub_node, [&]() { return message_received; });
+    bool success = spinUntil(node, sub_node, [&]() {return message_received;});
 
     ASSERT_TRUE(success);
     EXPECT_DOUBLE_EQ(received_msg.linear.x, 0.0);
@@ -76,22 +80,23 @@ TEST_F(CommandVelocityPublisherTest, TestCustomPublishingAndNormalization) {
 
     auto sub = sub_node->create_subscription<geometry_msgs::msg::Twist>(
         "cmd_vel", 10,
-        [&](const geometry_msgs::msg::Twist::SharedPtr msg) {
-            received_msg = *msg;
-            message_received = true;
-        });
+    [&](const geometry_msgs::msg::Twist::SharedPtr msg) {
+      received_msg = *msg;
+      message_received = true;
+    });
 
-    bool success = spinUntil(node, sub_node, [&]() { return message_received; });
+    bool success = spinUntil(node, sub_node, [&]() {return message_received;});
 
     ASSERT_TRUE(success);
     EXPECT_DOUBLE_EQ(received_msg.linear.x, 2.5);
-    
+
     // Expect 7.0 mapped into [-pi, pi] -> (7.0 - 2*pi) ≈ 0.7168146
     double expected_normalized_angular = std::atan2(std::sin(7.0), std::cos(7.0));
     EXPECT_NEAR(received_msg.angular.z, expected_normalized_angular, 1e-4);
 }
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

@@ -5,7 +5,7 @@ using namespace std::chrono_literals;
 /* Public Member Functions */
 
 CommandVelocityPublisher::CommandVelocityPublisher(const rclcpp::NodeOptions & options)
-:Node("command_velocity_publisher", options)
+: Node("command_velocity_publisher", options)
 {
   publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
