@@ -14,8 +14,8 @@ CommandVelocityPublisherNode::CommandVelocityPublisherNode(const rclcpp::NodeOpt
   this->declare_parameter<double>("linear_velocity", 0.0);
   this->declare_parameter<double>("angular_velocity", 0.0);
 
-  // Set up 100 Hz wall timer (10 ms period)
-  timer_ = this->create_wall_timer(10ms,
+  // Set up 1 Hz wall timer (1000 ms period)
+  timer_ = this->create_wall_timer(1000ms,
     std::bind(&CommandVelocityPublisherNode::timerCallback, this));
 }
 

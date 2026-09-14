@@ -31,7 +31,13 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 
 void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
-  RCLCPP_INFO(this->get_logger(), "\nSubscribing: \n"
+  if (message->linear.x == robot_.getVelocityCommand().linearVelocity ||
+    message->angular.z == robot_.getVelocityCommand().angularVelocity)
+  {
+    return;
+  }
+
+  RCLCPP_INFO(this->get_logger(), "\nUpdating velocity command with: \n"
                                     "\tLinear: %.2f m/s\n"
                                     "\tAngular: %.2f rad/s\n", message->linear.x,
                                                                message->angular.z);
