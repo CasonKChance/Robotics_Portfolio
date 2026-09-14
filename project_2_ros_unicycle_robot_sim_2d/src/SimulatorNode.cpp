@@ -8,7 +8,7 @@ using namespace std::chrono_literals;
 
 SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 : Node("simulator_node", options),
-  robot_{Pose{0.0, 0.0, 0.0}},
+  robot_{Pose{1.0, 1.0, 0.0}},
   world_{10, 10, {}, Obstacle{8.0, 8.0, 1.0}},
   status_{SimulationStatus::Running}
 {
