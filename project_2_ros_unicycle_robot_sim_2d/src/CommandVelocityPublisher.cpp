@@ -40,14 +40,3 @@ double CommandVelocityPublisher::normalizeAngle(double angle) const
   // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
   return std::atan2(std::sin(angle), std::cos(angle));
 }
-
-/* Main */
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<CommandVelocityPublisher>());
-  rclcpp::shutdown();
-
-  return 0;
-}

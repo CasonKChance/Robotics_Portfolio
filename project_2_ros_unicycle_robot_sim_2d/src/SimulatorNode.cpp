@@ -8,12 +8,10 @@ using namespace std::chrono_literals;
 
 SimulatorNode::SimulatorNode(const rclcpp::NodeOptions& options)
 : Node("simulator_node", options),
+  robot_{Pose{0.0, 0.0, 0.0}},
+  world_{10, 10, {}, Obstacle{8.0, 8.0, 1.0}},
   status_{ SimulationStatus::Running }
 {
-    // Initialize robot at origin and default world state
-    robot_ = Robot({0.0, 0.0, 0.0});
-    world_ = World(10, 10, {}, Obstacle{8.0, 8.0, 1.0});
-
     // Subscribe to command velocity topic
     commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
 
@@ -30,12 +28,12 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
     RCLCPP_INFO(this->get_logger(), "\nSubscribing: \n"
                                     "\tLinear: %.2f m/s\n"
-                                    "\tAngular: %.2f rad/s\n", message.linear.x, message.angular.z);
+                                    "\tAngular: %.2f rad/s\n", message->linear.x, message->angular.z);
 
     // Update target velocity command on robot model
     robot_.setVelocityCommand({
-        .linearVelocity = message.linear.x,
-        .angularVelocity = message.angular.z
+        .linearVelocity = message->linear.x,
+        .angularVelocity = message->angular.z
     });
 }
 
@@ -73,32 +71,4 @@ SimulationStatus SimulatorNode::checkCollision() const
     }
 
     return SimulationStatus::Running;
-}
-
-/* Main */
-
-int main(int argc, char* argv[])
-{
-    rclcpp::init(argc, argv);
-    auto simulatorNode = std::make_shared<SimulatorNode>();
-    rclcpp::spin(simulatorNode);
-
-    // Log final simulation terminal state after spin loop exits
-    switch(simulatorNode->getStatus()) {
-        case SimulationStatus::GoalReached:
-            std::cout << "Robot reached the goal!\n";
-            break;
-        case SimulationStatus::ObstacleCollision:
-            std::cout << "Robot collided with an obstacle!\n";
-            break;
-        case SimulationStatus::OutOfBounds:
-            std::cout << "Robot went out of bounds!\n";
-            break;
-        default:
-            std::cout << "Simulation ended with unknown status.\n";
-    }
-
-    rclcpp::shutdown();
-
-    return 0;
 }

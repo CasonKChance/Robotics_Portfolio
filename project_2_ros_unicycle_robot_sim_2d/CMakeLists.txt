@@ -32,13 +32,13 @@ target_link_libraries(${PROJECT_NAME}_lib
     ${geometry_msgs_TARGETS}
 )
 
-add_executable(CommandVelocityPublisher src/CommandVelocityPublisher.cpp)
+add_executable(CommandVelocityPublisher src/CommandVelocityPublisherMain.cpp)
 target_link_libraries(CommandVelocityPublisher
   PUBLIC
     ${PROJECT_NAME}_lib
 )
 
-add_executable(SimulatorNode src/SimulatorNode.cpp)
+add_executable(SimulatorNode src/SimulatorNodeMain.cpp)
 target_link_libraries(SimulatorNode
   PUBLIC
     ${PROJECT_NAME}_lib

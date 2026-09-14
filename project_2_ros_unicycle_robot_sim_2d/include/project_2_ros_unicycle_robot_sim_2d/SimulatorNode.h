@@ -43,7 +43,7 @@ public:
 private:
   Robot robot_;                                           // Robot state and kinematics model
   World world_;                                           // Simulation environment definition
-  SimulationStatus status_{ SimulationStatus::Running };  // Simulation environment definition
+  SimulationStatus status_{ SimulationStatus::Running };  // Active simulation status state machine
   
   rclcpp::Subscription< geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::TimerBase::SharedPtr timer_;
