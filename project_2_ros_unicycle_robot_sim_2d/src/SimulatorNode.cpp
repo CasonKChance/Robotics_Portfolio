@@ -6,35 +6,37 @@ using namespace std::chrono_literals;
 
 /* Public Member Functions */
 
-SimulatorNode::SimulatorNode(const rclcpp::NodeOptions& options)
+SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 : Node("simulator_node", options),
   robot_{Pose{0.0, 0.0, 0.0}},
   world_{10, 10, {}, Obstacle{8.0, 8.0, 1.0}},
-  status_{ SimulationStatus::Running }
+  status_{SimulationStatus::Running}
 {
     // Subscribe to command velocity topic
-    commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
+  commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10,
+    std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
 
     // 100 Hz simulation timer loop (dt = 0.01 seconds)
-    timer_ = this->create_wall_timer(10ms, std::bind(&SimulatorNode::updateLoop, this));
+  timer_ = this->create_wall_timer(10ms, std::bind(&SimulatorNode::updateLoop, this));
 
     // Evaluate initial spatial condition
-    status_ = checkCollision();
+  status_ = checkCollision();
 }
 
 /* Private Member Functions */
 
 void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
-    RCLCPP_INFO(this->get_logger(), "\nSubscribing: \n"
+  RCLCPP_INFO(this->get_logger(), "\nSubscribing: \n"
                                     "\tLinear: %.2f m/s\n"
-                                    "\tAngular: %.2f rad/s\n", message->linear.x, message->angular.z);
+                                    "\tAngular: %.2f rad/s\n", message->linear.x,
+                                                               message->angular.z);
 
     // Update target velocity command on robot model
-    robot_.setVelocityCommand({
-        .linearVelocity = message->linear.x,
-        .angularVelocity = message->angular.z
-    });
+  robot_.setVelocityCommand({
+    .linearVelocity = message->linear.x,
+    .angularVelocity = message->angular.z
+  });
 }
 
 void SimulatorNode::updateLoop()
@@ -56,19 +58,19 @@ void SimulatorNode::updateLoop()
 
 SimulationStatus SimulatorNode::checkCollision() const
 {
-    const Pose& pose = robot_.getPose();
+  const Pose & pose = robot_.getPose();
 
-    if (!world_.isWithinBounds(pose.x, pose.y)) {
-        return SimulationStatus::OutOfBounds;
-    }
+  if (!world_.isWithinBounds(pose.x, pose.y)) {
+    return SimulationStatus::OutOfBounds;
+  }
 
-    if (world_.isCollisionWithObstacle(pose.x, pose.y)) {
-        return SimulationStatus::ObstacleCollision;
-    }
+  if (world_.isCollisionWithObstacle(pose.x, pose.y)) {
+    return SimulationStatus::ObstacleCollision;
+  }
 
-    if (world_.isCollisionWithGoal(pose.x, pose.y)) {
-        return SimulationStatus::GoalReached;
-    }
+  if (world_.isCollisionWithGoal(pose.x, pose.y)) {
+    return SimulationStatus::GoalReached;
+  }
 
-    return SimulationStatus::Running;
+  return SimulationStatus::Running;
 }

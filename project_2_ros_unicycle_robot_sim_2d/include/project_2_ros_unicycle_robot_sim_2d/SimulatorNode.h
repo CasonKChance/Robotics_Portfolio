@@ -13,11 +13,12 @@
 /**
  * @brief Represents the current operational state or termination reason of the simulation.
  */
-enum class SimulationStatus {
-    Running,           // Simulation is progressing normally
-    GoalReached,       // Robot successfully reached the target goal region
-    ObstacleCollision, // Robot collided with an environmental obstacle
-    OutOfBounds        // Robot moved outside the valid map boundaries
+enum class SimulationStatus
+{
+  Running,             // Simulation is progressing normally
+  GoalReached,         // Robot successfully reached the target goal region
+  ObstacleCollision,   // Robot collided with an environmental obstacle
+  OutOfBounds          // Robot moved outside the valid map boundaries
 };
 
 /**
@@ -32,20 +33,20 @@ public:
    * @brief Constructs a Simulator instance holding a robot and world model.
    * @param options Configuration options for Node initialization.
    */
-  explicit SimulatorNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+  explicit SimulatorNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   /**
    * @brief Gets the current operational or termination status of the simulation.
    * @return Active SimulationStatus enum value.
    */
-  SimulationStatus getStatus() const { return status_; }
+  SimulationStatus getStatus() const {return status_;}
 
 private:
   Robot robot_;                                           // Robot state and kinematics model
   World world_;                                           // Simulation environment definition
-  SimulationStatus status_{ SimulationStatus::Running };  // Active simulation status state machine
-  
-  rclcpp::Subscription< geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
+  SimulationStatus status_ {SimulationStatus::Running};   // Active simulation status state machine
+
+  rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   /**

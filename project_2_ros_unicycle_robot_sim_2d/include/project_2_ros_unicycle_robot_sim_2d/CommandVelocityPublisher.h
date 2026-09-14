@@ -19,7 +19,7 @@ public:
    * @brief Constructs a new Command Velocity Publisher node.
    * @param options Configuration options for Node initialization and parameter overrides.
    */
-  explicit CommandVelocityPublisher(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
+  explicit CommandVelocityPublisher(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;

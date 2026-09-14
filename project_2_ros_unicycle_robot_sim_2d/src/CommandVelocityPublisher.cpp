@@ -4,7 +4,7 @@ using namespace std::chrono_literals;
 
 /* Public Member Functions */
 
-CommandVelocityPublisher::CommandVelocityPublisher(const rclcpp::NodeOptions& options)
+CommandVelocityPublisher::CommandVelocityPublisher(const rclcpp::NodeOptions & options)
 : Node("command_velocity_publisher", options)
 {
   // Initialize publisher for velocity commands
