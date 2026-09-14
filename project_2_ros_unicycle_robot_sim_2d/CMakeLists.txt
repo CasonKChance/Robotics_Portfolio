@@ -15,7 +15,7 @@ add_library(${PROJECT_NAME}_lib
   src/Obstacle.cpp
   src/Robot.cpp
   src/World.cpp
-  src/CommandVelocityPublisher.cpp
+  src/CommandVelocityPublisherNode.cpp
   src/SimulatorNode.cpp
 )
 
@@ -32,8 +32,8 @@ target_link_libraries(${PROJECT_NAME}_lib
     ${geometry_msgs_TARGETS}
 )
 
-add_executable(CommandVelocityPublisher src/CommandVelocityPublisherMain.cpp)
-target_link_libraries(CommandVelocityPublisher
+add_executable(CommandVelocityPublisherNode src/CommandVelocityPublisherNodeMain.cpp)
+target_link_libraries(CommandVelocityPublisherNode
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -56,11 +56,11 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   # Add the GoogleTest target
-  ament_add_gtest(TestCommandVelocityPublisher
-    tests/CommandVelocityPublisherTests.cpp
+  ament_add_gtest(TestCommandVelocityPublisherNode
+    tests/CommandVelocityPublisherNodeTests.cpp
   )
 
-  target_link_libraries(TestCommandVelocityPublisher
+  target_link_libraries(TestCommandVelocityPublisherNode
     ${PROJECT_NAME}_lib
   )
 endif()
@@ -69,9 +69,12 @@ endif()
 install(
   TARGETS
     ${PROJECT_NAME}_lib
-    CommandVelocityPublisher
+    CommandVelocityPublisherNode
     SimulatorNode
-  DESTINATION lib/${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}_libTargets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(

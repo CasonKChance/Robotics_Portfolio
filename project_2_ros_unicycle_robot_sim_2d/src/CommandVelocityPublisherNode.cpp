@@ -1,11 +1,11 @@
-#include "project_2_ros_unicycle_robot_sim_2d/CommandVelocityPublisher.h"
+#include "project_2_ros_unicycle_robot_sim_2d/CommandVelocityPublisherNode.h"
 
 using namespace std::chrono_literals;
 
 /* Public Member Functions */
 
-CommandVelocityPublisher::CommandVelocityPublisher(const rclcpp::NodeOptions & options)
-: Node("command_velocity_publisher", options)
+CommandVelocityPublisherNode::CommandVelocityPublisherNode(const rclcpp::NodeOptions & options)
+: Node("command_velocity_publisher_node", options)
 {
   // Initialize publisher for velocity commands
   publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
@@ -16,12 +16,12 @@ CommandVelocityPublisher::CommandVelocityPublisher(const rclcpp::NodeOptions & o
 
   // Set up 100 Hz wall timer (10 ms period)
   timer_ = this->create_wall_timer(10ms,
-    std::bind(&CommandVelocityPublisher::timerCallback, this));
+    std::bind(&CommandVelocityPublisherNode::timerCallback, this));
 }
 
 /* Private Member Functions */
 
-void CommandVelocityPublisher::timerCallback()
+void CommandVelocityPublisherNode::timerCallback()
 {
   auto message = geometry_msgs::msg::Twist();
 
@@ -35,7 +35,7 @@ void CommandVelocityPublisher::timerCallback()
   publisher_->publish(message);
 }
 
-double CommandVelocityPublisher::normalizeAngle(double angle) const
+double CommandVelocityPublisherNode::normalizeAngle(double angle) const
 {
   // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
   return std::atan2(std::sin(angle), std::cos(angle));

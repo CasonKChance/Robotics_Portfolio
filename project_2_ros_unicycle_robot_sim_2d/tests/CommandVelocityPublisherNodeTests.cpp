@@ -1,4 +1,4 @@
-#include <project_2_ros_unicycle_robot_sim_2d/CommandVelocityPublisher.h>
+#include <project_2_ros_unicycle_robot_sim_2d/CommandVelocityPublisherNode.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -9,7 +9,7 @@
 
 using namespace std::chrono_literals;
 
-class CommandVelocityPublisherTest : public ::testing::Test {
+class CommandVelocityPublisherNodeTest : public ::testing::Test {
 protected:
   static void SetUpTestCase()
   {
@@ -43,8 +43,8 @@ bool spinUntil(
 }
 
 // Test 1: Verify default parameters publish zero velocity
-TEST_F(CommandVelocityPublisherTest, TestDefaultPublishing) {
-    auto node = std::make_shared<CommandVelocityPublisher>();
+TEST_F(CommandVelocityPublisherNodeTest, TestDefaultPublishing) {
+    auto node = std::make_shared<CommandVelocityPublisherNode>();
     auto sub_node = std::make_shared<rclcpp::Node>("test_subscriber");
 
     geometry_msgs::msg::Twist received_msg;
@@ -66,13 +66,13 @@ TEST_F(CommandVelocityPublisherTest, TestDefaultPublishing) {
 }
 
 // Test 2: Verify custom parameters and angle normalization implicitly through publication
-TEST_F(CommandVelocityPublisherTest, TestCustomPublishingAndNormalization) {
+TEST_F(CommandVelocityPublisherNodeTest, TestCustomPublishingAndNormalization) {
     rclcpp::NodeOptions options;
     // Set angular_velocity to 7.0 rad, which should normalize to ~0.7168 rad [-pi, pi]
     options.append_parameter_override("linear_velocity", 2.5);
     options.append_parameter_override("angular_velocity", 7.0);
 
-    auto node = std::make_shared<CommandVelocityPublisher>(options);
+    auto node = std::make_shared<CommandVelocityPublisherNode>(options);
     auto sub_node = std::make_shared<rclcpp::Node>("test_subscriber");
 
     geometry_msgs::msg::Twist received_msg;

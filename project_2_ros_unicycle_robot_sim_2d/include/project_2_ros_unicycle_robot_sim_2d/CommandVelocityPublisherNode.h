@@ -1,5 +1,5 @@
-#ifndef COMMAND_VELOCITY_PUBLISHER_H
-#define COMMAND_VELOCITY_PUBLISHER_H
+#ifndef COMMAND_VELOCITY_PUBLISHER_NODE_H
+#define COMMAND_VELOCITY_PUBLISHER_NODE_H
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -13,13 +13,14 @@
  * This node manages user-configurable linear and angular velocity parameters and broadcasts
  * them to the "cmd_vel" topic on a fixed timer schedule.
  */
-class CommandVelocityPublisher: public rclcpp::Node {
+class CommandVelocityPublisherNode: public rclcpp::Node {
 public:
   /**
    * @brief Constructs a new Command Velocity Publisher node.
    * @param options Configuration options for Node initialization and parameter overrides.
    */
-  explicit CommandVelocityPublisher(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit CommandVelocityPublisherNode(
+    const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
