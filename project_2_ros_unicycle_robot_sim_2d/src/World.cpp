@@ -11,12 +11,16 @@ World::World(int maxX, int maxY, std::vector<Obstacle> obstacles, std::optional<
   goal_{std::move(goal)}
 {
   // Ensure the goal and obstacles are within the bounds of the world
-  if (goal_ && !isWithinBounds(goal_->x + goal_->radius, goal_->y + goal_->radius)) {
+  if (goal_ && (!isWithinBounds(goal_->x + goal_->radius, goal_->y + goal_->radius) ||
+    !isWithinBounds(goal_->x - goal_->radius, goal_->y - goal_->radius)))
+  {
     throw std::invalid_argument("Goal position is out of bounds.");
   }
 
   for (const auto & obstacle : obstacles_) {
-    if (!isWithinBounds(obstacle.x + obstacle.radius, obstacle.y + obstacle.radius)) {
+    if (!isWithinBounds(obstacle.x + obstacle.radius, obstacle.y + obstacle.radius) ||
+      !isWithinBounds(obstacle.x - obstacle.radius, obstacle.y - obstacle.radius))
+    {
       throw std::invalid_argument("Obstacle position is out of bounds.");
     }
   }
