@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>project_2_unicycle_robot_sim_2d</name>
+  <name>project_2_ros_unicycle_robot_sim_2d</name>
   <version>0.0.0</version>
   <description>Project 2: Unicycle 2D Robot Simulator using ROS</description>
   <maintainer email="casonkchance@gmail.com">Cason</maintainer>
