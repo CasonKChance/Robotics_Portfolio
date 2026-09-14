@@ -31,7 +31,7 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 
 void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
-  if (message->linear.x == robot_.getVelocityCommand().linearVelocity ||
+  if (message->linear.x == robot_.getVelocityCommand().linearVelocity &&
     message->angular.z == robot_.getVelocityCommand().angularVelocity)
   {
     return;
