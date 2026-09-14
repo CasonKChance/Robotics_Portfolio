@@ -16,6 +16,7 @@ add_library(${PROJECT_NAME}_lib
   src/Robot.cpp
   src/World.cpp
   src/CommandVelocityPublisher.cpp
+  src/SimulatorNode.cpp
 )
 
 # Export include directories
@@ -33,6 +34,12 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 add_executable(CommandVelocityPublisher src/CommandVelocityPublisher.cpp)
 target_link_libraries(CommandVelocityPublisher
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
+add_executable(SimulatorNode src/SimulatorNode.cpp)
+target_link_libraries(SimulatorNode
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -60,7 +67,10 @@ endif()
 
 # Installation rules
 install(
-  TARGETS ${PROJECT_NAME}_lib CommandVelocityPublisher
+  TARGETS
+    ${PROJECT_NAME}_lib
+    CommandVelocityPublisher
+    SimulatorNode
   DESTINATION lib/${PROJECT_NAME}
 )
 
