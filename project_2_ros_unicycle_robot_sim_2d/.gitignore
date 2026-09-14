@@ -3,8 +3,10 @@
 /install
 /log
 
-# Local configuration folders
-.vscode/*
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
 
 # Python Virtual Environments
 .venv/

@@ -15,6 +15,7 @@ add_library(${PROJECT_NAME}_lib
   src/Obstacle.cpp
   src/Robot.cpp
   src/World.cpp
+  src/CommandVelocityPublisher.cpp
 )
 
 # Export include directories
@@ -36,16 +37,25 @@ target_link_libraries(CommandVelocityPublisher
     ${PROJECT_NAME}_lib
 )
 
+# Enable testing
+option(BUILD_TESTING "Enable testing and build tests" ON)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
+  find_package(ament_cmake_gtest REQUIRED)
+
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  # Add the GoogleTest target
+  ament_add_gtest(TestCommandVelocityPublisher
+    tests/CommandVelocityPublisherTests.cpp
+  )
+  
+  target_link_libraries(TestCommandVelocityPublisher
+    ${PROJECT_NAME}_lib
+  )
 endif()
 
 # Installation rules
