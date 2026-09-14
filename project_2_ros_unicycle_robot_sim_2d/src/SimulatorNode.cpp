@@ -82,8 +82,8 @@ SimulationStatus SimulatorNode::checkCollision() const
 void SimulatorNode::buildWorld()
 {
   // Bounds
-  const double length = this->declare_parameter<double>("world.bounds.length", 10.0);
-  const double width = this->declare_parameter<double>("world.bounds.width", 10.0);
+  const double maxX = this->declare_parameter<double>("world.bounds.length", 10.0);
+  const double maxY = this->declare_parameter<double>("world.bounds.width", 10.0);
 
   // Goal
   const bool isGoalEnabled = this->declare_parameter<bool>("world.goal.enabled", false);
@@ -125,5 +125,5 @@ void SimulatorNode::buildWorld()
       });
   }
 
-  world_ = World(length, width, obstacles, goal);
+  world_ = World(maxX, maxY, obstacles, goal);
 }

@@ -59,8 +59,14 @@ if(BUILD_TESTING)
   ament_add_gtest(TestCommandVelocityPublisherNode
     tests/CommandVelocityPublisherNodeTests.cpp
   )
+  ament_add_gtest(TestSimulatorNode
+    tests/SimulatorNodeTests.cpp
+  )
 
   target_link_libraries(TestCommandVelocityPublisherNode
+    ${PROJECT_NAME}_lib
+  )
+  target_link_libraries(TestSimulatorNode
     ${PROJECT_NAME}_lib
   )
 endif()
