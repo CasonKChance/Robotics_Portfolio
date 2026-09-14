@@ -7,9 +7,9 @@
 
 using namespace std::chrono_literals;
 
-static const kDefaultWorldMaxX = 10.0;
-static const kDefaultWorldMaxY = 10.0;
-static const kUpdateRobotTimestep = 0.01;
+static const double kDefaultWorldMaxX = 10.0;
+static const double kDefaultWorldMaxY = 10.0;
+static const double kUpdateRobotTimestep = 0.01;
 
 /* Public Member Functions */
 
@@ -61,8 +61,7 @@ void SimulatorNode::updateLoop()
     return;
   }
 
-  constexpr double dt = kUpdateRobotTimestep;
-  robot_.update(dt);
+  robot_.update(kUpdateRobotTimestep);
 
   status_ = checkCollision();
 
