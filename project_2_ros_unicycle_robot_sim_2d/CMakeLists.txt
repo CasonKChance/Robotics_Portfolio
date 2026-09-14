@@ -10,11 +10,30 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
-add_executable(CommandVelocityPublisher src/CommandVelocityPublisher.cpp)
-target_link_libraries(CommandVelocityPublisher
+# Declare C++ library for core simulation classes
+add_library(${PROJECT_NAME}_lib
+  src/Obstacle.cpp
+  src/Robot.cpp
+  src/World.cpp
+)
+
+# Export include directories
+target_include_directories(${PROJECT_NAME}_lib
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
+
+target_link_libraries(${PROJECT_NAME}_lib
   PUBLIC
     rclcpp::rclcpp
     ${geometry_msgs_TARGETS}
+)
+
+add_executable(CommandVelocityPublisher src/CommandVelocityPublisher.cpp)
+target_link_libraries(CommandVelocityPublisher
+  PUBLIC
+    ${PROJECT_NAME}_lib
 )
 
 if(BUILD_TESTING)
@@ -29,9 +48,15 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(TARGETS
-  CommandVelocityPublisher
+# Installation rules
+install(
+  TARGETS ${PROJECT_NAME}_lib CommandVelocityPublisher
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
 )
 
 ament_package()

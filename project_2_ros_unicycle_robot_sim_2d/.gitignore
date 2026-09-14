@@ -1,0 +1,19 @@
+# Folders created by `colcon build`
+/build
+/install
+/log
+
+# Local configuration folders
+.vscode/*
+
+# Python Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & generated files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
