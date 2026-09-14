@@ -52,7 +52,7 @@ if(BUILD_TESTING)
   ament_add_gtest(TestCommandVelocityPublisher
     tests/CommandVelocityPublisherTests.cpp
   )
-  
+
   target_link_libraries(TestCommandVelocityPublisher
     ${PROJECT_NAME}_lib
   )
