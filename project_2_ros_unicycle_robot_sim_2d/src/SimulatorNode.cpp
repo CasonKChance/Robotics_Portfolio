@@ -7,12 +7,16 @@
 
 using namespace std::chrono_literals;
 
+static const kDefaultWorldMaxX = 10.0;
+static const kDefaultWorldMaxY = 10.0;
+static const kUpdateRobotTimestep = 0.01;
+
 /* Public Member Functions */
 
 SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 : Node("simulator_node", options),
   robot_(Pose{1.0, 1.0, 0.0}),
-  world_(10.0, 10.0),
+  world_(0.0, 0.0),
   status_{SimulationStatus::Running}
 {
   buildWorld();
@@ -57,7 +61,7 @@ void SimulatorNode::updateLoop()
     return;
   }
 
-  constexpr double dt = 0.01; // 10ms step time
+  constexpr double dt = kUpdateRobotTimestep;
   robot_.update(dt);
 
   status_ = checkCollision();
@@ -90,8 +94,8 @@ SimulationStatus SimulatorNode::checkCollision() const
 void SimulatorNode::buildWorld()
 {
   // Bounds
-  const double maxX = this->declare_parameter<double>("world.bounds.length", 10.0);
-  const double maxY = this->declare_parameter<double>("world.bounds.width", 10.0);
+  const double maxX = this->declare_parameter<double>("world.bounds.length", kDefaultWorldMaxX);
+  const double maxY = this->declare_parameter<double>("world.bounds.width", kDefaultWorldMaxY);
 
   // Goal
   const bool isGoalEnabled = this->declare_parameter<bool>("world.goal.enabled", false);
