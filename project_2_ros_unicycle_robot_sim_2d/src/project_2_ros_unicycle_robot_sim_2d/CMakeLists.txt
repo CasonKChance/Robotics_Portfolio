@@ -14,6 +14,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Obstacle.msg"
   "msg/Goal.msg"
+  "msg/RobotPose.msg"
   "srv/SendWorldData.srv"
   DEPENDENCIES geometry_msgs
 )
@@ -58,6 +59,13 @@ add_executable(SimulatorNode src/SimulatorNodeMain.cpp)
 target_link_libraries(SimulatorNode
   PUBLIC
     ${PROJECT_NAME}_lib
+)
+
+install(
+  PROGRAMS
+    src/VisualizationNode.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME VisualizationNode
 )
 
 # Enable testing

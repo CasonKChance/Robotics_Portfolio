@@ -65,6 +65,10 @@ void SimulatorNode::handleWorldDataService(
 
     response->obstacles.push_back(messageObstacle);
   }
+
+  response->robot_pose.x = robot_.getPose().x;
+  response->robot_pose.y = robot_.getPose().y;
+  response->robot_pose.theta = robot_.getPose().theta;
 }
 
 /* Private Member Functions */
