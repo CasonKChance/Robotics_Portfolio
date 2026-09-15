@@ -652,6 +652,18 @@ TEST_F(SimulatorNodeTest, SendWorldDataReturnsConfiguredWorld)
   EXPECT_DOUBLE_EQ(
     response->obstacles[2].radius,
     0.75);
+
+  EXPECT_DOUBLE_EQ(
+    response->robot_pose.x,
+    1.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->robot_pose.y,
+    1.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->robot_pose.theta,
+    0.0);
 }
 
 /* Main */
