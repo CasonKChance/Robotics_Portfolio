@@ -6,6 +6,7 @@ import threading
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
+from project_2_ros_unicycle_robot_sim_2d.msg import RobotPose
 from project_2_ros_unicycle_robot_sim_2d.srv import SendWorldData
 
 import rclpy
@@ -29,7 +30,14 @@ class VisualizationNode(Node):
                 'Waiting for service from SimulationNode...'
             )
 
-        # Variables to describe world state
+        # Set up /robot_pose subscriber
+        self.robot_pose_subscription = self.create_subscription(
+            RobotPose,
+            'robot_pose',
+            self.robot_pose_listener_callback,
+            10)
+
+        # World State variables
         self.max_x = None
         self.max_y = None
         self.goals = []
@@ -38,6 +46,10 @@ class VisualizationNode(Node):
 
         self.world_received = False
         self.world_drawn = False
+
+        # Incremented whenever a new robot pose is received.
+        self.robot_pose_version = 0
+        self.last_drawn_pose_version = 0
 
         # Protects shared state between the ROS executor thread and
         # Matplotlib's GUI thread.
@@ -53,6 +65,7 @@ class VisualizationNode(Node):
 
         self.robot_body = None
         self.robot_heading = None
+        self.robot_path = []
 
         # Send request
         self.request_world()
@@ -84,6 +97,11 @@ class VisualizationNode(Node):
             'Received world data from SimulationNode.'
         )
 
+    def robot_pose_listener_callback(self, message):
+        with self.state_lock:
+            self.robot_pose = message
+            self.robot_pose_version += 1
+
     def create_visualization(self):
         self.fig, self.ax = plt.subplots(
             figsize=(8, 8),
@@ -93,7 +111,7 @@ class VisualizationNode(Node):
         self.ax.set_title(
             '2D Spatial Trajectory',
             fontweight='bold',
-            loc='left'
+            loc='center'
         )
 
         self.ax.set_xlabel('X Position [m]')
@@ -107,7 +125,7 @@ class VisualizationNode(Node):
             alpha=0.6
         )
 
-        # Keep a reference to the timer so that it is not garbage collected.
+        # Timer to update the plot when new robot pose data is received
         self.update_timer = self.fig.canvas.new_timer(
             interval=30,
             callbacks=[
@@ -119,6 +137,7 @@ class VisualizationNode(Node):
 
     def update_visualization(self):
         self.draw_world()
+        self.update_robot()
 
         if self.fig is not None:
             self.fig.canvas.draw_idle()
@@ -211,21 +230,26 @@ class VisualizationNode(Node):
 
             self.ax.add_patch(self.robot_body)
 
-            heading_x = (
-                robot_pose.x 
-                + heading_length * math.cos(robot_pose.theta)
-            )
-            heading_y = (
-                robot_pose.y
-                + heading_length * math.sin(robot_pose.theta)
-            )
+            heading_x = (robot_pose.x + heading_length * math.cos(robot_pose.theta))
+            heading_y = (robot_pose.y + heading_length * math.sin(robot_pose.theta))
 
             self.robot_heading, = self.ax.plot(
                 [robot_pose.x, heading_x],
                 [robot_pose.y, heading_y],
                 linewidth=2,
                 zorder=6
-            ) 
+            )
+
+            # Draw initial marker for first trajectory point
+            self.ax.plot(
+                robot_pose.x,
+                robot_pose.y,
+                marker='o',
+                linestyle='None',
+                color='blue',
+                markersize=4,
+                zorder=4
+            )
 
             legend_handles.append(
                 patches.Patch(
@@ -253,6 +277,44 @@ class VisualizationNode(Node):
 
         self.get_logger().info(
             'World visualization created.'
+        )
+
+    def update_robot(self):
+        if not self.world_drawn:
+            return
+
+        with self.state_lock:
+            if self.robot_pose is None:
+                return
+
+            if self.robot_pose_version == self.last_drawn_pose_version:
+                return
+
+            robot_pose = self.robot_pose
+
+            self.last_drawn_pose_version = self.robot_pose_version
+
+        heading_length = 0.5
+
+        self.robot_body.center = (
+            robot_pose.x,
+            robot_pose.y
+        )
+
+        heading_x = (robot_pose.x + heading_length * math.cos(robot_pose.theta))
+        heading_y = (robot_pose.y + heading_length * math.sin(robot_pose.theta))
+
+        self.robot_heading.set_data([robot_pose.x, heading_x], [robot_pose.y, heading_y])
+
+        # Leave a blue dot at the robot's new position.
+        self.ax.plot(
+            robot_pose.x,
+            robot_pose.y,
+            marker='o',
+            linestyle='None',
+            color='blue',
+            markersize=4,
+            zorder=4
         )
 
     def shutdown_visualization(self):

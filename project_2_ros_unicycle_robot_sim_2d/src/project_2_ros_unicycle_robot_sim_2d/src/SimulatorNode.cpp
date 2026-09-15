@@ -29,6 +29,9 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
   timer_ = this->create_wall_timer(
     10ms, std::bind(&SimulatorNode::updateLoop, this));
 
+  robotPosePublisher_ =
+    this->create_publisher<project_2_ros_unicycle_robot_sim_2d::msg::RobotPose>("robot_pose", 10);
+
   status_ = checkCollision();
 }
 
@@ -95,6 +98,18 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
   });
 }
 
+void SimulatorNode::publishRobotPose() const
+{
+  auto message = project_2_ros_unicycle_robot_sim_2d::msg::RobotPose();
+  auto robotPose = robot_.getPose();
+
+  message.x = robotPose.x;
+  message.y = robotPose.y;
+  message.theta = robotPose.theta;
+
+  this->robotPosePublisher_->publish(message);
+}
+
 void SimulatorNode::updateLoop()
 {
   if (status_ != SimulationStatus::Running) {
@@ -102,6 +117,9 @@ void SimulatorNode::updateLoop()
   }
 
   robot_.update(kUpdateRobotTimestep);
+
+  // Send new pose to visualization node
+  publishRobotPose();
 
   status_ = checkCollision();
 

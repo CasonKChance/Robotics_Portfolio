@@ -4,6 +4,7 @@
 #include "Robot.h"
 #include "World.h"
 #include "project_2_ros_unicycle_robot_sim_2d/srv/send_world_data.hpp"
+#include "project_2_ros_unicycle_robot_sim_2d/msg/robot_pose.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -58,6 +59,8 @@ private:
   SimulationStatus status_ {SimulationStatus::Running};   // Active simulation status state machine
 
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
+  rclcpp::Publisher < project_2_ros_unicycle_robot_sim_2d::msg::RobotPose >
+  ::SharedPtr robotPosePublisher_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   /**
@@ -65,6 +68,11 @@ private:
    * @param message Pointer to received geometry_msgs::msg::Twist command.
    */
   void topicCallback(geometry_msgs::msg::Twist::UniquePtr message);
+
+  /**
+   * @brief Publishes the robot's current pose to topic 'robot_pose'.
+   */
+  void publishRobotPose() const;
 
   /**
    * @brief Discrete simulation loop handler executed periodically by wall timer.
