@@ -18,6 +18,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES geometry_msgs
 )
 
+rosidl_get_typesupport_target(
+  cpp_typesupport_target
+  ${PROJECT_NAME}
+  "rosidl_typesupport_cpp"
+)
+
 # Declare C++ library for core simulation classes
 add_library(${PROJECT_NAME}_lib
   src/Obstacle.cpp
@@ -39,6 +45,7 @@ target_link_libraries(${PROJECT_NAME}_lib
   PUBLIC
     rclcpp::rclcpp
     ${geometry_msgs_TARGETS}
+    "${cpp_typesupport_target}"
 )
 
 add_executable(CommandVelocityPublisherNode src/CommandVelocityPublisherNodeMain.cpp)
@@ -99,7 +106,7 @@ install(
 
 install(
   DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
+  DESTINATION share/${PROJECT_NAME}/config
 )
 
 ament_package()

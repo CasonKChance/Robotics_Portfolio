@@ -3,12 +3,15 @@
 
 #include "Robot.h"
 #include "World.h"
+#include "project_2_ros_unicycle_robot_sim_2d/srv/send_world_data.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
 #include <chrono>
 #include <memory>
+
+using project_2_ros_unicycle_robot_sim_2d::srv::SendWorldData;
 
 /**
  * @brief Represents the current operational state or termination reason of the simulation.
@@ -34,6 +37,14 @@ public:
    * @param options Configuration options for Node initialization.
    */
   explicit SimulatorNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+
+  /**
+   * @brief Handles sending world data to visualization node via service response
+   */
+  void handleWorldDataService(
+    const std::shared_ptr < rmw_request_id_t > request_header,
+    const std::shared_ptr < SendWorldData::Request > request,
+    const std::shared_ptr < SendWorldData::Response > response) const;
 
   /**
    * @brief Gets the current operational or termination status of the simulation.

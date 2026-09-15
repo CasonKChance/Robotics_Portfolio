@@ -6,6 +6,7 @@
 #include <vector>
 
 using namespace std::chrono_literals;
+using project_2_ros_unicycle_robot_sim_2d::srv::SendWorldData;
 
 static const double kDefaultWorldMaxX = 10.0;
 static const double kDefaultWorldMaxY = 10.0;
@@ -29,6 +30,41 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
     10ms, std::bind(&SimulatorNode::updateLoop, this));
 
   status_ = checkCollision();
+}
+
+void SimulatorNode::handleWorldDataService(
+  const std::shared_ptr<rmw_request_id_t> request_header,
+  const std::shared_ptr<SendWorldData::Request> request,
+  const std::shared_ptr<SendWorldData::Response> response) const
+{
+  (void)request_header;
+  (void)request;
+
+  RCLCPP_INFO(this->get_logger(), "Sending world data to visualization node");
+
+  response->max_x = world_.getMaxX();
+  response->max_y = world_.getMaxY();
+
+  std::optional<Goal> goal = world_.getGoal();
+  if (goal.has_value()) {
+    project_2_ros_unicycle_robot_sim_2d::msg::Goal messageGoal;
+
+    messageGoal.center.x = goal->x;
+    messageGoal.center.y = goal->y;
+    messageGoal.radius = goal->radius;
+
+    response->goal.push_back(messageGoal);
+  }
+
+  for (const auto & obstacle : world_.getObstacles()) {
+    project_2_ros_unicycle_robot_sim_2d::msg::Obstacle messageObstacle;
+
+    messageObstacle.center.x = obstacle.x;
+    messageObstacle.center.y = obstacle.y;
+    messageObstacle.radius = obstacle.radius;
+
+    response->obstacles.push_back(messageObstacle);
+  }
 }
 
 /* Private Member Functions */

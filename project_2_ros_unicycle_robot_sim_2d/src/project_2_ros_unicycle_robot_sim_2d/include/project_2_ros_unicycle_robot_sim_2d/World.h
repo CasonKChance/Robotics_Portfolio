@@ -79,7 +79,7 @@ private:
   int maxX_ {10};                                   // Map upper bound along the X-axis
   int maxY_ {10};                                   // Map upper bound along the Y-axis
   std::vector < Obstacle > obstacles_ {};           // List of active circular obstacles
-  std::optional < Goal > goal_ {std::nullopt};  // Optional target goal region
+  std::optional < Goal > goal_ {std::nullopt};      // Optional target goal region
 };
 
 #endif
