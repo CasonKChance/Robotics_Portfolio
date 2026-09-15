@@ -13,6 +13,7 @@ find_package(geometry_msgs REQUIRED)
 # Declare C++ library for core simulation classes
 add_library(${PROJECT_NAME}_lib
   src/Obstacle.cpp
+  src/Goal.cpp
   src/Robot.cpp
   src/World.cpp
   src/CommandVelocityPublisherNode.cpp

@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include "Obstacle.h"
+#include "Goal.h"
 
 #include <optional>
 #include <vector>
@@ -20,7 +21,7 @@ public:
    * @param goal Optional goal region (defaults to std::nullopt / no goal).
    */
   World(int maxX, int maxY, std::vector < Obstacle > obstacles = {},
-    std::optional < Obstacle > goal = std::nullopt);
+    std::optional < Goal > goal = std::nullopt);
 
   /**
    * @brief Evaluates whether a given position intersects with any environmental obstacle.
@@ -70,7 +71,7 @@ public:
    * @brief Gets the goal region, if it exists.
    * @return Reference to the optional goal region.
    */
-  const std::optional < Obstacle > & getGoal() const {
+  const std::optional < Goal > & getGoal() const {
     return goal_;
   }
 
@@ -78,7 +79,7 @@ private:
   int maxX_ {10};                                   // Map upper bound along the X-axis
   int maxY_ {10};                                   // Map upper bound along the Y-axis
   std::vector < Obstacle > obstacles_ {};           // List of active circular obstacles
-  std::optional < Obstacle > goal_ {std::nullopt};  // Optional target goal region
+  std::optional < Goal > goal_ {std::nullopt};  // Optional target goal region
 };
 
 #endif

@@ -4,7 +4,7 @@
 
 /* Public Member Functions */
 
-World::World(int maxX, int maxY, std::vector<Obstacle> obstacles, std::optional<Obstacle> goal)
+World::World(int maxX, int maxY, std::vector<Obstacle> obstacles, std::optional<Goal> goal)
 : maxX_{maxX},
   maxY_{maxY},
   obstacles_{std::move(obstacles)},

@@ -99,13 +99,13 @@ void SimulatorNode::buildWorld()
   // Goal
   const bool isGoalEnabled = this->declare_parameter<bool>("world.goal.enabled", false);
 
-  std::optional<Obstacle> goal = std::nullopt;
+  std::optional<Goal> goal = std::nullopt;
   if (isGoalEnabled) {
     const double goalX = this->declare_parameter<double>("world.goal.x", 0.0);
     const double goalY = this->declare_parameter<double>("world.goal.y", 0.0);
     const double goalRadius = this->declare_parameter<double>("world.goal.radius", 0.0);
 
-    goal = Obstacle{goalX, goalY, goalRadius};
+    goal = Goal{goalX, goalY, goalRadius};
   }
 
   // Obstacles
