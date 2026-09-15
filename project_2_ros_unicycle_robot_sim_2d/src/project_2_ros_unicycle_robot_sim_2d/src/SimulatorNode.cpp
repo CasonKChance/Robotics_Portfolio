@@ -43,7 +43,7 @@ void SimulatorNode::handleWorldDataService(
   (void)request_header;
   (void)request;
 
-  RCLCPP_INFO(this->get_logger(), "Sending world data to visualization node");
+  RCLCPP_INFO(this->get_logger(), "Sending world data to visualization node.\n");
 
   response->max_x = world_.getMaxX();
   response->max_y = world_.getMaxY();
@@ -78,7 +78,7 @@ void SimulatorNode::handleWorldDataService(
 
 void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
-  RCLCPP_INFO_ONCE(this->get_logger(), "\nListening for velocity command updates...\n");
+  RCLCPP_INFO_ONCE(this->get_logger(), "Listening for velocity command updates...\n");
 
   if (message->linear.x == robot_.getVelocityCommand().linearVelocity &&
     message->angular.z == robot_.getVelocityCommand().angularVelocity)
@@ -86,7 +86,7 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
     return;
   }
 
-  RCLCPP_INFO(this->get_logger(), "\nUpdating velocity command with: \n"
+  RCLCPP_INFO(this->get_logger(), "Updating velocity command with: \n"
                                     "\tLinear: %.2f m/s\n"
                                     "\tAngular: %.2f rad/s\n", message->linear.x,
                                                                message->angular.z);
@@ -100,6 +100,8 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 
 void SimulatorNode::publishRobotPose() const
 {
+  RCLCPP_INFO_ONCE(this->get_logger(), "Publishing Robot Pose...\n");
+
   auto message = project_2_ros_unicycle_robot_sim_2d::msg::RobotPose();
   auto robotPose = robot_.getPose();
 
@@ -124,8 +126,9 @@ void SimulatorNode::updateLoop()
   status_ = checkCollision();
 
   if (status_ != SimulationStatus::Running) {
-    RCLCPP_INFO(this->get_logger(), "Simulation ending condition met. Shutting down node.");
-    rclcpp::shutdown();
+    RCLCPP_INFO(this->get_logger(), "Simulation ending condition met.\n");
+
+    timer_->cancel();
   }
 }
 

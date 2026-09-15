@@ -1,9 +1,12 @@
+#include "project_2_ros_unicycle_robot_sim_2d/SimulatorNode.h"
+
 #include <iostream>
 #include <memory>
 #include <functional>
+#include <thread>
 
-#include "project_2_ros_unicycle_robot_sim_2d/SimulatorNode.h"
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/executors/single_threaded_executor.hpp"
 
 using project_2_ros_unicycle_robot_sim_2d::srv::SendWorldData;
 
@@ -18,7 +21,13 @@ int main(int argc, char * argv[])
     std::placeholders::_2,
     std::placeholders::_3));
 
-  rclcpp::spin(simulatorNode);
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(simulatorNode);
+
+  while (rclcpp::ok() && simulatorNode->getStatus() == SimulationStatus::Running) {
+    executor.spin_some();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 
   // Log final simulation terminal state after spin loop exits
   switch(simulatorNode->getStatus()) {

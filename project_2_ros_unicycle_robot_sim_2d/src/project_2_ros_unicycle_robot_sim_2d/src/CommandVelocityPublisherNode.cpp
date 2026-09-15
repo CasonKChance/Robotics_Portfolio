@@ -28,7 +28,7 @@ void CommandVelocityPublisherNode::timerCallback()
   message.linear.x = this->get_parameter("linear_velocity").as_double();
   message.angular.z = normalizeAngle(this->get_parameter("angular_velocity").as_double());
 
-  RCLCPP_INFO_ONCE(this->get_logger(), "\nPublishing...\n");
+  RCLCPP_INFO_ONCE(this->get_logger(), "Publishing command velocity...\n");
 
   publisher_->publish(message);
 }
