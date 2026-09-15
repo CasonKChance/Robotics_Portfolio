@@ -1,0 +1,6 @@
+int64 max_x
+int64 max_y
+msg/Goal[<=1] goal
+msg/Obstacles[] obstacles
+---
+bool success

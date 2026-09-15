@@ -9,6 +9,14 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Obstacle.msg"
+  "msg/Goal.msg"
+  "srv/SendWorldData.srv"
+  DEPENDENCIES geometry_msgs
+)
 
 # Declare C++ library for core simulation classes
 add_library(${PROJECT_NAME}_lib

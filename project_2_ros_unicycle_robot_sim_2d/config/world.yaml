@@ -2,8 +2,8 @@ simulator_node:
   ros__parameters:
     world:
       bounds:
-        length: 10.0
-        width: 10.0
+        max_x: 10.0
+        max_y: 10.0
 
       goal:
         enabled: true
