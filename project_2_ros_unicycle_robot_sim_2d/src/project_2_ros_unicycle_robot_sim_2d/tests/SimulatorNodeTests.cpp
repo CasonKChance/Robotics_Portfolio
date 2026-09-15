@@ -1,4 +1,5 @@
 #include <project_2_ros_unicycle_robot_sim_2d/SimulatorNode.h>
+#include "project_2_ros_unicycle_robot_sim_2d/srv/send_world_data.hpp"
 
 #include <gtest/gtest.h>
 
@@ -66,8 +67,8 @@ protected:
   {
     rclcpp::NodeOptions options;
 
-    options.append_parameter_override("world.bounds.length", 10.0);
-    options.append_parameter_override("world.bounds.width", 10.0);
+    options.append_parameter_override("world.bounds.max_x", 10.0);
+    options.append_parameter_override("world.bounds.max_y", 10.0);
 
     options.append_parameter_override("world.goal.enabled", goalEnabled);
     options.append_parameter_override("world.goal.x", goalX);
@@ -486,6 +487,172 @@ TEST_F(SimulatorNodeTest, LinearVelocityCommandReachesGoal)
     SimulationStatus::GoalReached);
 }
 
+/**
+ * Verify that SimulatorNode correctly sends its configured world data through
+ * the send_world_data service.
+ *
+ * The service should return:
+ *   - the configured world bounds
+ *   - the configured goal
+ *   - all configured obstacles
+ */
+TEST_F(SimulatorNodeTest, SendWorldDataReturnsConfiguredWorld)
+{
+  rclcpp::NodeOptions options;
+
+  options.append_parameter_override(
+    "world.bounds.max_x",
+    10.0);
+
+  options.append_parameter_override(
+    "world.bounds.max_y",
+    8.0);
+
+  options.append_parameter_override(
+    "world.goal.enabled",
+    true);
+
+  options.append_parameter_override(
+    "world.goal.x",
+    7.0);
+
+  options.append_parameter_override(
+    "world.goal.y",
+    6.0);
+
+  options.append_parameter_override(
+    "world.goal.radius",
+    0.5);
+
+  options.append_parameter_override(
+    "world.obstacles.x",
+    std::vector<double>{2.0, 4.0, 6.0});
+
+  options.append_parameter_override(
+    "world.obstacles.y",
+    std::vector<double>{1.0, 3.0, 5.0});
+
+  options.append_parameter_override(
+    "world.obstacles.radius",
+    std::vector<double>{0.25, 0.5, 0.75});
+
+  auto simulator = std::make_shared<SimulatorNode>(options);
+
+  auto worldDataServer =
+    simulator->create_service<
+    project_2_ros_unicycle_robot_sim_2d::srv::SendWorldData>(
+    "send_world_data",
+    std::bind(
+      &SimulatorNode::handleWorldDataService,
+      simulator.get(),
+      std::placeholders::_1,
+      std::placeholders::_2,
+      std::placeholders::_3));
+
+  auto clientNode =
+    std::make_shared<rclcpp::Node>(
+    "simulator_test_world_data_client");
+
+  auto client =
+    clientNode->create_client<
+    project_2_ros_unicycle_robot_sim_2d::srv::SendWorldData>(
+    "send_world_data");
+
+  rclcpp::executors::SingleThreadedExecutor executor;
+
+  executor.add_node(simulator);
+  executor.add_node(clientNode);
+
+  ASSERT_TRUE(
+    client->wait_for_service(2s));
+
+  auto request =
+    std::make_shared<
+    project_2_ros_unicycle_robot_sim_2d::srv::SendWorldData::Request>();
+
+  auto future = client->async_send_request(request);
+
+  const bool responseReceived = spinUntil(
+    executor,
+    [&]() {
+      return future.wait_for(0ms) ==
+             std::future_status::ready;
+    },
+    2s);
+
+  ASSERT_TRUE(responseReceived);
+
+  auto response = future.get();
+
+  ASSERT_NE(response, nullptr);
+
+  // Verify world bounds.
+  EXPECT_DOUBLE_EQ(
+    response->max_x,
+    10.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->max_y,
+    8.0);
+
+  // Verify goal.
+  ASSERT_EQ(
+    response->goal.size(),
+    1u);
+
+  EXPECT_DOUBLE_EQ(
+    response->goal[0].center.x,
+    7.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->goal[0].center.y,
+    6.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->goal[0].radius,
+    0.5);
+
+  // Verify obstacles.
+  ASSERT_EQ(
+    response->obstacles.size(),
+    3u);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[0].center.x,
+    2.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[0].center.y,
+    1.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[0].radius,
+    0.25);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[1].center.x,
+    4.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[1].center.y,
+    3.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[1].radius,
+    0.5);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[2].center.x,
+    6.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[2].center.y,
+    5.0);
+
+  EXPECT_DOUBLE_EQ(
+    response->obstacles[2].radius,
+    0.75);
+}
 
 /* Main */
 
