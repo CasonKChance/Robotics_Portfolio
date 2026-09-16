@@ -413,13 +413,6 @@ CMake
 colcon
 ```
 
-Create or enter a ROS 2 workspace:
-
-```bash
-mkdir -p ~/robotics_ws/src
-cd ~/robotics_ws/src
-```
-
 Clone this repository:
 
 ```bash
