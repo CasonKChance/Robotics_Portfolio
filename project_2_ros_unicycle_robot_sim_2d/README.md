@@ -420,16 +420,16 @@ mkdir -p ~/robotics_ws/src
 cd ~/robotics_ws/src
 ```
 
-Clone this repository into the workspace:
+Clone this repository:
 
 ```bash
-git clone https://github.com/CasonKChance/Robotics_Portfolio/tree/main/project_2_ros_unicycle_robot_sim_2d/src/project_2_ros_unicycle_robot_sim_2d
+git clone https://github.com/CasonKChance/Robotics_Portfolio
 ```
 
 Build the package:
 
 ```bash
-cd ~/robotics_ws
+cd ~/Robotics_Portfolio/project_2_ros_unicycle_robot_sim_2d
 colcon build --packages-select project_2_ros_unicycle_robot_sim_2d
 ```
 
