@@ -1,0 +1,7 @@
+# No data needed from client
+---
+float64 max_x
+float64 max_y
+Goal[<=1] goal
+Obstacle[] obstacles
+RobotPose robot_pose

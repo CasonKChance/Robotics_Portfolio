@@ -1,0 +1,24 @@
+# Folders created by `colcon build`
+/build
+/install
+/log
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+
+# Python Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & generated files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Path command script
+robot_commands.py
