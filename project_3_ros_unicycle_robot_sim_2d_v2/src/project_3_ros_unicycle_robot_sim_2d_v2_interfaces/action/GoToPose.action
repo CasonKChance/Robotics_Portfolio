@@ -4,11 +4,10 @@ float64 y
 float64 theta
 ---
 # Result
-bool success
-float64 final_x
-float64 final_y
-float64 final_theta
+float64 x
+float64 y
+float64 theta
 ---
 # Feedback
 float64 distance_remaining
-float64 heading_error
+float64 rotation_remaining

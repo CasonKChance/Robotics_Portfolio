@@ -654,15 +654,15 @@ TEST_F(SimulatorNodeTest, SendWorldDataReturnsConfiguredWorld)
     0.75);
 
   EXPECT_DOUBLE_EQ(
-    response->robot_pose.x,
+    response->robot_state.x,
     1.0);
 
   EXPECT_DOUBLE_EQ(
-    response->robot_pose.y,
+    response->robot_state.y,
     1.0);
 
   EXPECT_DOUBLE_EQ(
-    response->robot_pose.theta,
+    response->robot_state.theta,
     0.0);
 }
 

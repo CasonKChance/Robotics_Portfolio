@@ -13,7 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Obstacle.msg"
   "msg/Goal.msg"
-  "msg/RobotPose.msg"
+  "msg/RobotState.msg"
   "srv/SendWorldData.srv"
   "action/GoToPose.action"
   DEPENDENCIES geometry_msgs

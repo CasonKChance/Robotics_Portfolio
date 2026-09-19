@@ -29,9 +29,9 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
   timer_ = this->create_wall_timer(
     10ms, std::bind(&SimulatorNode::updateLoop, this));
 
-  robotPosePublisher_ =
-    this->create_publisher<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotPose>(
-    "robot_pose", 10);
+  robotStatePublisher_ =
+    this->create_publisher<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
+    "robot_state", 10);
 
   status_ = checkCollision();
 }
@@ -70,9 +70,9 @@ void SimulatorNode::handleWorldDataService(
     response->obstacles.push_back(messageObstacle);
   }
 
-  response->robot_pose.x = robot_.getPose().x;
-  response->robot_pose.y = robot_.getPose().y;
-  response->robot_pose.theta = robot_.getPose().theta;
+  response->robot_state.x = robot_.getPose().x;
+  response->robot_state.y = robot_.getPose().y;
+  response->robot_state.theta = robot_.getPose().theta;
 }
 
 /* Private Member Functions */
@@ -99,18 +99,20 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
   });
 }
 
-void SimulatorNode::publishRobotPose() const
+void SimulatorNode::publishRobotState() const
 {
-  RCLCPP_INFO_ONCE(this->get_logger(), "Publishing Robot Pose...\n");
+  RCLCPP_INFO_ONCE(this->get_logger(), "Publishing Robot State...\n");
 
-  auto message = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotPose();
+  auto message = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState();
   auto robotPose = robot_.getPose();
 
   message.x = robotPose.x;
   message.y = robotPose.y;
   message.theta = robotPose.theta;
+  message.linear_velocity = robot_.getActualVelocity().linearVelocity;
+  message.angular_velocity = robot_.getActualVelocity().angularVelocity;
 
-  this->robotPosePublisher_->publish(message);
+  this->robotStatePublisher_->publish(message);
 }
 
 void SimulatorNode::updateLoop()
@@ -122,7 +124,7 @@ void SimulatorNode::updateLoop()
   robot_.update(kUpdateRobotTimestep);
 
   // Send new pose to visualization node
-  publishRobotPose();
+  publishRobotState();
 
   status_ = checkCollision();
 

@@ -66,10 +66,10 @@ private:
   Pose pose_;                                                  // Current state [x, y, θ]ᵀ in the World frame.
   VelocityCommand velocityCommand_;                            // Current active velocity command [v, ω]ᵀ.
   VelocityCommand actualVelocity_;                             // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command.
-  const double maximumLinearVelocity_ {5.0};                   // Maximum linear velocity of robot
-  const double maximumAngularVelocity_ {std::numbers::pi};     // Maximum angular velocity of robot
-  const double linearAcceleration_ {2.5};                      // Linear acceleration of robot
-  const double angularAcceleration_ {std::numbers::pi / 2};    // Angular acceleration of robot
+  const double maximumLinearVelocity_ {5.0};                   // Maximum linear velocity of robot (m/s)
+  const double maximumAngularVelocity_ {std::numbers::pi};     // Maximum angular velocity of robot (rads/s)
+  const double linearAcceleration_ {2.5};                      // Linear acceleration of robot (m/s^2)
+  const double angularAcceleration_ {std::numbers::pi / 2};    // Angular acceleration of robot (rads/s^2)
 
   /**
    * @brief Normalizes an angle into the range [-π, π] radians.

@@ -6,7 +6,7 @@ import threading
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 
-from project_3_ros_unicycle_robot_sim_2d_v2_interfaces.msg import RobotPose
+from project_3_ros_unicycle_robot_sim_2d_v2_interfaces.msg import RobotState
 from project_3_ros_unicycle_robot_sim_2d_v2_interfaces.srv import SendWorldData
 
 import rclpy
@@ -30,11 +30,11 @@ class VisualizationNode(Node):
                 'Waiting for service from SimulationNode...'
             )
 
-        # Set up /robot_pose subscriber
-        self.robot_pose_subscription = self.create_subscription(
-            RobotPose,
-            'robot_pose',
-            self.robot_pose_listener_callback,
+        # Set up /robot_state subscriber
+        self.robot_state_subscription = self.create_subscription(
+            RobotState,
+            'robot_state',
+            self.robot_state_listener_callback,
             10)
 
         # World State variables
@@ -42,13 +42,13 @@ class VisualizationNode(Node):
         self.max_y = None
         self.goals = []
         self.obstacles = []
-        self.robot_pose = None
+        self.robot_state = None
 
         self.world_received = False
         self.world_drawn = False
 
         # Incremented whenever a new robot pose is received.
-        self.robot_pose_version = 0
+        self.robot_state_version = 0
         self.last_drawn_pose_version = 0
 
         # Protects shared state between the ROS executor thread and
@@ -90,17 +90,17 @@ class VisualizationNode(Node):
             self.max_y = response.max_y
             self.goals = list(response.goal)
             self.obstacles = list(response.obstacles)
-            self.robot_pose = response.robot_pose
+            self.robot_state = response.robot_state
             self.world_received = True
 
         self.get_logger().info(
             'Received world data from SimulationNode.'
         )
 
-    def robot_pose_listener_callback(self, message):
+    def robot_state_listener_callback(self, message):
         with self.state_lock:
-            self.robot_pose = message
-            self.robot_pose_version += 1
+            self.robot_state = message
+            self.robot_state_version += 1
 
     def create_visualization(self):
         self.fig, self.ax = plt.subplots(
@@ -154,7 +154,7 @@ class VisualizationNode(Node):
             max_y = self.max_y
             goals = list(self.goals)
             obstacles = list(self.obstacles)
-            robot_pose = self.robot_pose
+            robot_state = self.robot_state
 
         legend_handles = []
 
@@ -215,12 +215,12 @@ class VisualizationNode(Node):
                 )
             )
 
-        if robot_pose is not None:
+        if robot_state is not None:
             robot_radius = 0.25
             heading_length = 0.5
 
             self.robot_body = patches.Circle(
-                (robot_pose.x, robot_pose.y),
+                (robot_state.x, robot_state.y),
                 robot_radius,
                 facecolor='white',
                 edgecolor='black',
@@ -230,20 +230,20 @@ class VisualizationNode(Node):
 
             self.ax.add_patch(self.robot_body)
 
-            heading_x = (robot_pose.x + heading_length * math.cos(robot_pose.theta))
-            heading_y = (robot_pose.y + heading_length * math.sin(robot_pose.theta))
+            heading_x = (robot_state.x + heading_length * math.cos(robot_state.theta))
+            heading_y = (robot_state.y + heading_length * math.sin(robot_state.theta))
 
             self.robot_heading, = self.ax.plot(
-                [robot_pose.x, heading_x],
-                [robot_pose.y, heading_y],
+                [robot_state.x, heading_x],
+                [robot_state.y, heading_y],
                 linewidth=2,
                 zorder=6
             )
 
             # Draw initial marker for first trajectory point
             self.ax.plot(
-                robot_pose.x,
-                robot_pose.y,
+                robot_state.x,
+                robot_state.y,
                 marker='o',
                 linestyle='None',
                 color='blue',
@@ -284,32 +284,32 @@ class VisualizationNode(Node):
             return
 
         with self.state_lock:
-            if self.robot_pose is None:
+            if self.robot_state is None:
                 return
 
-            if self.robot_pose_version == self.last_drawn_pose_version:
+            if self.robot_state_version == self.last_drawn_pose_version:
                 return
 
-            robot_pose = self.robot_pose
+            robot_state = self.robot_state
 
-            self.last_drawn_pose_version = self.robot_pose_version
+            self.last_drawn_pose_version = self.robot_state_version
 
         heading_length = 0.5
 
         self.robot_body.center = (
-            robot_pose.x,
-            robot_pose.y
+            robot_state.x,
+            robot_state.y
         )
 
-        heading_x = (robot_pose.x + heading_length * math.cos(robot_pose.theta))
-        heading_y = (robot_pose.y + heading_length * math.sin(robot_pose.theta))
+        heading_x = (robot_state.x + heading_length * math.cos(robot_state.theta))
+        heading_y = (robot_state.y + heading_length * math.sin(robot_state.theta))
 
-        self.robot_heading.set_data([robot_pose.x, heading_x], [robot_pose.y, heading_y])
+        self.robot_heading.set_data([robot_state.x, heading_x], [robot_state.y, heading_y])
 
         # Leave a blue dot at the robot's new position.
         self.ax.plot(
-            robot_pose.x,
-            robot_pose.y,
+            robot_state.x,
+            robot_state.y,
             marker='o',
             linestyle='None',
             color='blue',
