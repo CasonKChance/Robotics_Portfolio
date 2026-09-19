@@ -70,7 +70,7 @@ private:
   void topicCallback(geometry_msgs::msg::Twist::UniquePtr message);
 
   /**
-   * @brief Publishes the robot's current pose to topic 'robot_state'.
+   * @brief Publishes the robot's current state to topic 'robot_state'.
    */
   void publishRobotState() const;
 

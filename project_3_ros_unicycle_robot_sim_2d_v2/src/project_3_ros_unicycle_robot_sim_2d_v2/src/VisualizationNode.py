@@ -47,9 +47,9 @@ class VisualizationNode(Node):
         self.world_received = False
         self.world_drawn = False
 
-        # Incremented whenever a new robot pose is received.
+        # Incremented whenever a new robot state is received.
         self.robot_state_version = 0
-        self.last_drawn_pose_version = 0
+        self.last_drawn_state_version = 0
 
         # Protects shared state between the ROS executor thread and
         # Matplotlib's GUI thread.
@@ -125,7 +125,7 @@ class VisualizationNode(Node):
             alpha=0.6
         )
 
-        # Timer to update the plot when new robot pose data is received
+        # Timer to update the plot when new robot state data is received
         self.update_timer = self.fig.canvas.new_timer(
             interval=30,
             callbacks=[
@@ -287,12 +287,12 @@ class VisualizationNode(Node):
             if self.robot_state is None:
                 return
 
-            if self.robot_state_version == self.last_drawn_pose_version:
+            if self.robot_state_version == self.last_drawn_state_version:
                 return
 
             robot_state = self.robot_state
 
-            self.last_drawn_pose_version = self.robot_state_version
+            self.last_drawn_state_version = self.robot_state_version
 
         heading_length = 0.5
 
