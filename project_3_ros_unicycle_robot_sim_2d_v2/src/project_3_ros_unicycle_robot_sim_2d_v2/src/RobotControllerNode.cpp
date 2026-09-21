@@ -63,7 +63,7 @@ void RobotControllerNode::handleAccepted(const std::shared_ptr<GoalHandleGoToPos
 
 void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goalHandle)
 {
-  RCLCPP_INFO(this->get_logger(), "Executing goal");
+  RCLCPP_INFO(this->get_logger(), "Executing goal\n");
 
   const auto goal = goalHandle->get_goal();
   const Pose goalPose = Pose{goal->x, goal->y, normalizeAngle(goal->theta)};
@@ -88,7 +88,7 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
       result->theta = currentRobotState_.theta;
 
       goalHandle->canceled(result);
-      RCLCPP_INFO(this->get_logger(), "Goal canceled");
+      RCLCPP_INFO(this->get_logger(), "Goal canceled\n");
     };
 
   double distanceRemaining = getDistanceRemaining(goalPose);
@@ -195,7 +195,7 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
     result->y = currentRobotState_.y;
     result->theta = currentRobotState_.theta;
     goalHandle->succeed(result);
-    RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+    RCLCPP_INFO(this->get_logger(), "Goal succeeded\n");
   }
 }
 

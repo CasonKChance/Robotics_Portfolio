@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME}_lib
   src/World.cpp
   src/SimulatorNode.cpp
   src/RobotControllerNode.cpp
+  src/RobotOperatorNode.cpp
 )
 
 # Export include directories
@@ -45,6 +46,12 @@ target_link_libraries(RobotControllerNode
 
 add_executable(SimulatorNode src/SimulatorNodeMain.cpp)
 target_link_libraries(SimulatorNode
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
+add_executable(RobotOperatorNode src/RobotOperatorNodeMain.cpp)
+target_link_libraries(RobotOperatorNode
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -82,6 +89,7 @@ install(
     ${PROJECT_NAME}_lib
     RobotControllerNode
     SimulatorNode
+    RobotOperatorNode
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
