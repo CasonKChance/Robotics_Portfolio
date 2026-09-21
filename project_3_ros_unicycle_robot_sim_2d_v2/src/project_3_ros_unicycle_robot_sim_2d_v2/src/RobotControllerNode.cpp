@@ -51,9 +51,6 @@ rclcpp_action::CancelResponse RobotControllerNode::handleCancel(
   RCLCPP_INFO(this->get_logger(), "Received request to cancel goal\n");
   (void)goalHandle;
 
-  // Stop robot movement when action is canceled
-  publishCommandVelocity(0.0, 0.0);
-
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
@@ -74,6 +71,26 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
   auto result = std::make_shared<GoToPose::Result>();
   rclcpp::Rate loopRate(50.0);
 
+  // Helper lambda to handle clean cancellation exit
+  auto handleCancellationExit = [&]() {
+      // Command robot to stop
+      publishCommandVelocity(0.0, 0.0);
+
+      // Wait for robot to stop
+      while (rclcpp::ok() && currentRobotState_.linearVelocity > 0 &&
+        currentRobotState_.angularVelocity > 0)
+      {
+        loopRate.sleep();
+      }
+
+      result->x = currentRobotState_.x;
+      result->y = currentRobotState_.y;
+      result->theta = currentRobotState_.theta;
+
+      goalHandle->canceled(result);
+      RCLCPP_INFO(this->get_logger(), "Goal canceled");
+    };
+
   double distanceRemaining = getDistanceRemaining(goalPose);
   double rotationRemaining = getRotationRemaining(goalPose);
 
@@ -83,12 +100,7 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
     currentRobotState_.angularAcceleration);
   while (rclcpp::ok() && std::abs(rotationToGoalPositionRemaining) > distanceToStop) {
     if (goalHandle->is_canceling()) {
-      result->x = currentRobotState_.x;
-      result->y = currentRobotState_.y;
-      result->theta = currentRobotState_.theta;
-
-      goalHandle->canceled(result);
-      RCLCPP_INFO(this->get_logger(), "Goal canceled");
+      handleCancellationExit();
       return;
     }
 
@@ -123,12 +135,7 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
   currentRobotState_.linearAcceleration);
   while (rclcpp::ok() && distanceRemaining > distanceToStop) {
     if (goalHandle->is_canceling()) {
-      result->x = currentRobotState_.x;
-      result->y = currentRobotState_.y;
-      result->theta = currentRobotState_.theta;
-
-      goalHandle->canceled(result);
-      RCLCPP_INFO(this->get_logger(), "Goal canceled");
+      handleCancellationExit();
       return;
     }
 
@@ -158,12 +165,7 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
     currentRobotState_.angularAcceleration);
   while (rclcpp::ok() && std::abs(rotationRemaining) > distanceToStop) {
     if (goalHandle->is_canceling()) {
-      result->x = currentRobotState_.x;
-      result->y = currentRobotState_.y;
-      result->theta = currentRobotState_.theta;
-
-      goalHandle->canceled(result);
-      RCLCPP_INFO(this->get_logger(), "Goal canceled");
+      handleCancellationExit();
       return;
     }
 
@@ -182,6 +184,11 @@ void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goal
   }
 
   publishCommandVelocity(0.0, 0.0);
+
+  // Wait for robot to stop
+  while (rclcpp::ok() && std::abs(currentRobotState_.angularVelocity) > 0) {
+    loopRate.sleep();
+  }
 
   if (rclcpp::ok()) {
     result->x = currentRobotState_.x;
