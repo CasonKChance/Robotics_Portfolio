@@ -9,6 +9,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>rclcpp_action</depend>
   <depend>rclcpp</depend>
   <depend>geometry_msgs</depend>
   <depend>project_3_ros_unicycle_robot_sim_2d_v2_interfaces</depend>

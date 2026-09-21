@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(project_3_ros_unicycle_robot_sim_2d_v2_interfaces REQUIRED)
 
@@ -17,8 +18,8 @@ add_library(${PROJECT_NAME}_lib
   src/Goal.cpp
   src/Robot.cpp
   src/World.cpp
-  src/CommandVelocityPublisherNode.cpp
   src/SimulatorNode.cpp
+  src/RobotControllerNode.cpp
 )
 
 # Export include directories
@@ -31,12 +32,13 @@ target_include_directories(${PROJECT_NAME}_lib
 target_link_libraries(${PROJECT_NAME}_lib
   PUBLIC
     rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
     ${geometry_msgs_TARGETS}
     ${project_3_ros_unicycle_robot_sim_2d_v2_interfaces_TARGETS}
 )
 
-add_executable(CommandVelocityPublisherNode src/CommandVelocityPublisherNodeMain.cpp)
-target_link_libraries(CommandVelocityPublisherNode
+add_executable(RobotControllerNode src/RobotControllerNodeMain.cpp)
+target_link_libraries(RobotControllerNode
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -66,16 +68,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   # Add the GoogleTest target
-  ament_add_gtest(TestCommandVelocityPublisherNode
-    tests/CommandVelocityPublisherNodeTests.cpp
-  )
   ament_add_gtest(TestSimulatorNode
     tests/SimulatorNodeTests.cpp
   )
 
-  target_link_libraries(TestCommandVelocityPublisherNode
-    ${PROJECT_NAME}_lib
-  )
   target_link_libraries(TestSimulatorNode
     ${PROJECT_NAME}_lib
   )
@@ -85,7 +81,7 @@ endif()
 install(
   TARGETS
     ${PROJECT_NAME}_lib
-    CommandVelocityPublisherNode
+    RobotControllerNode
     SimulatorNode
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
