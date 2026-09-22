@@ -9,11 +9,12 @@
 
 #include <memory>
 #include <future>
+#include <thread>
 
 /**
  * @brief ROS 2 Node providing a user interface and action client interface to send navigation targets to a robot.
  *
- * Prompts user for target poses via standard console input, validates and normalizes the target coordinate inputs, 
+ * Prompts user for target poses via standard console input, validates and normalizes the target coordinate inputs,
  * and sends action goal requests to a `GoToPose` action server.
  */
 class RobotOperatorNode: public rclcpp::Node
@@ -28,9 +29,14 @@ public:
    */
   explicit RobotOperatorNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
+  /**
+   * @brief Stops and joins the user input thread before destroying the node.
+   */
+  ~RobotOperatorNode();
+
 private:
   rclcpp_action::Client < GoToPose > ::SharedPtr goToPoseActionClient_;
-  rclcpp::TimerBase::SharedPtr timer_;
+  std::thread inputThread_;
 
   /**
    * @brief Continuous loop running on a separate thread to accept pose targets from standard console input.

@@ -12,7 +12,16 @@ RobotOperatorNode::RobotOperatorNode(const rclcpp::NodeOptions & options)
         this,
         "go_to_pose");
 
-  std::thread([this]() {this->receiveGoalPose();}).detach();
+  inputThread_ = std::thread([this]() {
+        this->receiveGoalPose();
+  });
+}
+
+RobotOperatorNode::~RobotOperatorNode()
+{
+  if (inputThread_.joinable()) {
+    inputThread_.join();
+  }
 }
 
 /* Private Member Functions */
@@ -30,6 +39,8 @@ void RobotOperatorNode::receiveGoalPose()
     double theta = getValidInput("Input heading (in radians): ");
     goalPose.theta = normalizeAngle(theta);
 
+    std::cout << "---------------------------------\n";
+
     RCLCPP_INFO(
             this->get_logger(),
             "Received valid Pose:\n"
@@ -45,7 +56,7 @@ void RobotOperatorNode::receiveGoalPose()
       continue;
     }
 
-    RCLCPP_INFO(this->get_logger(), "Waiting for robot to complete movement...");
+    RCLCPP_INFO(this->get_logger(), "Waiting for robot to complete movement...\n");
 
     GoalHandleGoToPose::WrappedResult result = resultFuture.get();
   }
@@ -56,7 +67,8 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
 {
   if (!this->goToPoseActionClient_->wait_for_action_server()) {
     RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
-    rclcpp::shutdown();
+
+    return {};
   }
 
   auto goalMessage = GoToPose::Goal();
