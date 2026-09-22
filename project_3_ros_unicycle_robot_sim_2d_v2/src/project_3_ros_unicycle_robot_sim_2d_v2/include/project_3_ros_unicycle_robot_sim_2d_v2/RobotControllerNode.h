@@ -9,7 +9,6 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
-#include <chrono>
 #include <functional>
 #include <memory>
 #include <thread>
@@ -28,6 +27,22 @@ struct RobotState
   const double maximumAngularVelocity {std::numbers::pi}; // rads/s
   const double linearAcceleration {2.5}; // m/s^2
   const double angularAcceleration {std::numbers::pi / 2}; // rads/s^2
+};
+
+/**
+ * @brief Internal tracking enum for the controllers current state in a given control loop.
+ */
+enum class ControllerState
+{
+  Idle,
+  RotatingToGoalPosition,
+  WaitingForRotationToGoalPositionStop,
+  DrivingToGoalPose,
+  WaitingForDrivingToGoalPoseStop,
+  RotatingToGoalPose,
+  WaitingForRotationToGoalPoseStop,
+  GoalPoseReached,
+  GoalCanceled
 };
 
 /**
@@ -52,7 +67,10 @@ private:
   rclcpp::Publisher < geometry_msgs::msg::Twist > ::SharedPtr commandVelocityPublisher_;
   rclcpp::Subscription < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState >
   ::SharedPtr robotPoseSubscription_;
+  rclcpp::TimerBase::SharedPtr controlTimer_;
+  std::shared_ptr < GoalHandleGoToPose > activeGoalHandle_;
   RobotState currentRobotState_;
+  ControllerState controllerState_;
 
   /**
    * @brief Handles incoming action goal requests.
@@ -80,10 +98,13 @@ private:
   void handleAccepted(const std::shared_ptr < GoalHandleGoToPose > goalHandle);
 
   /**
-   * @brief Main control loop executed in a separate thread to control trajectory to goal pose.
-   * @param goalHandle Handle to the target goal being executed.
+   * @brief Executes one iteration of the closed-loop controller state machine.
+   *
+   * Evaluates the active goal and current robot state, then commands the robot
+   * through the sequence of rotating toward the goal position, driving to the
+   * goal position, and rotating to the final goal heading.
    */
-  void execute(const std::shared_ptr < GoalHandleGoToPose > goalHandle);
+  void controlLoop();
 
   /**
    * @brief Calculates Euclidean distance remaining between current state and target goal pose.

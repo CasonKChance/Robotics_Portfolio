@@ -2,6 +2,10 @@
 
 #include <numbers>
 #include <cmath>
+#include <chrono>
+
+using namespace std::placeholders;
+using namespace std::chrono_literals;
 
 using GoToPose = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::action::GoToPose;
 using GoalHandleGoToPose = rclcpp_action::ServerGoalHandle<GoToPose>;
@@ -12,8 +16,6 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
 : Node("robot_controller", options)
 {
   // Set up action server
-  using namespace std::placeholders;
-
   goToPoseActionServer_ = rclcpp_action::create_server<GoToPose>(
       this,
       "go_to_pose",
@@ -29,6 +31,12 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
   robotPoseSubscription_ = this->create_subscription<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
     "robot_state", 10,
     std::bind(&RobotControllerNode::robotPoseTopicCallback, this, std::placeholders::_1));
+
+  controllerState_ = ControllerState::Idle;
+
+  controlTimer_ = this->create_wall_timer(
+      20ms,
+      std::bind(&RobotControllerNode::controlLoop, this));
 }
 
 /* Private Member Functions */
@@ -37,6 +45,11 @@ rclcpp_action::GoalResponse RobotControllerNode::handleGoal(
   const rclcpp_action::GoalUUID & uuid,
   std::shared_ptr<const GoToPose::Goal> goal)
 {
+  if (activeGoalHandle_) {
+    RCLCPP_WARN(this->get_logger(), "Rejecting goal: another goal is active");
+    return rclcpp_action::GoalResponse::REJECT;
+  }
+
   RCLCPP_INFO(this->get_logger(), "Recieved goal request to go to pose:\n"
                                   "\tx: %.2f\n"
                                   "\ty: %.2f\n"
@@ -50,152 +63,168 @@ rclcpp_action::CancelResponse RobotControllerNode::handleCancel(
 {
   RCLCPP_INFO(this->get_logger(), "Received request to cancel goal\n");
   (void)goalHandle;
-
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
 void RobotControllerNode::handleAccepted(const std::shared_ptr<GoalHandleGoToPose> goalHandle)
 {
-  // Spawn detached thread for asynchronous control loop execution
-  auto executeInThread = [this, goalHandle](){return this->execute(goalHandle);};
-  std::thread{executeInThread}.detach();
+  activeGoalHandle_ = goalHandle;
+
+  controllerState_ = ControllerState::RotatingToGoalPosition;
 }
 
-void RobotControllerNode::execute(const std::shared_ptr<GoalHandleGoToPose> goalHandle)
+void RobotControllerNode::controlLoop()
 {
-  RCLCPP_INFO(this->get_logger(), "Executing goal\n");
+  const auto goalHandle = activeGoalHandle_;
+  if (!goalHandle) {
+    return;
+  }
+
+  if (goalHandle->is_canceling()) {
+    // Command robot to stop
+    publishCommandVelocity(0.0, 0.0);
+
+    controllerState_ = ControllerState::GoalCanceled;
+    return;
+  }
 
   const auto goal = goalHandle->get_goal();
   const Pose goalPose = Pose{goal->x, goal->y, normalizeAngle(goal->theta)};
   auto feedback = std::make_shared<GoToPose::Feedback>();
   auto result = std::make_shared<GoToPose::Result>();
-  rclcpp::Rate loopRate(50.0);
 
-  // Helper lambda to handle clean cancellation exit
-  auto handleCancellationExit = [&]() {
-      // Command robot to stop
-      publishCommandVelocity(0.0, 0.0);
-
-      // Wait for robot to stop
-      while (rclcpp::ok() && currentRobotState_.linearVelocity > 0 &&
-        currentRobotState_.angularVelocity > 0)
-      {
-        loopRate.sleep();
+  switch(controllerState_) {
+    case ControllerState::Idle: {
+        // Loop until a new goal is accepted
+        return;
       }
+    case ControllerState::RotatingToGoalPosition: {
+        // Rotate to goal position
+        double rotationToGoalPositionRemaining = getRotationToGoalPositionRemaining(goalPose);
+        double distanceToStop = getStoppingDistance(currentRobotState_.angularVelocity,
+        currentRobotState_.angularAcceleration);
+        if (std::abs(rotationToGoalPositionRemaining) > distanceToStop) {
+          const double direction = rotationToGoalPositionRemaining >= 0.0 ? 1.0 : -1.0;
+          publishCommandVelocity(0.0, currentRobotState_.maximumAngularVelocity * direction);
 
-      result->x = currentRobotState_.x;
-      result->y = currentRobotState_.y;
-      result->theta = currentRobotState_.theta;
+          feedback->distance_remaining = getDistanceRemaining(goalPose);
+          feedback->rotation_remaining = getRotationRemaining(goalPose);
+          goalHandle->publish_feedback(feedback);
 
-      goalHandle->canceled(result);
-      RCLCPP_INFO(this->get_logger(), "Goal canceled\n");
-    };
+          return;
+        }
 
-  double distanceRemaining = getDistanceRemaining(goalPose);
-  double rotationRemaining = getRotationRemaining(goalPose);
+        // Command robot to stop
+        publishCommandVelocity(0.0, 0.0);
+        controllerState_ = ControllerState::WaitingForRotationToGoalPositionStop;
+        return;
+      }
+    case ControllerState::WaitingForRotationToGoalPositionStop: {
+        // Make sure robot has completed stop, loop until completed.
+        if (std::abs(currentRobotState_.angularVelocity) > 0) {
+          return;
+        }
 
-  // Rotate towards goal position
-  double rotationToGoalPositionRemaining = getRotationToGoalPositionRemaining(goalPose);
-  double distanceToStop = getStoppingDistance(currentRobotState_.angularVelocity,
-    currentRobotState_.angularAcceleration);
-  while (rclcpp::ok() && std::abs(rotationToGoalPositionRemaining) > distanceToStop) {
-    if (goalHandle->is_canceling()) {
-      handleCancellationExit();
-      return;
-    }
+        controllerState_ = ControllerState::DrivingToGoalPose;
+        return;
+      }
+    case ControllerState::DrivingToGoalPose: {
+        // Translate to goal pose
+        double distanceRemaining = getDistanceRemaining(goalPose);
+        double distanceToStop = getStoppingDistance(currentRobotState_.linearVelocity,
+          currentRobotState_.linearAcceleration);
+        if (distanceRemaining > distanceToStop) {
+          publishCommandVelocity(currentRobotState_.maximumLinearVelocity, 0.0);
 
-    const double direction = rotationToGoalPositionRemaining >= 0.0 ? 1.0 : -1.0;
-    publishCommandVelocity(0.0, currentRobotState_.maximumAngularVelocity * direction);
+          feedback->distance_remaining = getDistanceRemaining(goalPose);
+          feedback->rotation_remaining = getRotationRemaining(goalPose);
+          goalHandle->publish_feedback(feedback);
 
-    rotationToGoalPositionRemaining = getRotationToGoalPositionRemaining(goalPose);
-    distanceToStop = getStoppingDistance(currentRobotState_.linearVelocity,
-      currentRobotState_.linearAcceleration);
+          return;
+        }
 
-    rotationRemaining = getRotationRemaining(goalPose);
-    distanceToStop = getStoppingDistance(currentRobotState_.angularVelocity,
-      currentRobotState_.angularAcceleration);
+        // Command robot to stop
+        publishCommandVelocity(0.0, 0.0);
+        controllerState_ = ControllerState::WaitingForDrivingToGoalPoseStop;
+        return;
+      }
+    case ControllerState::WaitingForDrivingToGoalPoseStop: {
+        // Make sure robot has completed stop, loop until completed.
+        if (std::abs(currentRobotState_.linearVelocity) > 0) {
+          return;
+        }
 
-    feedback->distance_remaining = distanceRemaining;
-    feedback->rotation_remaining = rotationRemaining;
-    goalHandle->publish_feedback(feedback);
+        controllerState_ = ControllerState::RotatingToGoalPose;
+        return;
+      }
+    case ControllerState::RotatingToGoalPose: {
+        // Rotate to goal pose
+        double rotationRemaining = getRotationRemaining(goalPose);
+        double distanceToStop = getStoppingDistance(currentRobotState_.angularVelocity,
+          currentRobotState_.angularAcceleration);
+        if (std::abs(rotationRemaining) > distanceToStop) {
+          const double direction = rotationRemaining >= 0.0 ? 1.0 : -1.0;
+          publishCommandVelocity(0.0, currentRobotState_.maximumAngularVelocity * direction);
 
-    loopRate.sleep();
-  }
+          feedback->distance_remaining = getDistanceRemaining(goalPose);
+          feedback->rotation_remaining = getRotationRemaining(goalPose);
+          goalHandle->publish_feedback(feedback);
 
-  publishCommandVelocity(0.0, 0.0);
+          return;
+        }
 
-  // Wait for robot to stop
-  while (rclcpp::ok() && std::abs(currentRobotState_.angularVelocity) > 0) {
-    loopRate.sleep();
-  }
+        // Command robot to stop
+        publishCommandVelocity(0.0, 0.0);
+        controllerState_ = ControllerState::WaitingForRotationToGoalPoseStop;
+        return;
+      }
+    case ControllerState::WaitingForRotationToGoalPoseStop: {
+        // Make sure robot has completed stop, loop until completed.
+        if (std::abs(currentRobotState_.angularVelocity) > 0) {
+          return;
+        }
 
-  // Translate to goal pose
-  distanceRemaining = getDistanceRemaining(goalPose);
-  distanceToStop = getStoppingDistance(currentRobotState_.linearVelocity,
-  currentRobotState_.linearAcceleration);
-  while (rclcpp::ok() && distanceRemaining > distanceToStop) {
-    if (goalHandle->is_canceling()) {
-      handleCancellationExit();
-      return;
-    }
+        controllerState_ = ControllerState::GoalPoseReached;
+        return;
+      }
+    case ControllerState::GoalPoseReached: {
+        result->x = currentRobotState_.x;
+        result->y = currentRobotState_.y;
+        result->theta = currentRobotState_.theta;
+        goalHandle->succeed(result);
+        RCLCPP_INFO(this->get_logger(), "Goal succeeded\n");
 
-    publishCommandVelocity(currentRobotState_.maximumLinearVelocity, 0.0);
+        controllerState_ = ControllerState::Idle;
+        activeGoalHandle_.reset();
 
-    distanceRemaining = getDistanceRemaining(goalPose);
-    distanceToStop = getStoppingDistance(currentRobotState_.linearVelocity,
-      currentRobotState_.linearAcceleration);
+        return;
+      }
+    case ControllerState::GoalCanceled: {
+        // Make sure robot has completed stop, loop until completed.
+        if (std::abs(currentRobotState_.linearVelocity) > 0 ||
+          std::abs(currentRobotState_.angularVelocity) > 0)
+        {
+          return;
+        }
 
-    feedback->distance_remaining = distanceRemaining;
-    feedback->rotation_remaining = rotationRemaining;
-    goalHandle->publish_feedback(feedback);
+        result->x = currentRobotState_.x;
+        result->y = currentRobotState_.y;
+        result->theta = currentRobotState_.theta;
 
-    loopRate.sleep();
-  }
+        goalHandle->canceled(result);
+        RCLCPP_INFO(this->get_logger(), "Goal canceled\n");
 
-  publishCommandVelocity(0.0, 0.0);
+        controllerState_ = ControllerState::Idle;
+        activeGoalHandle_.reset();
 
-  // Wait for robot to stop
-  while (rclcpp::ok() && std::abs(currentRobotState_.linearVelocity) > 0) {
-    loopRate.sleep();
-  }
-
-  // Rotate to goal pose
-  rotationRemaining = getRotationRemaining(goalPose);
-  distanceToStop = getStoppingDistance(currentRobotState_.angularVelocity,
-    currentRobotState_.angularAcceleration);
-  while (rclcpp::ok() && std::abs(rotationRemaining) > distanceToStop) {
-    if (goalHandle->is_canceling()) {
-      handleCancellationExit();
-      return;
-    }
-
-    const double direction = rotationRemaining >= 0.0 ? 1.0 : -1.0;
-    publishCommandVelocity(0.0, currentRobotState_.maximumAngularVelocity * direction);
-
-    rotationRemaining = getRotationRemaining(goalPose);
-    distanceToStop = getStoppingDistance(currentRobotState_.angularVelocity,
-      currentRobotState_.angularAcceleration);
-
-    feedback->distance_remaining = distanceRemaining;
-    feedback->rotation_remaining = rotationRemaining;
-    goalHandle->publish_feedback(feedback);
-
-    loopRate.sleep();
-  }
-
-  publishCommandVelocity(0.0, 0.0);
-
-  // Wait for robot to stop
-  while (rclcpp::ok() && std::abs(currentRobotState_.angularVelocity) > 0) {
-    loopRate.sleep();
-  }
-
-  if (rclcpp::ok()) {
-    result->x = currentRobotState_.x;
-    result->y = currentRobotState_.y;
-    result->theta = currentRobotState_.theta;
-    goalHandle->succeed(result);
-    RCLCPP_INFO(this->get_logger(), "Goal succeeded\n");
+        return;
+      }
+    default: {
+        RCLCPP_INFO(this->get_logger(), "Unknown controller state. Canceling goal.\n");
+        publishCommandVelocity(0.0, 0.0);
+        controllerState_ = ControllerState::GoalCanceled;
+        return;
+      }
   }
 }
 
