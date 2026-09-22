@@ -65,7 +65,8 @@ void RobotOperatorNode::receiveGoalPose()
         RCLCPP_INFO(this->get_logger(), "Result received: \n"
                                   "\tx: %.2f\n"
                                   "\ty: %.2f\n"
-                                  "\ttheta: %.2f\n", result.result->x, result.result->y, result.result->theta);
+                                  "\ttheta: %.2f\n", result.result->x, result.result->y,
+        result.result->theta);
         break;
       case rclcpp_action::ResultCode::ABORTED:
         RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
