@@ -59,6 +59,24 @@ void RobotOperatorNode::receiveGoalPose()
     RCLCPP_INFO(this->get_logger(), "Waiting for robot to complete movement...\n");
 
     GoalHandleGoToPose::WrappedResult result = resultFuture.get();
+
+    switch (result.code) {
+      case rclcpp_action::ResultCode::SUCCEEDED:
+        RCLCPP_INFO(this->get_logger(), "Result received: \n"
+                                  "\tx: %.2f\n"
+                                  "\ty: %.2f\n"
+                                  "\ttheta: %.2f\n", result.result->x, result.result->y, result.result->theta);
+        break;
+      case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+        return;
+      case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+        return;
+      default:
+        RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+        return;
+    }
   }
 }
 
@@ -98,32 +116,9 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
       feedback->distance_remaining, feedback->rotation_remaining);
     };
 
-  sendGoalOptions.result_callback = [this](const GoalHandleGoToPose::WrappedResult & result)
-    {
-      switch (result.code) {
-        case rclcpp_action::ResultCode::SUCCEEDED:
-          break;
-        case rclcpp_action::ResultCode::ABORTED:
-          RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
-          return;
-        case rclcpp_action::ResultCode::CANCELED:
-          RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
-          return;
-        default:
-          RCLCPP_ERROR(this->get_logger(), "Unknown result code");
-          return;
-      }
-
-
-      RCLCPP_INFO(this->get_logger(), "Result received: \n"
-                                        "\tx: %.2f\n"
-                                        "\ty: %.2f\n"
-                                        "\ttheta: %.2f\n", result.result->x, result.result->y,
-      result.result->theta);
-    };
-
   auto goalHandleFuture = this->goToPoseActionClient_->async_send_goal(goalMessage,
     sendGoalOptions);
+
   auto goalHandle = goalHandleFuture.get();
 
   if (!goalHandle) {
