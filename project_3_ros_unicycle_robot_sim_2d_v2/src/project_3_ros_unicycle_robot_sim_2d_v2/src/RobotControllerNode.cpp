@@ -10,6 +10,8 @@ using namespace std::chrono_literals;
 using GoToPose = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::action::GoToPose;
 using GoalHandleGoToPose = rclcpp_action::ServerGoalHandle<GoToPose>;
 
+const static double velocityTolerance = 1e-3;
+
 /* Public Member Functions */
 
 RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
@@ -121,7 +123,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPositionStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > 0) {
+        if (std::abs(currentRobotState_.angularVelocity) > velocityTolerance) {
           return;
         }
 
@@ -150,7 +152,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForDrivingToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > 0) {
+        if (std::abs(currentRobotState_.linearVelocity) > velocityTolerance) {
           return;
         }
 
@@ -180,7 +182,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > 0) {
+        if (std::abs(currentRobotState_.angularVelocity) > velocityTolerance) {
           return;
         }
 
@@ -201,8 +203,8 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::GoalCanceled: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > 0 ||
-          std::abs(currentRobotState_.angularVelocity) > 0)
+        if (std::abs(currentRobotState_.linearVelocity) > velocityTolerance ||
+          std::abs(currentRobotState_.angularVelocity) > velocityTolerance)
         {
           return;
         }
