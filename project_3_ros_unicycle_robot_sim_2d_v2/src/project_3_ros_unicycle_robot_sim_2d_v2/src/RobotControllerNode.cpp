@@ -10,13 +10,30 @@ using namespace std::chrono_literals;
 using GoToPose = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::action::GoToPose;
 using GoalHandleGoToPose = rclcpp_action::ServerGoalHandle<GoToPose>;
 
-const static double velocityTolerance = 1e-3;
+static const double kDefaultRobotMaximumLinearVelocity = 5.0;
+static const double kDefaultRobotMaximumAngularVelocity = std::numbers::pi;
+static const double kDefaultRobotLinearAcceleration = 2.5;
+static const double kDefaultRobotAngularAcceleration = std::numbers::pi / 2;
+
+static const double velocityTolerance = 1e-3;
 
 /* Public Member Functions */
 
 RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
 : Node("robot_controller", options)
 {
+  // Save robot physical limits
+  currentRobotState_.maximumLinearVelocity =
+    this->declare_parameter<double>("robot.max_linear_velocity",
+    kDefaultRobotMaximumLinearVelocity);
+  currentRobotState_.maximumAngularVelocity =
+    this->declare_parameter<double>("robot.max_angular_velocity",
+    kDefaultRobotMaximumAngularVelocity);
+  currentRobotState_.linearAcceleration =
+    this->declare_parameter<double>("robot.linear_acceleration", kDefaultRobotLinearAcceleration);
+  currentRobotState_.angularAcceleration =
+    this->declare_parameter<double>("robot.angular_acceleration", kDefaultRobotAngularAcceleration);
+
   // Set up action server
   goToPoseActionServer_ = rclcpp_action::create_server<GoToPose>(
       this,

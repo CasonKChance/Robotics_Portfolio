@@ -90,6 +90,11 @@ private:
    * @brief Builds the world from config/world.yaml
    */
   void buildWorld();
+
+  /**
+   * @brief Configures the robot's physical limits
+   */
+  void configureRobotLimits();
 };
 
 #endif

@@ -23,10 +23,10 @@ struct RobotState
   double theta {0.0};
   double angularVelocity {0.0}; // m/s
   double linearVelocity {0.0}; // m/s
-  const double maximumLinearVelocity {5.0}; // m/s
-  const double maximumAngularVelocity {std::numbers::pi}; // rads/s
-  const double linearAcceleration {2.5}; // m/s^2
-  const double angularAcceleration {std::numbers::pi / 2}; // rads/s^2
+  double maximumLinearVelocity {0.0}; // m/s
+  double maximumAngularVelocity {0.0}; // rads/s
+  double linearAcceleration {0.0}; // m/s^2
+  double angularAcceleration {0.0}; // rads/s^2
 };
 
 /**

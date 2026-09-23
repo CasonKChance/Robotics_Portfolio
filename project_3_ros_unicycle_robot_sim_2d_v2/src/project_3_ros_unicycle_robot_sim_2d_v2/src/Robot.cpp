@@ -21,6 +21,26 @@ void Robot::setVelocityCommand(const VelocityCommand & command)
   velocityCommand_.angularVelocity = command.angularVelocity;
 }
 
+void Robot::setMaximumLinearVelocity(double maximumLinearVelocity)
+{
+  maximumLinearVelocity_ = maximumLinearVelocity;
+}
+
+void Robot::setMaximumAngularVelocity(double maximumAngularVelocity)
+{
+  maximumAngularVelocity_ = maximumAngularVelocity;
+}
+
+void Robot::setLinearAcceleration(double linearAcceleration)
+{
+  linearAcceleration_ = linearAcceleration;
+}
+
+void Robot::setAngularAcceleration(double angularAcceleration)
+{
+  angularAcceleration_ = angularAcceleration;
+}
+
 void Robot::update(double dt)
 {
   if (dt <= 0.0) {

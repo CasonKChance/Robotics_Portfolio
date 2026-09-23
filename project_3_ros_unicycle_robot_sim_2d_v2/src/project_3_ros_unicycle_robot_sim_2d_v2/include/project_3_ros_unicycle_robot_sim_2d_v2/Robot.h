@@ -27,6 +27,26 @@ public:
   void setVelocityCommand(const VelocityCommand & command);
 
   /**
+   * @brief Sets the maximum linear velocity for the robot.
+   */
+  void setMaximumLinearVelocity(double maximumLinearVelocity);
+
+  /**
+   * @brief Sets the maximum angular velocity for the robot.
+   */
+  void setMaximumAngularVelocity(double maximumAngularVelocity);
+
+  /**
+   * @brief Sets the robot's linear acceleration.
+   */
+  void setLinearAcceleration(double linearAcceleration);
+
+  /**
+   * @brief Sets the robot's angular acceleration.
+   */
+  void setAngularAcceleration(double angularAcceleration);
+
+  /**
    * @brief Advances the robot's state over a time step dt using Forward Euler integration.
    * @param dt Time step duration in seconds (must be positive).
    */
@@ -63,13 +83,13 @@ public:
   double getMaximumAngularVelocity() const {return maximumAngularVelocity_;}
 
 private:
-  Pose pose_;                                                  // Current state [x, y, θ]ᵀ in the World frame.
-  VelocityCommand velocityCommand_;                            // Current active velocity command [v, ω]ᵀ.
-  VelocityCommand actualVelocity_;                             // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command.
-  const double maximumLinearVelocity_ {5.0};                   // Maximum linear velocity of robot (m/s)
-  const double maximumAngularVelocity_ {std::numbers::pi};     // Maximum angular velocity of robot (rads/s)
-  const double linearAcceleration_ {2.5};                      // Linear acceleration of robot (m/s^2)
-  const double angularAcceleration_ {std::numbers::pi / 2};    // Angular acceleration of robot (rads/s^2)
+  Pose pose_;                               // Current state [x, y, θ]ᵀ in the World frame.
+  VelocityCommand velocityCommand_;         // Current active velocity command [v, ω]ᵀ.
+  VelocityCommand actualVelocity_;          // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command.
+  double maximumLinearVelocity_ {0.0};      // Maximum linear velocity of robot (m/s)
+  double maximumAngularVelocity_ {0.0};     // Maximum angular velocity of robot (rads/s)
+  double linearAcceleration_ {0.0};         // Linear acceleration of robot (m/s^2)
+  double angularAcceleration_ {0.0};        // Angular acceleration of robot (rads/s^2)
 
   /**
    * @brief Normalizes an angle into the range [-π, π] radians.

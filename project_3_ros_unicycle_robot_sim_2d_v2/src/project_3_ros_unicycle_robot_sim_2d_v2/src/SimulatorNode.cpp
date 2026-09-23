@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <numbers>
 
 using namespace std::chrono_literals;
 using project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
@@ -11,6 +12,11 @@ using project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
 static const double kDefaultWorldMaxX = 10.0;
 static const double kDefaultWorldMaxY = 10.0;
 static const double kUpdateRobotTimestep = 0.01;
+
+static const double kDefaultRobotMaximumLinearVelocity = 5.0;
+static const double kDefaultRobotMaximumAngularVelocity = std::numbers::pi;
+static const double kDefaultRobotLinearAcceleration = 2.5;
+static const double kDefaultRobotAngularAcceleration = std::numbers::pi / 2;
 
 /* Public Member Functions */
 
@@ -21,6 +27,7 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
   status_{SimulationStatus::Running}
 {
   buildWorld();
+  configureRobotLimits();
 
   commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", 10,
@@ -201,4 +208,22 @@ void SimulatorNode::buildWorld()
   }
 
   world_ = World(maxX, maxY, obstacles, goal);
+}
+
+void SimulatorNode::configureRobotLimits()
+{
+  const double maximumLinearVelocity = this->declare_parameter<double>("robot.max_linear_velocity",
+    kDefaultRobotMaximumLinearVelocity);
+  const double maximumAngularVelocity =
+    this->declare_parameter<double>("robot.max_angular_velocity",
+    kDefaultRobotMaximumAngularVelocity);
+  const double linearAcceleration = this->declare_parameter<double>("robot.linear_acceleration",
+    kDefaultRobotLinearAcceleration);
+  const double angularAcceleration = this->declare_parameter<double>("robot.angular_acceleration",
+    kDefaultRobotAngularAcceleration);
+
+  robot_.setMaximumLinearVelocity(maximumLinearVelocity);
+  robot_.setMaximumAngularVelocity(maximumAngularVelocity);
+  robot_.setLinearAcceleration(linearAcceleration);
+  robot_.setAngularAcceleration(angularAcceleration);
 }
