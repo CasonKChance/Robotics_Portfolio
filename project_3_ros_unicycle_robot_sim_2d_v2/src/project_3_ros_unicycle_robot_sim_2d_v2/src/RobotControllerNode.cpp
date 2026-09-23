@@ -15,6 +15,9 @@ static const double kDefaultRobotMaximumAngularVelocity = std::numbers::pi;
 static const double kDefaultRobotLinearAcceleration = 2.5;
 static const double kDefaultRobotAngularAcceleration = std::numbers::pi / 2;
 
+static const double kDefaultGoalPosePositionalTolerance = 0.01;
+static const double kDefaultGoalPoseHeadingTolerance = 0.0174533; // 1 degree -> radians
+
 static const double velocityTolerance = 1e-3;
 
 /* Public Member Functions */
@@ -33,6 +36,10 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
     this->declare_parameter<double>("robot.linear_acceleration", kDefaultRobotLinearAcceleration);
   currentRobotState_.angularAcceleration =
     this->declare_parameter<double>("robot.angular_acceleration", kDefaultRobotAngularAcceleration);
+
+  // Set up tolerances that the robot must be within to be considered to have reached the goal
+  goalPosePositionalTolerance_ = this->declare_parameter<double>("robot.goal_pose_positional_tolerance", kDefaultGoalPosePositionalTolerance);
+  goalPoseHeadingTolerance_ = this->declare_parameter<double>("robot.goal_pose_heading_tolerance", kDefaultGoalPoseHeadingTolerance);
 
   // Set up action server
   goToPoseActionServer_ = rclcpp_action::create_server<GoToPose>(
@@ -207,6 +214,16 @@ void RobotControllerNode::controlLoop()
         return;
       }
     case ControllerState::GoalPoseReached: {
+        if (getDistanceRemaining(goalPose) > goalPosePositionalTolerance_) {
+          RCLCPP_INFO(this->get_logger(), "Correcting position.\n");
+          controllerState_ = ControllerState::RotatingToGoalPosition;
+          return;
+        } else if (std::abs(getRotationRemaining(goalPose)) > goalPoseHeadingTolerance_) {
+          RCLCPP_INFO(this->get_logger(), "Correcting heading\n");
+          controllerState_ = ControllerState::RotatingToGoalPose;
+          return;
+        }
+
         result->x = currentRobotState_.x;
         result->y = currentRobotState_.y;
         result->theta = currentRobotState_.theta;

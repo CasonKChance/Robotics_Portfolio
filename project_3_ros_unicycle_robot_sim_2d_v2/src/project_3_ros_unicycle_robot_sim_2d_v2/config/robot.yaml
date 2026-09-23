@@ -4,3 +4,5 @@ robot:
     max_angular_velocity: 3.14156
     linear_acceleration: 2.5
     angular_acceleration: 1.57079
+    goal_pose_positional_tolerance: 0.01
+    goal_pose_heading_tolerance: 0.0174533

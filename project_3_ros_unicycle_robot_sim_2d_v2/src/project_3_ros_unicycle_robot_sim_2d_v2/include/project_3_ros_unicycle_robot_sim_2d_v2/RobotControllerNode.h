@@ -71,6 +71,8 @@ private:
   std::shared_ptr < GoalHandleGoToPose > activeGoalHandle_;
   RobotState currentRobotState_;
   ControllerState controllerState_;
+  double goalPosePositionalTolerance_;
+  double goalPoseHeadingTolerance_;
 
   /**
    * @brief Handles incoming action goal requests.
