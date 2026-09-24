@@ -39,6 +39,11 @@ private:
   std::thread inputThread_;
 
   /**
+   * @brief Sets up the action client
+   */
+  void setupActionClient();
+
+  /**
    * @brief Continuous loop running on a separate thread to accept pose targets from standard console input.
    */
   void receiveGoalPose();

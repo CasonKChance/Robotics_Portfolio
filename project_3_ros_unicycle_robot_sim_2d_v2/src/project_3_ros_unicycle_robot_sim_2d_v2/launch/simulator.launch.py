@@ -1,13 +1,10 @@
 import os
-import sys
 
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import EmitEvent, OpaqueFunction, RegisterEventHandler
-from launch.event_handlers import OnProcessExit
-from launch.events import Shutdown
 from launch_ros.actions import Node
+
 
 def generate_launch_description():
     package_share_dir = get_package_share_directory('project_3_ros_unicycle_robot_sim_2d_v2')

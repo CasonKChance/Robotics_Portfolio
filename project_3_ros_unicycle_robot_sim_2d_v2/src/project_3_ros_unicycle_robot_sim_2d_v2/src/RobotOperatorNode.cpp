@@ -3,14 +3,14 @@
 using GoToPose = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::action::GoToPose;
 using GoalHandleGoToPose = rclcpp_action::ClientGoalHandle<GoToPose>;
 
+using namespace std::chrono_literals;
+
 /* Public Member Functions */
 
 RobotOperatorNode::RobotOperatorNode(const rclcpp::NodeOptions & options)
 : Node("robot_operator_node", options)
 {
-  this->goToPoseActionClient_ = rclcpp_action::create_client<GoToPose>(
-        this,
-        "go_to_pose");
+  setupActionClient();
 
   inputThread_ = std::thread([this]() {
         this->receiveGoalPose();
@@ -26,11 +26,25 @@ RobotOperatorNode::~RobotOperatorNode()
 
 /* Private Member Functions */
 
+void RobotOperatorNode::setupActionClient()
+{
+  this->goToPoseActionClient_ = rclcpp_action::create_client<GoToPose>(
+        this,
+        "go_to_pose");
+}
+
 void RobotOperatorNode::receiveGoalPose()
 {
   Pose goalPose{0.0, 0.0, 0.0};
 
   while (rclcpp::ok()) {
+    if (!this->goToPoseActionClient_->wait_for_action_server(1000ms)) {
+      RCLCPP_WARN_THROTTLE(
+        this->get_logger(), *this->get_clock(), 2000,
+        "Waiting for Robot Controller connection...");
+      continue;
+    }
+
     std::cout << "\n---Input pose to send to robot---\n";
 
     goalPose.x = getValidInput("Input x position: ");
@@ -52,11 +66,29 @@ void RobotOperatorNode::receiveGoalPose()
     auto resultFuture = sendGoalPose(goalPose);
 
     if (!resultFuture.valid()) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to send goal to action server.");
+      RCLCPP_ERROR(this->get_logger(), "Robot Controller disconnected. Resetting operator...");
+      setupActionClient();
       continue;
     }
 
     RCLCPP_INFO(this->get_logger(), "Waiting for robot to complete movement...");
+
+    bool completed = false;
+    while (rclcpp::ok() && !completed) {
+      auto status = resultFuture.wait_for(500ms);
+
+      if (status == std::future_status::ready) {
+        completed = true;
+      } else if (!this->goToPoseActionClient_->wait_for_action_server(1000ms)) {
+        RCLCPP_ERROR(this->get_logger(), "Robot Controller disconnected. Resetting operator...");
+        setupActionClient();
+        break;
+      }
+    }
+
+    if (!completed) {
+      continue;
+    }
 
     GoalHandleGoToPose::WrappedResult result = resultFuture.get();
 
@@ -69,10 +101,10 @@ void RobotOperatorNode::receiveGoalPose()
         result.result->theta);
         break;
       case rclcpp_action::ResultCode::ABORTED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was aborted.");
+        RCLCPP_WARN(this->get_logger(), "Goal was aborted.");
         return;
       case rclcpp_action::ResultCode::CANCELED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was canceled.");
+        RCLCPP_WARN(this->get_logger(), "Goal was canceled.");
         return;
       default:
         RCLCPP_ERROR(this->get_logger(), "Unknown result code.");
@@ -84,8 +116,8 @@ void RobotOperatorNode::receiveGoalPose()
 std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoalPose(
   const Pose & goalPose)
 {
-  if (!this->goToPoseActionClient_->wait_for_action_server()) {
-    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting.");
+  if (!this->goToPoseActionClient_->wait_for_action_server(1000ms)) {
+    RCLCPP_WARN(this->get_logger(), "Robot Controller not available after waiting.");
 
     return {};
   }
@@ -101,7 +133,7 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
   sendGoalOptions.goal_response_callback = [this](const GoalHandleGoToPose::SharedPtr & goalHandle)
     {
       if (!goalHandle) {
-        RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server.");
+        RCLCPP_WARN(this->get_logger(), "Goal was rejected by server.");
       } else {
         RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result.");
       }
