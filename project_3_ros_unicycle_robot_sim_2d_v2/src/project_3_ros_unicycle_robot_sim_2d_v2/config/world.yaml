@@ -1,4 +1,4 @@
-simulator_node:
+/Simulator:
   ros__parameters:
     world:
       bounds:
