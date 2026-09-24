@@ -38,8 +38,19 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
     this->declare_parameter<double>("robot.angular_acceleration", kDefaultRobotAngularAcceleration);
 
   // Set up tolerances that the robot must be within to be considered to have reached the goal
-  goalPosePositionalTolerance_ = this->declare_parameter<double>("robot.goal_pose_positional_tolerance", kDefaultGoalPosePositionalTolerance);
-  goalPoseHeadingTolerance_ = this->declare_parameter<double>("robot.goal_pose_heading_tolerance", kDefaultGoalPoseHeadingTolerance);
+  goalPosePositionalTolerance_ =
+    this->declare_parameter<double>("robot.goal_pose_positional_tolerance",
+    kDefaultGoalPosePositionalTolerance);
+  goalPoseHeadingTolerance_ = this->declare_parameter<double>("robot.goal_pose_heading_tolerance",
+    kDefaultGoalPoseHeadingTolerance);
+
+  // Set up robot pose subscription
+  robotPoseSubscription_ = this->create_subscription<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
+    "robot_state", 10,
+    std::bind(&RobotControllerNode::robotPoseTopicCallback, this, std::placeholders::_1));
+
+  // Set up command velocity publisher
+  commandVelocityPublisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
   // Set up action server
   goToPoseActionServer_ = rclcpp_action::create_server<GoToPose>(
@@ -50,18 +61,10 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
       std::bind(&RobotControllerNode::handleAccepted, this, _1)
   );
 
-  // Set up command velocity publisher
-  commandVelocityPublisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
-
-  // Set up robot pose subscription
-  robotPoseSubscription_ = this->create_subscription<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
-    "robot_state", 10,
-    std::bind(&RobotControllerNode::robotPoseTopicCallback, this, std::placeholders::_1));
-
   controllerState_ = ControllerState::Idle;
 
   controlTimer_ = this->create_wall_timer(
-      20ms,
+      10ms,
       std::bind(&RobotControllerNode::controlLoop, this));
 }
 
@@ -72,14 +75,14 @@ rclcpp_action::GoalResponse RobotControllerNode::handleGoal(
   std::shared_ptr<const GoToPose::Goal> goal)
 {
   if (activeGoalHandle_) {
-    RCLCPP_WARN(this->get_logger(), "Rejecting goal: another goal is active");
+    RCLCPP_WARN(this->get_logger(), "Rejecting goal: another goal is active.");
     return rclcpp_action::GoalResponse::REJECT;
   }
 
   RCLCPP_INFO(this->get_logger(), "Recieved goal request to go to pose:\n"
                                   "\tx: %.2f\n"
                                   "\ty: %.2f\n"
-                                  "\ttheta: %.2f\n", goal->x, goal->y, normalizeAngle(goal->theta));
+                                  "\ttheta: %.2f", goal->x, goal->y, normalizeAngle(goal->theta));
   (void)uuid;
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
@@ -87,7 +90,7 @@ rclcpp_action::GoalResponse RobotControllerNode::handleGoal(
 rclcpp_action::CancelResponse RobotControllerNode::handleCancel(
   const std::shared_ptr<GoalHandleGoToPose> goalHandle)
 {
-  RCLCPP_INFO(this->get_logger(), "Received request to cancel goal\n");
+  RCLCPP_INFO(this->get_logger(), "Received request to cancel goal.");
   (void)goalHandle;
   return rclcpp_action::CancelResponse::ACCEPT;
 }
@@ -215,11 +218,11 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::GoalPoseReached: {
         if (getDistanceRemaining(goalPose) > goalPosePositionalTolerance_) {
-          RCLCPP_INFO(this->get_logger(), "Correcting position.\n");
+          RCLCPP_INFO(this->get_logger(), "Correcting position.");
           controllerState_ = ControllerState::RotatingToGoalPosition;
           return;
         } else if (std::abs(getRotationRemaining(goalPose)) > goalPoseHeadingTolerance_) {
-          RCLCPP_INFO(this->get_logger(), "Correcting heading\n");
+          RCLCPP_INFO(this->get_logger(), "Correcting heading.");
           controllerState_ = ControllerState::RotatingToGoalPose;
           return;
         }
@@ -228,7 +231,7 @@ void RobotControllerNode::controlLoop()
         result->y = currentRobotState_.y;
         result->theta = currentRobotState_.theta;
         goalHandle->succeed(result);
-        RCLCPP_INFO(this->get_logger(), "Goal succeeded\n");
+        RCLCPP_INFO(this->get_logger(), "Goal succeeded.");
 
         controllerState_ = ControllerState::Idle;
         activeGoalHandle_.reset();
@@ -248,7 +251,7 @@ void RobotControllerNode::controlLoop()
         result->theta = currentRobotState_.theta;
 
         goalHandle->canceled(result);
-        RCLCPP_INFO(this->get_logger(), "Goal canceled\n");
+        RCLCPP_INFO(this->get_logger(), "Goal canceled.");
 
         controllerState_ = ControllerState::Idle;
         activeGoalHandle_.reset();
@@ -256,7 +259,7 @@ void RobotControllerNode::controlLoop()
         return;
       }
     default: {
-        RCLCPP_INFO(this->get_logger(), "Unknown controller state. Canceling goal.\n");
+        RCLCPP_INFO(this->get_logger(), "Unknown controller state. Canceling goal.");
         publishCommandVelocity(0.0, 0.0);
         controllerState_ = ControllerState::GoalCanceled;
         return;

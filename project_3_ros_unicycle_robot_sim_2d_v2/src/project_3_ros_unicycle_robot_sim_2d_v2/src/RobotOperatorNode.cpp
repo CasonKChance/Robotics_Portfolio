@@ -46,7 +46,7 @@ void RobotOperatorNode::receiveGoalPose()
             "Received valid Pose:\n"
             "\tx: %.2f\n"
             "\ty: %.2f\n"
-            "\ttheta: %.2f\n",
+            "\ttheta: %.2f",
             goalPose.x, goalPose.y, goalPose.theta);
 
     auto resultFuture = sendGoalPose(goalPose);
@@ -56,7 +56,7 @@ void RobotOperatorNode::receiveGoalPose()
       continue;
     }
 
-    RCLCPP_INFO(this->get_logger(), "Waiting for robot to complete movement...\n");
+    RCLCPP_INFO(this->get_logger(), "Waiting for robot to complete movement...");
 
     GoalHandleGoToPose::WrappedResult result = resultFuture.get();
 
@@ -65,17 +65,17 @@ void RobotOperatorNode::receiveGoalPose()
         RCLCPP_INFO(this->get_logger(), "Result received: \n"
                                   "\tx: %.2f\n"
                                   "\ty: %.2f\n"
-                                  "\ttheta: %.2f\n", result.result->x, result.result->y,
+                                  "\ttheta: %.2f", result.result->x, result.result->y,
         result.result->theta);
         break;
       case rclcpp_action::ResultCode::ABORTED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+        RCLCPP_ERROR(this->get_logger(), "Goal was aborted.");
         return;
       case rclcpp_action::ResultCode::CANCELED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+        RCLCPP_ERROR(this->get_logger(), "Goal was canceled.");
         return;
       default:
-        RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+        RCLCPP_ERROR(this->get_logger(), "Unknown result code.");
         return;
     }
   }
@@ -85,7 +85,7 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
   const Pose & goalPose)
 {
   if (!this->goToPoseActionClient_->wait_for_action_server()) {
-    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+    RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting.");
 
     return {};
   }
@@ -95,15 +95,15 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
   goalMessage.y = goalPose.y;
   goalMessage.theta = goalPose.theta;
 
-  RCLCPP_INFO(this->get_logger(), "Sending goal");
+  RCLCPP_INFO(this->get_logger(), "Sending goal.");
 
   auto sendGoalOptions = rclcpp_action::Client<GoToPose>::SendGoalOptions();
   sendGoalOptions.goal_response_callback = [this](const GoalHandleGoToPose::SharedPtr & goalHandle)
     {
       if (!goalHandle) {
-        RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
+        RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server.");
       } else {
-        RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
+        RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result.");
       }
     };
 
@@ -113,7 +113,7 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
     {
       RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
       "\nDistance remaining: %.2f\n"
-                                      "Rotation remaining: %.2f\n",
+      "Rotation remaining: %.2f",
       feedback->distance_remaining, feedback->rotation_remaining);
     };
 
@@ -132,13 +132,17 @@ std::shared_future<GoalHandleGoToPose::WrappedResult> RobotOperatorNode::sendGoa
 double RobotOperatorNode::getValidInput(const std::string & prompt) const
 {
   double value;
+
   while (true) {
-    std::cout << prompt;
+    std::cout << prompt << std::flush;
+
     if (std::cin >> value) {
       return value;
     }
 
-    std::cout << "Invalid input. Please enter a valid numerical value.\n";
+    std::cout
+      << "Invalid input. Please enter a valid numerical value.\n"
+      << std::flush;
 
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');

@@ -33,12 +33,12 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
     "cmd_vel", 10,
     std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
 
-  timer_ = this->create_wall_timer(
-    10ms, std::bind(&SimulatorNode::updateLoop, this));
-
   robotStatePublisher_ =
     this->create_publisher<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
     "robot_state", 10);
+
+  timer_ = this->create_wall_timer(
+    10ms, std::bind(&SimulatorNode::updateLoop, this));
 
   status_ = checkCollision();
 }
@@ -50,8 +50,6 @@ void SimulatorNode::handleWorldDataService(
 {
   (void)request_header;
   (void)request;
-
-  RCLCPP_INFO(this->get_logger(), "Sending world data to visualization node.\n");
 
   response->max_x = world_.getMaxX();
   response->max_y = world_.getMaxY();
@@ -86,8 +84,6 @@ void SimulatorNode::handleWorldDataService(
 
 void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
-  RCLCPP_INFO_ONCE(this->get_logger(), "Listening for velocity command updates...\n");
-
   if (message->linear.x == robot_.getVelocityCommand().linearVelocity &&
     message->angular.z == robot_.getVelocityCommand().angularVelocity)
   {
@@ -96,7 +92,7 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 
   RCLCPP_INFO(this->get_logger(), "Updating velocity command with: \n"
                                     "\tLinear: %.2f m/s\n"
-                                    "\tAngular: %.2f rad/s\n", message->linear.x,
+                                    "\tAngular: %.2f rad/s", message->linear.x,
                                                                message->angular.z);
 
   // Update target velocity command on robot model
@@ -108,8 +104,6 @@ void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 
 void SimulatorNode::publishRobotState() const
 {
-  RCLCPP_INFO_ONCE(this->get_logger(), "Publishing Robot State...\n");
-
   auto message = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState();
   auto robotPose = robot_.getPose();
 
@@ -136,7 +130,7 @@ void SimulatorNode::updateLoop()
   status_ = checkCollision();
 
   if (status_ != SimulationStatus::Running) {
-    RCLCPP_INFO(this->get_logger(), "Simulation ending condition met.\n");
+    RCLCPP_WARN(this->get_logger(), "Simulation ending condition met.");
 
     timer_->cancel();
   }

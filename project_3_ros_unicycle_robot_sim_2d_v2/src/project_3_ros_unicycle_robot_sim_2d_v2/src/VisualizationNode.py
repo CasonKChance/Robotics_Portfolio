@@ -127,7 +127,7 @@ class VisualizationNode(Node):
 
         # Timer to update the plot when new robot state data is received
         self.update_timer = self.fig.canvas.new_timer(
-            interval=30,
+            interval=10,
             callbacks=[
                 (self.update_visualization, [], {})
             ]

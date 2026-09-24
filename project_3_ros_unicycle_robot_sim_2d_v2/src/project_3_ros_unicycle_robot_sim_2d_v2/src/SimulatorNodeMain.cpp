@@ -32,16 +32,16 @@ int main(int argc, char * argv[])
   // Log final simulation terminal state after spin loop exits
   switch(simulatorNode->getStatus()) {
     case SimulationStatus::GoalReached:
-      std::cout << "Robot reached the goal!\n";
+      RCLCPP_INFO(simulatorNode->get_logger(), "Robot reached the goal!");
       break;
     case SimulationStatus::ObstacleCollision:
-      std::cout << "Robot collided with an obstacle!\n";
+      RCLCPP_INFO(simulatorNode->get_logger(), "Robot collided with an obstacle!");
       break;
     case SimulationStatus::OutOfBounds:
-      std::cout << "Robot went out of bounds!\n";
+      RCLCPP_INFO(simulatorNode->get_logger(), "Robot went out of bounds!");
       break;
     default:
-      std::cout << "Simulation ended with unknown status.\n";
+      RCLCPP_INFO(simulatorNode->get_logger(), "Simulation ended with unknown status.");
   }
 
   rclcpp::shutdown();
