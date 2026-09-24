@@ -5,6 +5,7 @@
 #include "World.h"
 #include "project_3_ros_unicycle_robot_sim_2d_v2_interfaces/srv/send_world_data.hpp"
 #include "project_3_ros_unicycle_robot_sim_2d_v2_interfaces/msg/robot_state.hpp"
+#include "project_3_ros_unicycle_robot_sim_2d_v2_interfaces/msg/simulator_status.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -61,6 +62,8 @@ private:
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::Publisher < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState >
   ::SharedPtr robotStatePublisher_;
+  rclcpp::Publisher < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus >
+  ::SharedPtr simulatorStatusPublisher_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   /**

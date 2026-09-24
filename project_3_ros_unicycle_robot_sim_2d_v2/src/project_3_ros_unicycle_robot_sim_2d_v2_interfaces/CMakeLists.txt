@@ -14,6 +14,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Obstacle.msg"
   "msg/Goal.msg"
   "msg/RobotState.msg"
+  "msg/SimulatorStatus.msg"
   "srv/SendWorldData.srv"
   "action/GoToPose.action"
   DEPENDENCIES geometry_msgs

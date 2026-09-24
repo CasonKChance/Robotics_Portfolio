@@ -49,6 +49,12 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
     "robot_state", 10,
     std::bind(&RobotControllerNode::robotPoseTopicCallback, this, std::placeholders::_1));
 
+  // Set up simulator status subscription
+  simulatorStatusSubscription_ = this->create_subscription<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus>(
+    "simulator_status", 10,
+    std::bind(&RobotControllerNode::simulatorStatusTopicCallback, this, std::placeholders::_1)
+  );
+
   // Set up command velocity publisher
   commandVelocityPublisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
@@ -316,4 +322,14 @@ void RobotControllerNode::robotPoseTopicCallback(
   currentRobotState_.theta = message->theta;
   currentRobotState_.linearVelocity = message->linear_velocity;
   currentRobotState_.angularVelocity = message->angular_velocity;
+}
+
+void RobotControllerNode::simulatorStatusTopicCallback(
+  project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus::UniquePtr message)
+{
+  if (!message->is_simulator_running) {
+    publishCommandVelocity(0.0, 0.0);
+
+    rclcpp::shutdown();
+  }
 }

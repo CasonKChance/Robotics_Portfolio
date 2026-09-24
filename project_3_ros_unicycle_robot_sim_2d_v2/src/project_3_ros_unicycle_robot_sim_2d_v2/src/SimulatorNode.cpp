@@ -41,6 +41,8 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
     10ms, std::bind(&SimulatorNode::updateLoop, this));
 
   status_ = checkCollision();
+
+  simulatorStatusPublisher_ = this->create_publisher<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus>("simulator_status", 10);
 }
 
 void SimulatorNode::handleWorldDataService(
@@ -133,6 +135,10 @@ void SimulatorNode::updateLoop()
     RCLCPP_WARN(this->get_logger(), "Simulation ending condition met.");
 
     timer_->cancel();
+
+    auto message = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus();
+    message.is_simulator_running = false;
+    simulatorStatusPublisher_->publish(message);
   }
 }
 

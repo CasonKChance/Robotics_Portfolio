@@ -3,6 +3,7 @@
 
 #include "project_3_ros_unicycle_robot_sim_2d_v2_interfaces/action/go_to_pose.hpp"
 #include "project_3_ros_unicycle_robot_sim_2d_v2_interfaces/msg/robot_state.hpp"
+#include "project_3_ros_unicycle_robot_sim_2d_v2_interfaces/msg/simulator_status.hpp"
 #include "Pose.h"
 
 #include "rclcpp/rclcpp.hpp"
@@ -67,6 +68,8 @@ private:
   rclcpp::Publisher < geometry_msgs::msg::Twist > ::SharedPtr commandVelocityPublisher_;
   rclcpp::Subscription < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState >
   ::SharedPtr robotPoseSubscription_;
+  rclcpp::Subscription < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus >
+  ::SharedPtr simulatorStatusSubscription_;
   rclcpp::TimerBase::SharedPtr controlTimer_;
   std::shared_ptr < GoalHandleGoToPose > activeGoalHandle_;
   RobotState currentRobotState_;
@@ -157,6 +160,14 @@ private:
    */
   void robotPoseTopicCallback(
     project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState::UniquePtr message);
+
+  /**
+   * @brief Subscriber callback for simulator status updates from topic "simulator_status".
+   * Terminates node if it recieves status false.
+   * @param massage Unique pointer to incoming SimulatorStatus message.
+   */
+  void simulatorStatusTopicCallback(
+    project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus::UniquePtr message);
 };
 
 #endif
