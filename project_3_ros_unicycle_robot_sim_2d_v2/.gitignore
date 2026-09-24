@@ -19,6 +19,3 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Path command script
-robot_commands.py
