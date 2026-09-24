@@ -12,8 +12,6 @@
 #include <chrono>
 #include <memory>
 
-using project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
-
 /**
  * @brief Represents the current operational state or termination reason of the simulation.
  */
@@ -33,6 +31,8 @@ enum class SimulationStatus
  */
 class SimulatorNode: public rclcpp::Node {
 public:
+  using SendWorldData = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
+
   /**
    * @brief Constructs a Simulator instance holding a robot and world model.
    * @param options Configuration options for Node initialization.

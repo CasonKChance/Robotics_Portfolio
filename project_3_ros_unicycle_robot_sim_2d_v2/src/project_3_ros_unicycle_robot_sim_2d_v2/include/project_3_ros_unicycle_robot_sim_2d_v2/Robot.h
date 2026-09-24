@@ -27,26 +27,6 @@ public:
   void setVelocityCommand(const VelocityCommand & command);
 
   /**
-   * @brief Sets the maximum linear velocity for the robot.
-   */
-  void setMaximumLinearVelocity(double maximumLinearVelocity);
-
-  /**
-   * @brief Sets the maximum angular velocity for the robot.
-   */
-  void setMaximumAngularVelocity(double maximumAngularVelocity);
-
-  /**
-   * @brief Sets the robot's linear acceleration.
-   */
-  void setLinearAcceleration(double linearAcceleration);
-
-  /**
-   * @brief Sets the robot's angular acceleration.
-   */
-  void setAngularAcceleration(double angularAcceleration);
-
-  /**
    * @brief Advances the robot's state over a time step dt using Forward Euler integration.
    * @param dt Time step duration in seconds (must be positive).
    */
@@ -81,6 +61,26 @@ public:
    * @return The maximum angular velocity of the robot.
    */
   double getMaximumAngularVelocity() const {return maximumAngularVelocity_;}
+
+  /**
+   * @brief Sets the maximum linear velocity for the robot.
+   */
+  void setMaximumLinearVelocity(double maximumLinearVelocity);
+
+  /**
+   * @brief Sets the maximum angular velocity for the robot.
+   */
+  void setMaximumAngularVelocity(double maximumAngularVelocity);
+
+  /**
+   * @brief Sets the robot's linear acceleration.
+   */
+  void setLinearAcceleration(double linearAcceleration);
+
+  /**
+   * @brief Sets the robot's angular acceleration.
+   */
+  void setAngularAcceleration(double angularAcceleration);
 
 private:
   Pose pose_;                               // Current state [x, y, θ]ᵀ in the World frame.
