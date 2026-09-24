@@ -6,8 +6,11 @@
 #include <vector>
 #include <numbers>
 
+using namespace std::placeholders;
 using namespace std::chrono_literals;
-using project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
+
+using SendWorldData = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
+using SimulatorStatus = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus;
 
 static const double kDefaultWorldMaxX = 10.0;
 static const double kDefaultWorldMaxY = 10.0;
@@ -24,25 +27,25 @@ SimulatorNode::SimulatorNode(const rclcpp::NodeOptions & options)
 : Node("simulator_node", options),
   robot_(Pose{1.0, 1.0, 0.0}),
   world_(0.0, 0.0),
-  status_{SimulationStatus::Running}
+  simulatorState_{SimulatorState::Running}
 {
   buildWorld();
   configureRobotLimits();
 
   commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", 10,
-    std::bind(&SimulatorNode::topicCallback, this, std::placeholders::_1));
+    std::bind(&SimulatorNode::commandVelocityTopicCallback, this, _1));
 
   robotStatePublisher_ =
     this->create_publisher<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
     "robot_state", 10);
 
-  timer_ = this->create_wall_timer(
+  updateLoopTimer_ = this->create_wall_timer(
     10ms, std::bind(&SimulatorNode::updateLoop, this));
 
-  status_ = checkCollision();
+  simulatorState_ = checkCollision();
 
-  simulatorStatusPublisher_ = this->create_publisher<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus>("simulator_status", 10);
+  simulatorStatusPublisher_ = this->create_publisher<SimulatorStatus>("simulator_status", 10);
 }
 
 void SimulatorNode::handleWorldDataService(
@@ -58,7 +61,7 @@ void SimulatorNode::handleWorldDataService(
 
   std::optional<Goal> goal = world_.getGoal();
   if (goal.has_value()) {
-    project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::Goal messageGoal;
+    auto messageGoal = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::Goal();
 
     messageGoal.center.x = goal->x;
     messageGoal.center.y = goal->y;
@@ -68,7 +71,7 @@ void SimulatorNode::handleWorldDataService(
   }
 
   for (const auto & obstacle : world_.getObstacles()) {
-    project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::Obstacle messageObstacle;
+    auto messageObstacle = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::Obstacle();
 
     messageObstacle.center.x = obstacle.x;
     messageObstacle.center.y = obstacle.y;
@@ -84,7 +87,7 @@ void SimulatorNode::handleWorldDataService(
 
 /* Private Member Functions */
 
-void SimulatorNode::topicCallback(geometry_msgs::msg::Twist::UniquePtr message)
+void SimulatorNode::commandVelocityTopicCallback(geometry_msgs::msg::Twist::UniquePtr message)
 {
   if (message->linear.x == robot_.getVelocityCommand().linearVelocity &&
     message->angular.z == robot_.getVelocityCommand().angularVelocity)
@@ -120,7 +123,7 @@ void SimulatorNode::publishRobotState() const
 
 void SimulatorNode::updateLoop()
 {
-  if (status_ != SimulationStatus::Running) {
+  if (simulatorState_ != SimulatorState::Running) {
     return;
   }
 
@@ -129,36 +132,36 @@ void SimulatorNode::updateLoop()
   // Send new pose to visualization node
   publishRobotState();
 
-  status_ = checkCollision();
+  simulatorState_ = checkCollision();
 
-  if (status_ != SimulationStatus::Running) {
+  if (simulatorState_ != SimulatorState::Running) {
     RCLCPP_WARN(this->get_logger(), "Simulation ending condition met.");
 
-    timer_->cancel();
+    updateLoopTimer_->cancel();
 
-    auto message = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus();
+    auto message = SimulatorStatus();
     message.is_simulator_running = false;
     simulatorStatusPublisher_->publish(message);
   }
 }
 
-SimulationStatus SimulatorNode::checkCollision() const
+SimulatorState SimulatorNode::checkCollision() const
 {
   const Pose & pose = robot_.getPose();
 
   if (!world_.isWithinBounds(pose.x, pose.y)) {
-    return SimulationStatus::OutOfBounds;
+    return SimulatorState::OutOfBounds;
   }
 
   if (world_.isCollisionWithObstacle(pose.x, pose.y)) {
-    return SimulationStatus::ObstacleCollision;
+    return SimulatorState::ObstacleCollision;
   }
 
   if (world_.isCollisionWithGoal(pose.x, pose.y)) {
-    return SimulationStatus::GoalReached;
+    return SimulatorState::GoalReached;
   }
 
-  return SimulationStatus::Running;
+  return SimulatorState::Running;
 }
 
 void SimulatorNode::buildWorld()

@@ -56,6 +56,7 @@ class RobotControllerNode: public rclcpp::Node {
 public:
   using GoToPose = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::action::GoToPose;
   using GoalHandleGoToPose = rclcpp_action::ServerGoalHandle < GoToPose >;
+  using SimulatorStatus = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus;
 
   /**
    * @brief Constructs a RobotControllerNode instance.
@@ -68,8 +69,7 @@ private:
   rclcpp::Publisher < geometry_msgs::msg::Twist > ::SharedPtr commandVelocityPublisher_;
   rclcpp::Subscription < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState >
   ::SharedPtr robotPoseSubscription_;
-  rclcpp::Subscription < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus >
-  ::SharedPtr simulatorStatusSubscription_;
+  rclcpp::Subscription < SimulatorStatus > ::SharedPtr simulatorStatusSubscription_;
   rclcpp::TimerBase::SharedPtr controlTimer_;
   std::shared_ptr < GoalHandleGoToPose > activeGoalHandle_;
   RobotState currentRobotState_;
@@ -166,8 +166,7 @@ private:
    * Terminates node if it recieves status false.
    * @param massage Unique pointer to incoming SimulatorStatus message.
    */
-  void simulatorStatusTopicCallback(
-    project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus::UniquePtr message);
+  void simulatorStatusTopicCallback(SimulatorStatus::UniquePtr message);
 };
 
 #endif

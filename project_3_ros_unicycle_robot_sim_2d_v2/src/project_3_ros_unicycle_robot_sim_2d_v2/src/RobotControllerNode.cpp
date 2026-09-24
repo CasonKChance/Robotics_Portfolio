@@ -9,6 +9,7 @@ using namespace std::chrono_literals;
 
 using GoToPose = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::action::GoToPose;
 using GoalHandleGoToPose = rclcpp_action::ServerGoalHandle<GoToPose>;
+using SimulatorStatus = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus;
 
 static const double kDefaultRobotMaximumLinearVelocity = 5.0;
 static const double kDefaultRobotMaximumAngularVelocity = std::numbers::pi;
@@ -18,7 +19,8 @@ static const double kDefaultRobotAngularAcceleration = std::numbers::pi / 2;
 static const double kDefaultGoalPosePositionalTolerance = 0.01;
 static const double kDefaultGoalPoseHeadingTolerance = 0.0174533; // 1 degree -> radians
 
-static const double velocityTolerance = 1e-3;
+// Velocity tolerance level for robot to be considered as stopped
+static const double stoppingVelocityTolerance = 1e-3;
 
 /* Public Member Functions */
 
@@ -37,7 +39,7 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
   currentRobotState_.angularAcceleration =
     this->declare_parameter<double>("robot.angular_acceleration", kDefaultRobotAngularAcceleration);
 
-  // Set up tolerances that the robot must be within to be considered to have reached the goal
+  // Save tolerances that the robot must be within to be considered to have reached the goal
   goalPosePositionalTolerance_ =
     this->declare_parameter<double>("robot.goal_pose_positional_tolerance",
     kDefaultGoalPosePositionalTolerance);
@@ -47,12 +49,12 @@ RobotControllerNode::RobotControllerNode(const rclcpp::NodeOptions & options)
   // Set up robot pose subscription
   robotPoseSubscription_ = this->create_subscription<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState>(
     "robot_state", 10,
-    std::bind(&RobotControllerNode::robotPoseTopicCallback, this, std::placeholders::_1));
+    std::bind(&RobotControllerNode::robotPoseTopicCallback, this, _1));
 
   // Set up simulator status subscription
-  simulatorStatusSubscription_ = this->create_subscription<project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus>(
+  simulatorStatusSubscription_ = this->create_subscription<SimulatorStatus>(
     "simulator_status", 10,
-    std::bind(&RobotControllerNode::simulatorStatusTopicCallback, this, std::placeholders::_1)
+    std::bind(&RobotControllerNode::simulatorStatusTopicCallback, this, _1)
   );
 
   // Set up command velocity publisher
@@ -156,7 +158,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPositionStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > velocityTolerance) {
+        if (std::abs(currentRobotState_.angularVelocity) > stoppingVelocityTolerance) {
           return;
         }
 
@@ -185,7 +187,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForDrivingToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > velocityTolerance) {
+        if (std::abs(currentRobotState_.linearVelocity) > stoppingVelocityTolerance) {
           return;
         }
 
@@ -215,7 +217,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > velocityTolerance) {
+        if (std::abs(currentRobotState_.angularVelocity) > stoppingVelocityTolerance) {
           return;
         }
 
@@ -223,6 +225,7 @@ void RobotControllerNode::controlLoop()
         return;
       }
     case ControllerState::GoalPoseReached: {
+        // Force robot to correct position and/or heading if it is not currently close enough to the goal pose
         if (getDistanceRemaining(goalPose) > goalPosePositionalTolerance_) {
           RCLCPP_INFO(this->get_logger(), "Correcting position.");
           controllerState_ = ControllerState::RotatingToGoalPosition;
@@ -246,8 +249,8 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::GoalCanceled: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > velocityTolerance ||
-          std::abs(currentRobotState_.angularVelocity) > velocityTolerance)
+        if (std::abs(currentRobotState_.linearVelocity) > stoppingVelocityTolerance ||
+          std::abs(currentRobotState_.angularVelocity) > stoppingVelocityTolerance)
         {
           return;
         }
@@ -324,12 +327,9 @@ void RobotControllerNode::robotPoseTopicCallback(
   currentRobotState_.angularVelocity = message->angular_velocity;
 }
 
-void RobotControllerNode::simulatorStatusTopicCallback(
-  project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus::UniquePtr message)
+void RobotControllerNode::simulatorStatusTopicCallback(SimulatorStatus::UniquePtr message)
 {
   if (!message->is_simulator_running) {
-    publishCommandVelocity(0.0, 0.0);
-
     rclcpp::shutdown();
   }
 }

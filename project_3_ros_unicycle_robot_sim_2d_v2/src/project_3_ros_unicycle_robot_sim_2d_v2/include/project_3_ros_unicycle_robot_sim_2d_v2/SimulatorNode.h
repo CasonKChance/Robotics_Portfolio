@@ -16,7 +16,7 @@
 /**
  * @brief Represents the current operational state or termination reason of the simulation.
  */
-enum class SimulationStatus
+enum class SimulatorState
 {
   Running,             // Simulation is progressing normally
   GoalReached,         // Robot successfully reached the target goal region
@@ -33,6 +33,7 @@ enum class SimulationStatus
 class SimulatorNode: public rclcpp::Node {
 public:
   using SendWorldData = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::srv::SendWorldData;
+  using SimulatorStatus = project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus;
 
   /**
    * @brief Constructs a Simulator instance holding a robot and world model.
@@ -50,27 +51,26 @@ public:
 
   /**
    * @brief Gets the current operational or termination status of the simulation.
-   * @return Active SimulationStatus enum value.
+   * @return Active SimulatorState enum value.
    */
-  SimulationStatus getStatus() const {return status_;}
+  SimulatorState getStatus() const {return simulatorState_;}
 
 private:
   Robot robot_;                                           // Robot state and kinematics model
   World world_;                                           // Simulation environment definition
-  SimulationStatus status_ {SimulationStatus::Running};   // Active simulation status state machine
+  SimulatorState simulatorState_ {SimulatorState::Running};   // Active simulation status state machine
 
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::Publisher < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::RobotState >
   ::SharedPtr robotStatePublisher_;
-  rclcpp::Publisher < project_3_ros_unicycle_robot_sim_2d_v2_interfaces::msg::SimulatorStatus >
-  ::SharedPtr simulatorStatusPublisher_;
-  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Publisher < SimulatorStatus > ::SharedPtr simulatorStatusPublisher_;
+  rclcpp::TimerBase::SharedPtr updateLoopTimer_;
 
   /**
    * @brief Topic callback for incoming Twist messages.
    * @param message Pointer to received geometry_msgs::msg::Twist command.
    */
-  void topicCallback(geometry_msgs::msg::Twist::UniquePtr message);
+  void commandVelocityTopicCallback(geometry_msgs::msg::Twist::UniquePtr message);
 
   /**
    * @brief Publishes the robot's current state to topic 'robot_state'.
@@ -85,9 +85,9 @@ private:
 
   /**
    * @brief Evaluates current robot pose against world boundaries, obstacles, and goals.
-   * @return The resulting SimulationStatus based on spatial overlap.
+   * @return The resulting SimulatorState based on spatial overlap.
    */
-  SimulationStatus checkCollision() const;
+  SimulatorState checkCollision() const;
 
   /**
    * @brief Builds the world from config/world.yaml

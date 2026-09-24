@@ -10,23 +10,23 @@ using namespace std::chrono_literals;
 RobotOperatorNode::RobotOperatorNode(const rclcpp::NodeOptions & options)
 : Node("robot_operator_node", options)
 {
-  setupActionClient();
+  setupGoToPoseClient();
 
-  inputThread_ = std::thread([this]() {
+  userInputThread_ = std::thread([this]() {
         this->receiveGoalPose();
   });
 }
 
 RobotOperatorNode::~RobotOperatorNode()
 {
-  if (inputThread_.joinable()) {
-    inputThread_.join();
+  if (userInputThread_.joinable()) {
+    userInputThread_.join();
   }
 }
 
 /* Private Member Functions */
 
-void RobotOperatorNode::setupActionClient()
+void RobotOperatorNode::setupGoToPoseClient()
 {
   this->goToPoseActionClient_ = rclcpp_action::create_client<GoToPose>(
         this,
@@ -67,7 +67,7 @@ void RobotOperatorNode::receiveGoalPose()
 
     if (!resultFuture.valid()) {
       RCLCPP_ERROR(this->get_logger(), "Robot Controller disconnected. Resetting operator...");
-      setupActionClient();
+      setupGoToPoseClient();
       continue;
     }
 
@@ -81,7 +81,7 @@ void RobotOperatorNode::receiveGoalPose()
         completed = true;
       } else if (!this->goToPoseActionClient_->wait_for_action_server(1000ms)) {
         RCLCPP_ERROR(this->get_logger(), "Robot Controller disconnected. Resetting operator...");
-        setupActionClient();
+        setupGoToPoseClient();
         break;
       }
     }

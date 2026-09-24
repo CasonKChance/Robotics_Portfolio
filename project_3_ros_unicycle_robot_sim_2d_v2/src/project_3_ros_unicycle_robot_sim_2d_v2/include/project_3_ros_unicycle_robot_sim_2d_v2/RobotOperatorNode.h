@@ -36,12 +36,12 @@ public:
 
 private:
   rclcpp_action::Client < GoToPose > ::SharedPtr goToPoseActionClient_;
-  std::thread inputThread_;
+  std::thread userInputThread_;
 
   /**
-   * @brief Sets up the action client
+   * @brief Sets up the GoToPose action client
    */
-  void setupActionClient();
+  void setupGoToPoseClient();
 
   /**
    * @brief Continuous loop running on a separate thread to accept pose targets from standard console input.
