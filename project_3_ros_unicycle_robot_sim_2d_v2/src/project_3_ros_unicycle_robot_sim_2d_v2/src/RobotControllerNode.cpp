@@ -20,7 +20,7 @@ static const double kDefaultGoalPosePositionalTolerance = 0.01;
 static const double kDefaultGoalPoseHeadingTolerance = 0.0174533; // 1 degree -> radians
 
 // Velocity tolerance level for robot to be considered as stopped
-static const double stoppingVelocityTolerance = 1e-3;
+static const double kStoppingVelocityTolerance = 1e-3;
 
 /* Public Member Functions */
 
@@ -87,7 +87,7 @@ rclcpp_action::GoalResponse RobotControllerNode::handleGoal(
     return rclcpp_action::GoalResponse::REJECT;
   }
 
-  RCLCPP_INFO(this->get_logger(), "Recieved goal request to go to pose:\n"
+  RCLCPP_INFO(this->get_logger(), "Received goal request to go to pose:\n"
                                   "\tx: %.2f\n"
                                   "\ty: %.2f\n"
                                   "\ttheta: %.2f", goal->x, goal->y, normalizeAngle(goal->theta));
@@ -158,7 +158,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPositionStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > stoppingVelocityTolerance) {
+        if (std::abs(currentRobotState_.angularVelocity) > kStopingVelocityTolerance) {
           return;
         }
 
@@ -187,7 +187,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForDrivingToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > stoppingVelocityTolerance) {
+        if (std::abs(currentRobotState_.linearVelocity) > kStopingVelocityTolerance) {
           return;
         }
 
@@ -217,7 +217,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > stoppingVelocityTolerance) {
+        if (std::abs(currentRobotState_.angularVelocity) > kStopingVelocityTolerance) {
           return;
         }
 
@@ -249,8 +249,8 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::GoalCanceled: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > stoppingVelocityTolerance ||
-          std::abs(currentRobotState_.angularVelocity) > stoppingVelocityTolerance)
+        if (std::abs(currentRobotState_.linearVelocity) > kStopingVelocityTolerance ||
+          std::abs(currentRobotState_.angularVelocity) > kStopingVelocityTolerance)
         {
           return;
         }
