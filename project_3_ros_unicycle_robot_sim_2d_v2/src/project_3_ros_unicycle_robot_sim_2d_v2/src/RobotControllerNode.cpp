@@ -158,7 +158,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPositionStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > kStopingVelocityTolerance) {
+        if (std::abs(currentRobotState_.angularVelocity) > kStoppingVelocityTolerance) {
           return;
         }
 
@@ -187,7 +187,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForDrivingToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > kStopingVelocityTolerance) {
+        if (std::abs(currentRobotState_.linearVelocity) > kStoppingVelocityTolerance) {
           return;
         }
 
@@ -217,7 +217,7 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::WaitingForRotationToGoalPoseStop: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.angularVelocity) > kStopingVelocityTolerance) {
+        if (std::abs(currentRobotState_.angularVelocity) > kStoppingVelocityTolerance) {
           return;
         }
 
@@ -249,8 +249,8 @@ void RobotControllerNode::controlLoop()
       }
     case ControllerState::GoalCanceled: {
         // Make sure robot has completed stop, loop until completed.
-        if (std::abs(currentRobotState_.linearVelocity) > kStopingVelocityTolerance ||
-          std::abs(currentRobotState_.angularVelocity) > kStopingVelocityTolerance)
+        if (std::abs(currentRobotState_.linearVelocity) > kStoppingVelocityTolerance ||
+          std::abs(currentRobotState_.angularVelocity) > kStoppingVelocityTolerance)
         {
           return;
         }
