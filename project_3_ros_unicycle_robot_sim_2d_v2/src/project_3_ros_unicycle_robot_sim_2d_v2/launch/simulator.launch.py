@@ -15,7 +15,7 @@ def generate_launch_description():
     simulator_node = Node(
                         package='project_3_ros_unicycle_robot_sim_2d_v2',
                         executable='SimulatorNode',
-                        name='Simulator',
+                        name='SimulatorNode',
                         parameters=[world_config, robot_config],
                         output='screen',
                         emulate_tty=True
@@ -24,7 +24,7 @@ def generate_launch_description():
     visualization_node = Node(
                             package='project_3_ros_unicycle_robot_sim_2d_v2',
                             executable='VisualizationNode',
-                            name='Visualization',
+                            name='VisualizationNode',
                             output='screen',
                             emulate_tty=True
                         )
@@ -32,7 +32,7 @@ def generate_launch_description():
     robot_controller_node = Node(
                                 package='project_3_ros_unicycle_robot_sim_2d_v2',
                                 executable='RobotControllerNode',
-                                name='RobotController',
+                                name='RobotControllerNode',
                                 parameters=[robot_config],
                                 output='screen',
                                 emulate_tty=True
