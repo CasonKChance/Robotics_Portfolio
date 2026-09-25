@@ -81,6 +81,13 @@ if(BUILD_TESTING)
   target_link_libraries(TestSimulatorNode
     ${PROJECT_NAME}_lib
   )
+
+  ament_add_gtest(TestRobotControllerNode
+    tests/RobotControllerNodeTests.cpp
+  )
+  target_link_libraries(TestRobotControllerNode
+    ${PROJECT_NAME}_lib
+  )
 endif()
 
 # Installation rules

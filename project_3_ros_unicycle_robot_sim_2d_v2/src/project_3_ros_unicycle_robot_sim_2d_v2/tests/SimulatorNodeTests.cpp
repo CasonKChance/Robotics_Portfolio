@@ -104,7 +104,7 @@ TEST_F(SimulatorNodeTest, DefaultConstructionStartsRunning)
 
   EXPECT_EQ(
     node->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 }
 
 
@@ -123,7 +123,7 @@ TEST_F(SimulatorNodeTest, GoalOutsideRobotStartsRunning)
 
   EXPECT_EQ(
     node->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 }
 
 
@@ -145,7 +145,7 @@ TEST_F(SimulatorNodeTest, GoalAtInitialPoseReportsGoalReached)
 
   EXPECT_EQ(
     node->getStatus(),
-    SimulationStatus::GoalReached);
+    SimulatorState::GoalReached);
 }
 
 
@@ -173,7 +173,7 @@ TEST_F(SimulatorNodeTest, ObstacleAtInitialPoseReportsCollision)
 
   EXPECT_EQ(
     node->getStatus(),
-    SimulationStatus::ObstacleCollision);
+    SimulatorState::ObstacleCollision);
 }
 
 
@@ -192,7 +192,7 @@ TEST_F(SimulatorNodeTest, DisabledGoalDoesNotTerminateSimulation)
 
   EXPECT_EQ(
     node->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 }
 
 
@@ -293,7 +293,7 @@ TEST_F(SimulatorNodeTest, MultipleObstaclesLoadSuccessfully)
 
   EXPECT_EQ(
     node->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 }
 
 
@@ -332,7 +332,7 @@ TEST_F(SimulatorNodeTest, LinearVelocityCommandMovesRobotIntoObstacle)
 
   ASSERT_EQ(
     simulator->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 
   auto commandNode =
     std::make_shared<rclcpp::Node>("simulator_test_command_publisher");
@@ -360,14 +360,14 @@ TEST_F(SimulatorNodeTest, LinearVelocityCommandMovesRobotIntoObstacle)
     executor,
     [&]() {
       return simulator->getStatus() ==
-             SimulationStatus::ObstacleCollision;
+             SimulatorState::ObstacleCollision;
     },
     2s);
 
   EXPECT_TRUE(collisionDetected);
   EXPECT_EQ(
     simulator->getStatus(),
-    SimulationStatus::ObstacleCollision);
+    SimulatorState::ObstacleCollision);
 }
 
 
@@ -394,7 +394,7 @@ TEST_F(SimulatorNodeTest, AngularVelocityCommandCausesCurvedPathCollision)
 
   ASSERT_EQ(
     simulator->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 
   auto commandNode =
     std::make_shared<rclcpp::Node>("simulator_test_angular_command_publisher");
@@ -421,14 +421,14 @@ TEST_F(SimulatorNodeTest, AngularVelocityCommandCausesCurvedPathCollision)
     executor,
     [&]() {
       return simulator->getStatus() ==
-             SimulationStatus::ObstacleCollision;
+             SimulatorState::ObstacleCollision;
     },
     3s);
 
   EXPECT_TRUE(collisionDetected);
   EXPECT_EQ(
     simulator->getStatus(),
-    SimulationStatus::ObstacleCollision);
+    SimulatorState::ObstacleCollision);
 }
 
 
@@ -450,7 +450,7 @@ TEST_F(SimulatorNodeTest, LinearVelocityCommandReachesGoal)
 
   ASSERT_EQ(
     simulator->getStatus(),
-    SimulationStatus::Running);
+    SimulatorState::Running);
 
   auto commandNode =
     std::make_shared<rclcpp::Node>("simulator_test_goal_command_publisher");
@@ -477,14 +477,14 @@ TEST_F(SimulatorNodeTest, LinearVelocityCommandReachesGoal)
     executor,
     [&]() {
       return simulator->getStatus() ==
-             SimulationStatus::GoalReached;
+             SimulatorState::GoalReached;
     },
     2s);
 
   EXPECT_TRUE(goalReached);
   EXPECT_EQ(
     simulator->getStatus(),
-    SimulationStatus::GoalReached);
+    SimulatorState::GoalReached);
 }
 
 /**
