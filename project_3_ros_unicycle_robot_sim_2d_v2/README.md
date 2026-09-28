@@ -1,4 +1,4 @@
-# ROS 2 Unicycle Robot Simulator 2.0
+# ROS 2D Unicycle Robot Simulator 2.0
 
 A 2D unicycle robot simulator built in C++20 and ROS 2. This project extends my standalone unicycle simulator from projects 1 and 2 by adding user facing controls using ROS2 actions, configurable parameters to set physical limits for the simulated robot, and a launch process.
 
