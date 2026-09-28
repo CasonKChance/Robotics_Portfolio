@@ -133,7 +133,7 @@ void RobotControllerNode::controlLoop()
   switch(controllerState_) {
     case ControllerState::Idle: {
         // Loop until a new goal is accepted
-        return;
+        return; 
       }
     case ControllerState::RotatingToGoalPosition: {
         // Rotate to goal position
