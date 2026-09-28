@@ -4,13 +4,13 @@ A 2D unicycle robot simulator built in C++20 and ROS 2. This project extends my 
 
 ## Demo
 
-**[Insert GIF/video here.]**
+https://github.com/user-attachments/assets/1146adb7-dfaa-4101-8dc0-72e3ec373ba2
 
 ---
 
 ## Overview
 
-The project simulates a configurable unicycle robot moving through a configurable 2D world containing bounds, obstacles, and a goal region. Goal poses, given by the user through an operator node, in the world frame are supplied via a ROS2 action to a controller node. The controller calculates and communicates velocity commands to the simulator through a ROS2 publisher/subscriber relationship and utilizes a feedback loop and successive states to orient the robot toward the goal position, translate the robot to the goal position, and finally orient the robot into the goal pose. The simulator provides world and robot state information to a visualization node so the user can see interactions in real time.
+The project simulates a configurable unicycle robot moving through a configurable 2D world containing bounds, obstacles, and a goal region. Goal poses, given by the user through an operator node, in the world frame are supplied via a ROS2 action to a controller node. The controller calculates and communicates velocity commands to the simulator through a ROS2 publisher/subscriber relationship and utilizes a feedback loop and successive states to orient the robot toward the goal position, translate the robot to the goal position, and finally orients the robot into the goal pose. The simulator provides world and robot state information to a visualization node so the user can see interactions in real time.
 
 ---
 
@@ -48,9 +48,13 @@ The project simulates a configurable unicycle robot moving through a configurabl
               │                                   │
               └───────────────────────────────────┘
 
+---
+
 ### ROS Graph
 
-**[Insert image here.]**
+<img width="1029" height="410" alt="Screenshot 2026-09-28 at 2 47 36 PM" src="https://github.com/user-attachments/assets/dd289b66-20e4-4a1d-957f-b15e27c04dd9" />
+
+---
 
 ### Nodes
 
@@ -65,7 +69,6 @@ The operator receives a goal pose from the user in the form of [x, y, θ]ᵀ whe
 **Outputs:**  
 The operater contains a GoToPose action client which sends the goal pose received from the user to the Robot Controller node.
 
----
 
 #### Robot Controller
 
@@ -78,7 +81,6 @@ The controller receives the goal pose via a ROS2 action goal from the operator. 
 **Outputs:**  
 The controller provides ROS2 action feedback and results back to the operator as the action is being completed so the user can see information regarding the distance remaining to reach the goal pose. It also publishes velocity commands to /cmd_vel for simulator consumption.
 
----
 
 #### Simulator
 
@@ -91,7 +93,6 @@ The simulator subscribes to the /cmd_vel topic from which it receives velocity c
 **Outputs:**  
 The simulator publishes the robot's current pose and velocity to the /robot_state topic which is consumed by both the visualization and controller. It also publishes its own status to the /simulator_status topic so the controller can know whether or not the simulator is still running. Additionally, it acts as a server for the /send_world_data service where it receives a request for the world data from the visualization node upon that node's startup.
 
----
 
 #### Visualization
 
@@ -673,19 +674,19 @@ The robot.yaml configuration file is used to configure the robot's physical limi
 ```yaml
 world:
     bounds:
-    max_x: ...
-    max_y: ...
+      max_x: ...
+      max_y: ...
 
     goal:
-    enabled: true/false
-    x: ...
-    y: ...
-    radius: ...
+      enabled: true/false
+      x: ...
+      y: ...
+      radius: ...
 
     obstacles:
-    x: [..., ...]
-    y: [..., ...]
-    radius: [..., ...]
+      x: [..., ...]
+      y: [..., ...]
+      radius: [..., ...]
 ```
 
 The world.yaml configuration file is used to provide the simulator with information about the world to build. The simulator will relay this information to the visualization node for visualization.
@@ -694,7 +695,7 @@ The world.yaml configuration file is used to provide the simulator with informat
 
 ## Visualization
 
-**[Insert screenshot/GIF.]**
+<img width="962" height="792" alt="Screenshot 2026-09-28 at 11 52 54 AM" src="https://github.com/user-attachments/assets/6e29cce1-febc-4f1a-bde0-810dd3caf990" />
 
 ---
 
@@ -761,19 +762,17 @@ colcon test
 
 ## Technologies
 
-```text
-* C++20
-* Python 3
-* ROS 2
-* rclcpp
-* rclpy
-* CMake
-* ament_cmake
-* colcon
-* oogleTest
-* Matplotlib
-* Ubuntu 26.04
-```
+- C++20
+- Python 3
+- ROS 2
+- rclcpp
+- rclpy
+- CMake
+- ament_cmake
+- colcon
+- GoogleTest
+- Matplotlib
+- Ubuntu 26.04
 
 ---
 
