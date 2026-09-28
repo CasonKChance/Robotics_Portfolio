@@ -710,6 +710,12 @@ C++: 20
 Python: 3.14.4
 ```
 
+#### Source the Workspace
+
+```bash
+source /opt/ros/lyrical/setup.bash
+```
+
 ### Build
 
 ```bash
@@ -718,12 +724,12 @@ colcon build
 
 ### Start the simulator
 
-#### Source the Workspace
+#### Source the project
 
 In a separate tab
 
 ```bash
-source install/setup.bas
+source install/setup.bash
 ```
 
 #### Launch the Simulator
@@ -734,11 +740,11 @@ ros2 launch project_3_ros_unicycle_robot_sim_2d_v2 simulator.launch.py
 
 ### Run the operator
 
-#### Source the Workspace
+#### Source the project
 In a separate tab
 
 ```bash
-source install/setup.bas
+source install/setup.bash
 ```
 
 #### Start the operator
