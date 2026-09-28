@@ -19,6 +19,3 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Readme while still under construction
-README.md
