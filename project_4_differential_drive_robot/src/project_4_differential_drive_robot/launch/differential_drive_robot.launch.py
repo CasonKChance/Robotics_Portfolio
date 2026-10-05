@@ -6,7 +6,8 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     package_share = FindPackageShare('project_4_differential_drive_robot')
-    xacro_file = PathJoinSubstitution([package_share, 'urdf', 'differential_drive_robot.urdf.xacro'])
+    xacro_file = PathJoinSubstitution([package_share,
+                                       'urdf', 'differential_drive_robot.urdf.xacro'])
     robot_description = Command(['xacro', ' ', xacro_file])
 
     robot_state_publisher = Node(

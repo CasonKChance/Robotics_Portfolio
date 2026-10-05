@@ -13,16 +13,16 @@ static const double kMaximumAngularSpeed = 2.0;
 RobotController::RobotController(const rclcpp::NodeOptions & options)
 : rclcpp::Node("robot_controller", options)
 {
-    commandVelocityPublisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+  commandVelocityPublisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
-    // Initialize SDL Window
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        throw std::runtime_error(
+  // Initialize SDL Window
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    throw std::runtime_error(
             std::string("Failed to initialize SDL: ") +
             SDL_GetError());
-    }
+  }
 
-    window_ = SDL_CreateWindow(
+  window_ = SDL_CreateWindow(
                 "Differential Drive Teleop",
                 SDL_WINDOWPOS_CENTERED,
                 SDL_WINDOWPOS_CENTERED,
@@ -30,19 +30,20 @@ RobotController::RobotController(const rclcpp::NodeOptions & options)
                 150,
                 SDL_WINDOW_SHOWN);
 
-    if (!window_) {
-        const std::string error = SDL_GetError();
+  if (!window_) {
+    const std::string error = SDL_GetError();
 
-        SDL_Quit();
+    SDL_Quit();
 
-        throw std::runtime_error(
+    throw std::runtime_error(
             "Failed to create SDL window: " + error);
-    }
+  }
 
-    RCLCPP_INFO(this->get_logger(), "Teleop controller started. Focus the SDL window and use the arrow keys to control robot.");
+  RCLCPP_INFO(this->get_logger(),
+    "Teleop controller started. Focus the SDL window and use the arrow keys to control robot.");
 
-    // Poll keyboard at 100Hz rate
-    keyboardTimer_ = this->create_wall_timer(
+  // Poll keyboard at 100Hz rate
+  keyboardTimer_ = this->create_wall_timer(
         10ms, std::bind(&RobotController::processKeyboardInput, this));
 }
 
@@ -145,10 +146,12 @@ void RobotController::processKeyboardInput()
 
 void RobotController::publishCommandVelocity() const
 {
-    geometry_msgs::msg::Twist msg;
+  geometry_msgs::msg::Twist msg;
 
-    msg.linear.x = (upPressed_ ? kMaximumLinearSpeed : 0.0) - (downPressed_ ? kMaximumLinearSpeed : 0.0);
-    msg.angular.z = (leftPressed_ ? kMaximumAngularSpeed : 0.0) - (rightPressed_ ? kMaximumAngularSpeed : 0.0);
+  msg.linear.x = (upPressed_ ? kMaximumLinearSpeed : 0.0) -
+    (downPressed_ ? kMaximumLinearSpeed : 0.0);
+  msg.angular.z = (leftPressed_ ? kMaximumAngularSpeed : 0.0) -
+    (rightPressed_ ? kMaximumAngularSpeed : 0.0);
 
-    commandVelocityPublisher_->publish(msg);
+  commandVelocityPublisher_->publish(msg);
 }

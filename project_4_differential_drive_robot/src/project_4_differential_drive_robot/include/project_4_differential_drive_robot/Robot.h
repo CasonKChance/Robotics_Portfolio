@@ -48,8 +48,8 @@ private:
 
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robotDescriptionSubscription_;
-  std::shared_ptr<tf2_ros::TransformBroadcaster> tfBroadcaster_;
-  rclcpp::Publisher< sensor_msgs::msg::JointState > ::SharedPtr jointStatePublisher_;
+  std::shared_ptr < tf2_ros::TransformBroadcaster > tfBroadcaster_;
+  rclcpp::Publisher < sensor_msgs::msg::JointState > ::SharedPtr jointStatePublisher_;
   rclcpp::TimerBase::SharedPtr updateTimer_;
   rclcpp::Time lastUpdateTime_;
 
