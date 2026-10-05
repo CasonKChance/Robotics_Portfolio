@@ -29,7 +29,7 @@ Robot::Robot(const Pose & initialPose, const rclcpp::NodeOptions & options)
       _1));
 
   commandVelocitySubscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
-    "command_velocity", 10, std::bind(&Robot::commandVelocityTopicCallback, this, _1)
+    "cmd_vel", 10, std::bind(&Robot::commandVelocityTopicCallback, this, _1)
   );
 
   tfBroadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
@@ -78,6 +78,7 @@ void Robot::commandVelocityTopicCallback(geometry_msgs::msg::Twist::UniquePtr me
 void Robot::robotDescriptionTopicCallback(
   std_msgs::msg::String::UniquePtr message)
 {
+  // Pull model
   urdf::Model model;
 
   if (!model.initString(message->data)) {
@@ -88,16 +89,10 @@ void Robot::robotDescriptionTopicCallback(
   }
 
   const auto leftWheelJoint =
-    model.getJoint("left_wheel_joint");
+    model.getJoint("left_wheel_link_joint");
 
   const auto rightWheelJoint =
-    model.getJoint("right_wheel_joint");
-
-  const auto leftWheelBaseJoint =
-    model.getJoint("left_wheel_base_joint");
-
-  const auto rightWheelBaseJoint =
-    model.getJoint("right_wheel_base_joint");
+    model.getJoint("right_wheel_link_joint");
 
   const auto leftWheelLink =
     model.getLink("left_wheel_link");
@@ -107,8 +102,6 @@ void Robot::robotDescriptionTopicCallback(
 
   if (!leftWheelJoint ||
     !rightWheelJoint ||
-    !leftWheelBaseJoint ||
-    !rightWheelBaseJoint ||
     !leftWheelLink ||
     !rightWheelLink)
   {
@@ -117,6 +110,8 @@ void Robot::robotDescriptionTopicCallback(
       "Required differential-drive links/joints not found in URDF.");
     return;
   }
+
+  // Validate model
 
   if (!leftWheelJoint->limits ||
     !rightWheelJoint->limits ||
@@ -130,6 +125,8 @@ void Robot::robotDescriptionTopicCallback(
       "Wheel limits, inertials, or collision geometry missing.");
     return;
   }
+
+  // Extract wheel geometry
 
   const auto * leftCylinder =
     dynamic_cast<const urdf::Cylinder *>(
@@ -162,6 +159,8 @@ void Robot::robotDescriptionTopicCallback(
     return;
   }
 
+  // Extract wheel attributes
+
   wheelMomentOfInertia_ = leftWheelLink->inertial->iyy;
 
   if (leftWheelJoint->limits->velocity != rightWheelJoint->limits->velocity) {
@@ -182,22 +181,8 @@ void Robot::robotDescriptionTopicCallback(
 
   maximumWheelEffort_ = leftWheelJoint->limits->effort;
 
-  /*
-   * base_link
-   *   -> left/right_wheel_base_link
-   *     -> left/right_wheel_link
-   */
-  const double leftWheelY =
-    leftWheelBaseJoint
-    ->parent_to_joint_origin_transform.position.y +
-    leftWheelJoint
-    ->parent_to_joint_origin_transform.position.y;
-
-  const double rightWheelY =
-    rightWheelBaseJoint
-    ->parent_to_joint_origin_transform.position.y +
-    rightWheelJoint
-    ->parent_to_joint_origin_transform.position.y;
+  const double leftWheelY = leftWheelJoint->parent_to_joint_origin_transform.position.y;
+  const double rightWheelY = rightWheelJoint->parent_to_joint_origin_transform.position.y;
 
   wheelSeparation_ =
     std::abs(leftWheelY - rightWheelY);
@@ -342,7 +327,7 @@ void Robot::broadcastTransform() const {
     geometry_msgs::msg::TransformStamped t;
     t.header.stamp = now;
     t.header.frame_id = "odom";
-    t.child_frame_id = "base_link";
+    t.child_frame_id = "base_footprint";
     t.transform.translation.x = pose_.x;
     t.transform.translation.y = pose_.y;
     t.transform.translation.z = 0.0;
