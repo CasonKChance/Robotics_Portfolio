@@ -17,6 +17,12 @@ def generate_launch_description():
                 parameters=[{'robot_description': robot_description}],
             )
 
+    rviz_config = PathJoinSubstitution([
+        package_share,
+        'rviz',
+        'differential_drive_robot.rviz'
+    ])
+
     robot = Node(
                 package='project_4_differential_drive_robot',
                 executable='Robot',
@@ -24,12 +30,6 @@ def generate_launch_description():
                 output='screen',
                 emulate_tty=True
             )
-
-    rviz_config = PathJoinSubstitution([
-        package_share,
-        'rviz',
-        'differential_drive_robot.rviz'
-    ])
 
     rviz = Node(
         package='rviz2',
@@ -44,6 +44,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         robot_state_publisher,
-        robot,
-        rviz
+        rviz,
+        robot
     ])

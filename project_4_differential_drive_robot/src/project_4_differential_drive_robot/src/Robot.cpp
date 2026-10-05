@@ -34,19 +34,36 @@ Robot::Robot(const Pose & initialPose, const rclcpp::NodeOptions & options)
 
   tfBroadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
+  jointStatePublisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
+    "joint_states", 10
+  );
+
+  lastUpdateTime_ = this->get_clock()->now();
+
   updateTimer_ = this->create_wall_timer(
-    10ms, [this]() {this->update(0.01);});
+    10ms, [this]() {
+      const auto now = this->get_clock()->now();
+
+      const double dt = (now - lastUpdateTime_).seconds();
+
+      lastUpdateTime_ = now;
+
+      this->update(dt);
+    });
 }
 
 /* Private Member Functions */
 
 void Robot::update(double dt)
 {
-  if (dt <= 0.0) {
+  if (dt <= 0.0 || !robotDescriptionReady_) {
     return;
   }
 
   updateTwist(dt);
+
+  leftWheelPosition_ += leftWheelVelocity_ * dt;
+  rightWheelPosition_ += rightWheelVelocity_ * dt;
 
   double v = currentTwist_.linearVelocity;
   double omega = currentTwist_.angularVelocity;
@@ -55,6 +72,7 @@ void Robot::update(double dt)
   pose_.y += v * std::sin(pose_.theta) * dt;
   pose_.theta = normalizeAngle(pose_.theta + (omega * dt));
 
+  publishJointStates();
   broadcastTransform();
 }
 
@@ -337,4 +355,27 @@ void Robot::broadcastTransform() const {
     t.transform.rotation.w = cos(pose_.theta / 2.0);
 
     tfBroadcaster_->sendTransform(t);
+}
+
+void Robot::publishJointStates() const {
+  sensor_msgs::msg::JointState message;
+
+  message.header.stamp = this->get_clock()->now();
+
+  message.name = {
+    "left_wheel_link_joint",
+    "right_wheel_link_joint"
+  };
+
+  message.position = {
+    leftWheelPosition_,
+    rightWheelPosition_
+  };
+
+  message.velocity = {
+    leftWheelVelocity_,
+    rightWheelVelocity_
+  };
+
+  jointStatePublisher_->publish(message);
 }

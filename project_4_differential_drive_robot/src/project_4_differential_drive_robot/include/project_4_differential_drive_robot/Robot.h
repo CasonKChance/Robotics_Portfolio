@@ -9,6 +9,7 @@
 #include "tf2_ros/transform_broadcaster.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 
 #include <numbers>
 #include <memory>
@@ -36,6 +37,8 @@ private:
   Twist currentTwist_;                      // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command and physical limits.
   double leftWheelVelocity_ {0.0};          // Actual velocity of the left wheel (rads/s)
   double rightWheelVelocity_ {0.0};         // Actual velocity of the right wheel (rads/s)
+  double leftWheelPosition_ {0.0};          // Position of the left wheel
+  double rightWheelPosition_ {0.0};         // Position of the right wheel
   double wheelRadius_ {0.0};                // Wheel radius, described in URDF
   double wheelSeparation_ {0.0};            // Distance between the left and right wheels, described in URDF
   double wheelMomentOfInertia_ {0.0};       // Wheel moment of inertia, described in URDF
@@ -46,7 +49,9 @@ private:
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robotDescriptionSubscription_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tfBroadcaster_;
+  rclcpp::Publisher< sensor_msgs::msg::JointState > ::SharedPtr jointStatePublisher_;
   rclcpp::TimerBase::SharedPtr updateTimer_;
+  rclcpp::Time lastUpdateTime_;
 
   /**
    * @brief Advances the robot's state using Forward Euler integration.
@@ -78,9 +83,14 @@ private:
   void updateTwist(double dt);
 
   /**
-   * @brief Broadcast the robot's transform to the world frame
+   * @brief Broadcast the robot's transform to the world frame.
    */
   void broadcastTransform() const;
+
+  /**
+   * @brief Publishes the joint states of the robot.
+   */
+  void publishJointStates() const;
 };
 
 #endif
