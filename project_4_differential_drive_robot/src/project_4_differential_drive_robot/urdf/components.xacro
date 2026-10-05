@@ -72,6 +72,7 @@
             <child link="${child}"/>
             <axis xyz="0 1 0"/>
             <origin xyz="0 ${reflect * ((wheel_base_width/2) + (wheel_length/2))} 0" rpy="0 0 0"/>
+            <limit velocity="${wheel_max_velocity}" effort="${wheel_max_effort}"/>
         </joint>
     </xacro:macro>
     

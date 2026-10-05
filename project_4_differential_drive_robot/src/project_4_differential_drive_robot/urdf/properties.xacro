@@ -30,4 +30,8 @@
 
     <!-- Height of base_link origin above the ground -->
     <xacro:property name="base_link_ground_height" value="${(base_height/2) + (wheel_base_height/2) + wheel_radius}"/>
+
+    <!-- Wheel actuator limits -->
+    <xacro:property name="wheel_max_velocity" value="10.0"/>      <!-- rad/s -->
+    <xacro:property name="wheel_max_effort" value="1.0"/>        <!-- N*m -->
 </robot>
