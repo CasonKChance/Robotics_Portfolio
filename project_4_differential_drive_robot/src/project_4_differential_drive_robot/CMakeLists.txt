@@ -13,10 +13,12 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
 
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
   src/Robot.cpp
+  src/RobotController.cpp
 )
 
 # Export include directories
@@ -34,10 +36,17 @@ target_link_libraries(${PROJECT_NAME}_lib
     tf2_ros::tf2_ros
     ${std_msgs_TARGETS}
     ${sensor_msgs_TARGETS}
+    SDL2::SDL2
 )
 
 add_executable(Robot src/RobotMain.cpp)
 target_link_libraries(Robot
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
+add_executable(RobotController src/RobotControllerMain.cpp)
+target_link_libraries(RobotController
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -55,6 +64,7 @@ install(
   TARGETS
     ${PROJECT_NAME}_lib
     Robot
+    RobotController
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
