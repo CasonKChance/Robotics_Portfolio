@@ -32,7 +32,7 @@ Robot::Robot(const Pose & initialPose, const rclcpp::NodeOptions & options)
     "command_velocity", 10, std::bind(&Robot::commandVelocityTopicCallback, this, _1)
   );
 
-  tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+  tfBroadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
   updateTimer_ = this->create_wall_timer(
     10ms, [this]() {this->update(0.01);});
@@ -341,7 +341,7 @@ void Robot::broadcastTransform() const {
 
     geometry_msgs::msg::TransformStamped t;
     t.header.stamp = now;
-    t.header.frame_id = "world";
+    t.header.frame_id = "odom";
     t.child_frame_id = "base_link";
     t.transform.translation.x = pose_.x;
     t.transform.translation.y = pose_.y;
@@ -351,5 +351,5 @@ void Robot::broadcastTransform() const {
     t.transform.rotation.z = sin(pose_.theta / 2.0);
     t.transform.rotation.w = cos(pose_.theta / 2.0);
 
-    tf_broadcaster_->sendTransform(t);
+    tfBroadcaster_->sendTransform(t);
 }
