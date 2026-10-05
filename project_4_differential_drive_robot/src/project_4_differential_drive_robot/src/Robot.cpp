@@ -1,5 +1,7 @@
 #include <project_4_differential_drive_robot/Robot.h>
 
+#include "geometry_msgs/msg/transform_stamped.hpp"
+
 #include <cmath>
 #include <algorithm>
 
@@ -30,6 +32,8 @@ Robot::Robot(const Pose & initialPose, const rclcpp::NodeOptions & options)
     "command_velocity", 10, std::bind(&Robot::commandVelocityTopicCallback, this, _1)
   );
 
+  tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+
   updateTimer_ = this->create_wall_timer(
     10ms, [this]() {this->update(0.01);});
 }
@@ -41,7 +45,7 @@ void Robot::update(double dt)
   if (dt <= 0.0) {
     return;
   }
-  
+
   updateTwist(dt);
 
   double v = currentTwist_.linearVelocity;
@@ -50,6 +54,8 @@ void Robot::update(double dt)
   pose_.x += v * std::cos(pose_.theta) * dt;
   pose_.y += v * std::sin(pose_.theta) * dt;
   pose_.theta = normalizeAngle(pose_.theta + (omega * dt));
+
+  broadcastTransform();
 }
 
 void Robot::commandVelocityTopicCallback(geometry_msgs::msg::Twist::UniquePtr message)
@@ -275,9 +281,6 @@ void Robot::updateTwist(double dt)
    *
    *     α = Ꚍ / I
    *
-   * The wheel acceleration is therefore limited by BOTH the explicit
-   * acceleration limit and the amount of acceleration the actuator
-   * effort could physically produce.
    */
   const double maximumAcceleration =
     maximumWheelEffort_ / wheelMomentOfInertia_;
@@ -331,4 +334,22 @@ void Robot::updateTwist(double dt)
   currentTwist_.angularVelocity =
     (wheelRadius_ / wheelSeparation_) *
     (rightWheelVelocity_ - leftWheelVelocity_);
+}
+
+void Robot::broadcastTransform() const {
+    rclcpp::Time now = this->get_clock()->now();
+
+    geometry_msgs::msg::TransformStamped t;
+    t.header.stamp = now;
+    t.header.frame_id = "world";
+    t.child_frame_id = "base_link";
+    t.transform.translation.x = pose_.x;
+    t.transform.translation.y = pose_.y;
+    t.transform.translation.z = 0.0;
+    t.transform.rotation.x = 0.0;
+    t.transform.rotation.y = 0.0;
+    t.transform.rotation.z = sin(pose_.theta / 2.0);
+    t.transform.rotation.w = cos(pose_.theta / 2.0);
+
+    tf_broadcaster_->sendTransform(t);
 }

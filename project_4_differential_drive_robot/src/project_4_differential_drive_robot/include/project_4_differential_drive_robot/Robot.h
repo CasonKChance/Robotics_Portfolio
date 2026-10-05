@@ -6,6 +6,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "urdf/model.hpp"
+#include "tf2_ros/transform_broadcaster.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/string.hpp"
 
@@ -44,6 +45,7 @@ private:
 
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robotDescriptionSubscription_;
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   rclcpp::TimerBase::SharedPtr updateTimer_;
 
   /**
@@ -74,6 +76,11 @@ private:
    * @brief Updates the robot's actual velocity ([v, ω]ᵀ).
    */
   void updateTwist(double dt);
+
+  /**
+   * @brief Broadcast the robot's transform to the world frame
+   */
+  void broadcastTransform() const;
 };
 
 #endif

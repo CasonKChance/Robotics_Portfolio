@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(urdf REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
@@ -29,6 +30,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     rclcpp::rclcpp
     urdf::urdf
     ${geometry_msgs_TARGETS}
+    tf2_ros::tf2_ros
 )
 
 add_executable(Robot src/RobotMain.cpp)
