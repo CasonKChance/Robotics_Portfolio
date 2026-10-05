@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="differential_drive_robot">
+    <xacro:include filename="properties.xacro"/>
+    <xacro:include filename="components.xacro"/>
+    
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+    <material name="black">
+        <color rgba="0 0 0 1"/>
+    </material>
+    <material name="blue">
+        <color rgba="0 0 1 1"/>
+    </material>
+
+    <!-- Dummy Root Link -->
+    <link name="base_footprint"/>
+
+    <!-- Base Link -->
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="${base_length} ${base_width} ${base_height}"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${base_length} ${base_width} ${base_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="${base_mass}"/>
+            <inertia
+                ixx="${base_mass * ((base_width*base_width) + (base_height*base_height)) / 12.0}"
+                ixy="0"
+                ixz="0"
+                iyy="${base_mass * ((base_length*base_length) + (base_height*base_height)) / 12.0}"
+                iyz="0"
+                izz="${base_mass * ((base_length*base_length) + (base_width*base_width)) / 12.0}"/>
+        </inertial>
+    </link>
+
+    <joint name="base_footprint_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 ${base_link_ground_height}" rpy="0 0 0"/> 
+    </joint>
+
+    <!-- Wheel Base Links -->
+    <xacro:wheel_base_link prefix="right" mass="${wheel_base_mass}"/>
+    <xacro:wheel_base_joint parent="base_link" child="right_wheel_base_link" reflect="-1"/>
+
+    <xacro:wheel_base_link prefix="left" mass="${wheel_base_mass}"/> 
+    <xacro:wheel_base_joint parent="base_link" child="left_wheel_base_link" reflect="1"/> 
+
+    <!-- Wheels -->
+    <xacro:wheel_link prefix="right" mass="${wheel_mass}"/>
+    <xacro:wheel_joint parent="right_wheel_base_link" child="right_wheel_link" reflect="-1"/>
+
+    <xacro:wheel_link prefix="left" mass="${wheel_mass}"/>
+    <xacro:wheel_joint parent="left_wheel_base_link" child="left_wheel_link" reflect="1"/>
+
+    <!-- Sensors -->
+    <xacro:sensor_link prefix="camera" mass="${sensor_mass}"/>
+    <xacro:sensor_joint parent="base_link" child="camera_sensor_link" reflect="-1"/>
+
+    <xacro:sensor_link prefix="laser" mass="${sensor_mass}"/>
+    <xacro:sensor_joint parent="base_link" child="laser_sensor_link" reflect="1"/>
+
+    <!-- Caster Wheel -->
+    <xacro:wheel_base_link prefix="caster" mass="${wheel_base_mass}"/>
+    <joint name="caster_wheel_base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="caster_wheel_base_link"/>
+        <origin xyz="${(base_length/2) - (wheel_base_length/2)} 0 -${(base_height/2) + (wheel_base_height/2)}" rpy="0 0 0"/>
+    </joint>
+
+    <link name="caster_wheel_link">
+        <visual>
+            <geometry>
+                <sphere radius="${caster_wheel_radius}"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="${caster_wheel_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="${caster_wheel_mass}"/>
+            <inertia
+                ixx="${(2.0/5.0) * caster_wheel_mass * caster_wheel_radius * caster_wheel_radius}"
+                ixy="0"
+                ixz="0"
+                iyy="${(2.0/5.0) * caster_wheel_mass * caster_wheel_radius * caster_wheel_radius}"
+                iyz="0"
+                izz="${(2.0/5.0) * caster_wheel_mass * caster_wheel_radius * caster_wheel_radius}"/>
+        </inertial>
+    </link>
+    <joint name="caster_wheel_joint" type="fixed">
+        <parent link="caster_wheel_base_link"/>
+        <child link="caster_wheel_link"/>
+        <origin xyz="0 0 -${(wheel_base_height/2) +caster_wheel_radius}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Give the caster wheel low friction so it can slide -->
+    <gazebo reference="caster_wheel_link">
+        <mu1>0.01</mu1>
+        <mu2>0.01</mu2>
+    </gazebo>
+</robot>
