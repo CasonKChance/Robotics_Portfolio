@@ -22,7 +22,6 @@ void FrameInspector::timerCallback() const
 {
   geometry_msgs::msg::TransformStamped t;
 
-  rclcpp::Time now = this->get_clock()->now();
   try {
     t = tfBuffer_->lookupTransform(
         toFrame_.c_str(),
