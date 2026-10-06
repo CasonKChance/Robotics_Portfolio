@@ -106,6 +106,12 @@ void Robot::robotDescriptionTopicCallback(
     return;
   }
 
+  const auto leftWheelBaseJoint =
+    model.getJoint("left_wheel_base_link_joint");
+
+  const auto rightWheelBaseJoint =
+    model.getJoint("right_wheel_base_link_joint");
+
   const auto leftWheelJoint =
     model.getJoint("left_wheel_link_joint");
 
@@ -118,7 +124,9 @@ void Robot::robotDescriptionTopicCallback(
   const auto rightWheelLink =
     model.getLink("right_wheel_link");
 
-  if (!leftWheelJoint ||
+  if (!leftWheelBaseJoint ||
+    !rightWheelBaseJoint ||
+    !leftWheelJoint ||
     !rightWheelJoint ||
     !leftWheelLink ||
     !rightWheelLink)
@@ -199,8 +207,10 @@ void Robot::robotDescriptionTopicCallback(
 
   maximumWheelEffort_ = leftWheelJoint->limits->effort;
 
-  const double leftWheelY = leftWheelJoint->parent_to_joint_origin_transform.position.y;
-  const double rightWheelY = rightWheelJoint->parent_to_joint_origin_transform.position.y;
+  const double leftWheelY = leftWheelBaseJoint->parent_to_joint_origin_transform.position.y +
+    leftWheelJoint->parent_to_joint_origin_transform.position.y;
+  const double rightWheelY = rightWheelBaseJoint->parent_to_joint_origin_transform.position.y +
+    rightWheelJoint->parent_to_joint_origin_transform.position.y;
 
   wheelSeparation_ =
     std::abs(leftWheelY - rightWheelY);
