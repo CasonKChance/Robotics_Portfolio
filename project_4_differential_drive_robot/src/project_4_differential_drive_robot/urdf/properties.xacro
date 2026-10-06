@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Base -->
+    <xacro:property name="base_length" value="0.5"/>
+    <xacro:property name="base_width" value="0.3"/>
+    <xacro:property name="base_height" value="0.2"/>
+    <xacro:property name="base_mass" value="4.0"/>
+
+    <!-- Wheel Mounts -->
+    <xacro:property name="wheel_base_length" value="0.05"/>
+    <xacro:property name="wheel_base_width" value="0.05"/>
+    <xacro:property name="wheel_base_height" value="0.05"/>
+    <xacro:property name="wheel_base_mass" value="0.1"/>
+
+    <!-- Wheels -->
+    <xacro:property name="wheel_radius" value="0.1"/>
+    <xacro:property name="wheel_length" value="0.1"/>
+    <xacro:property name="wheel_mass" value="0.5"/>
+    <xacro:property name="wheel_roll" value="${pi/2}"/>
+
+    <!-- Sensors -->
+    <xacro:property name="sensor_length" value="0.05"/>
+    <xacro:property name="sensor_width" value="0.05"/>
+    <xacro:property name="sensor_height" value="0.05"/>
+    <xacro:property name="sensor_mass" value="0.15"/>
+
+    <!-- Caster Wheel Radius -->
+    <xacro:property name="caster_wheel_radius" value="${(wheel_radius - (wheel_base_height/2))/2}"/>
+    <xacro:property name="caster_wheel_mass" value="0.1"/>
+
+    <!-- Height of base_link origin above the ground -->
+    <xacro:property name="base_link_ground_height" value="${(base_height/2) + (wheel_base_height/2) + wheel_radius}"/>
+
+    <!-- Wheel actuator limits -->
+    <xacro:property name="wheel_max_velocity" value="10.0"/>      <!-- rad/s -->
+    <xacro:property name="wheel_max_effort" value="1.0"/>        <!-- N*m -->
+</robot>

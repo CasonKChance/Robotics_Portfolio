@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Wheel base link -->
+    <xacro:macro name="wheel_base_link" params="prefix mass">
+        <link name="${prefix}_wheel_base_link">
+            <visual>
+                <geometry>
+                    <box size="${wheel_base_length} ${wheel_base_width} ${wheel_base_height}"/>
+                </geometry>
+                <material name="white"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="${wheel_base_length} ${wheel_base_width} ${wheel_base_height}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${mass * ((wheel_base_width*wheel_base_width) + (wheel_base_height*wheel_base_height)) / 12.0}"
+                    ixy="0"
+                    ixz="0"
+                    iyy="${mass * ((wheel_base_length*wheel_base_length) + (wheel_base_height*wheel_base_height)) / 12.0}"
+                    iyz="0"
+                    izz="${mass * ((wheel_base_length*wheel_base_length) + (wheel_base_width*wheel_base_width)) / 12.0}"/>
+            </inertial>
+        </link> 
+    </xacro:macro>
+
+    <!-- Wheel base joint -->
+    <xacro:macro name="wheel_base_joint" params="parent child reflect">
+        <joint name="${child}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="${child}"/>
+            <origin xyz="-${(base_length/2) - (wheel_base_length/2)} ${reflect*((base_width/2) - (wheel_base_width/2))} -${(base_height/2) + (wheel_base_height/2)}" rpy="0 0 0"/>
+        </joint>
+    </xacro:macro>
+
+    <!-- Wheel link -->
+    <xacro:macro name="wheel_link" params="prefix mass">
+        <link name="${prefix}_wheel_link">
+            <visual>
+                <origin rpy="${wheel_roll} 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+                </geometry>
+                <material name="black"/>
+            </visual>
+            <collision>
+                <origin rpy="${wheel_roll} 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${mass * ((3*wheel_radius*wheel_radius) + (wheel_length*wheel_length)) / 12.0}"
+                    ixy="0"
+                    ixz="0"
+                    iyy="${mass * (wheel_radius*wheel_radius / 2.0)}"
+                    iyz="0"
+                    izz="${mass * ((3*wheel_radius*wheel_radius) + (wheel_length*wheel_length)) / 12.0}"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <!-- Wheel joint -->
+    <xacro:macro name="wheel_joint" params="parent child reflect">
+        <joint name="${child}_joint" type="continuous">
+            <parent link="${parent}"/>
+            <child link="${child}"/>
+            <axis xyz="0 1 0"/>
+            <origin xyz="0 ${reflect * ((wheel_base_width/2) + (wheel_length/2))} 0" rpy="0 0 0"/>
+            <limit velocity="${wheel_max_velocity}" effort="${wheel_max_effort}"/>
+        </joint>
+    </xacro:macro>
+    
+    <!-- Sensors -->
+    <xacro:macro name="sensor_link" params="prefix mass">
+        <link name="${prefix}_sensor_link">
+            <visual>
+                <geometry>
+                    <box size="${sensor_length} ${sensor_width} ${sensor_height}"/>
+                </geometry>
+                <material name="blue"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 ${sensor_height/4}"/>
+                <geometry>
+                    <box size="${sensor_length + (sensor_length/2)} ${sensor_width + (sensor_width/2)} ${sensor_height + (sensor_height/2)}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="${mass}"/>
+                <inertia
+                    ixx="${mass * ((sensor_width*sensor_width) + (sensor_height*sensor_height)) / 12.0}"
+                    ixy="0"
+                    ixz="0"
+                    iyy="${mass * ((sensor_length*sensor_length + sensor_height*sensor_height)) / 12.0}"
+                    iyz="0"
+                    izz="${mass * ((sensor_length*sensor_length) + (sensor_width*sensor_width)) / 12.0}"/>
+            </inertial>
+        </link>
+    </xacro:macro>
+
+    <!-- Sensor Joints -->
+    <xacro:macro name="sensor_joint" params="parent child reflect">
+        <joint name="${child}_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="${child}"/>
+            <origin xyz="${(base_length/2) - (sensor_length/2)} ${reflect * (base_width/4)} ${(base_height/2) + (sensor_height/2)}" rpy="0 0 0"/>
+        </joint>
+    </xacro:macro>
+</robot>
