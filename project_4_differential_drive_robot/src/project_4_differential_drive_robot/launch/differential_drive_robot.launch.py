@@ -32,6 +32,14 @@ def generate_launch_description():
                 emulate_tty=True
             )
 
+    robot_controller = Node(
+                        package='project_4_differential_drive_robot',
+                        executable='RobotController',
+                        name='RobotController',
+                        output='screen',
+                        emulate_tty=True
+                       )
+
     rviz = Node(
         package='rviz2',
         executable='rviz2',
@@ -46,5 +54,6 @@ def generate_launch_description():
     return LaunchDescription([
         robot_state_publisher,
         rviz,
-        robot
+        robot,
+        robot_controller
     ])

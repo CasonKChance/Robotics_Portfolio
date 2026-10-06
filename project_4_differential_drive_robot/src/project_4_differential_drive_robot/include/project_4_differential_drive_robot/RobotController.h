@@ -9,7 +9,7 @@
 class RobotController: public rclcpp::Node
 {
 public:
-  RobotController(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit RobotController(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   ~RobotController();
 
