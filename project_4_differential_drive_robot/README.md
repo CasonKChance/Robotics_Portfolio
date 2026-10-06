@@ -136,7 +136,7 @@ C++: 20
 ### Clone the repository and move to project directory
 ```bash
 git clone https://github.com/CasonKChance/Robotics_Portfolio/
-cd robotics_portfolio && cd project_4_differential_drive_robot
+cd Robotics_Portfolio && cd project_4_differential_drive_robot
 ```
 
 ### Source the workspace
