@@ -7,9 +7,15 @@
 #include "tf2_ros/transform_listener.hpp"
 #include "tf2_ros/buffer.hpp"
 
+/**
+ * @brief Allows inspection of the transformation between two arbitrary coordninate frames within the system.
+ */
 class FrameInspector: public rclcpp::Node
 {
 public:
+  /**
+   * @brief Constructs the frame inspector node and initializes the tf listener and buffer.
+   */
   explicit FrameInspector(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
@@ -19,6 +25,9 @@ private:
   std::unique_ptr < tf2_ros::Buffer > tfBuffer_;
   rclcpp::TimerBase::SharedPtr timer_ {nullptr};
 
+  /**
+   * @brief Callback for the timer that inspects the transformation between the specified frames.
+   */
   void timerCallback() const;
 };
 
