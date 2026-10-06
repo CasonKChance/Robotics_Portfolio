@@ -24,7 +24,7 @@ class Robot: public rclcpp::Node {
 public:
   /**
    * @brief Constructs a Robot instance with a given initial pose.
-   * @param initialPose Initial spatial configuration [x, y, θ]ᵀ in the World frame.
+   * @param initialPose Initial spatial configuration [x, y, θ]ᵀ in the Odom frame.
    * @param options Configuration options for Node initialization.
    */
   explicit Robot(
@@ -32,7 +32,7 @@ public:
     const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
-  Pose pose_;                               // Current state [x, y, θ]ᵀ in the World frame.
+  Pose pose_;                               // Current state [x, y, θ]ᵀ in the Odom frame.
   Twist velocityCommand_;                   // Current active velocity command [v, ω]ᵀ.
   Twist currentTwist_;                      // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command and physical limits.
   double leftWheelVelocity_ {0.0};          // Actual velocity of the left wheel (rads/s)
@@ -83,7 +83,7 @@ private:
   void updateTwist(double dt);
 
   /**
-   * @brief Broadcast the robot's transform to the world frame.
+   * @brief Broadcast the robot's transform to the Odom frame.
    */
   void broadcastTransform() const;
 

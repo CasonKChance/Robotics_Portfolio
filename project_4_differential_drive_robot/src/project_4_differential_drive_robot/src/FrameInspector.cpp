@@ -22,8 +22,6 @@ void FrameInspector::timerCallback() const
 {
   geometry_msgs::msg::TransformStamped t;
 
-    // Look up for the transformation between target_frame and turtle2 frames
-    // and send velocity commands for turtle2 to reach target_frame
   rclcpp::Time now = this->get_clock()->now();
   try {
     t = tfBuffer_->lookupTransform(

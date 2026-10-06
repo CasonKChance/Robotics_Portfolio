@@ -3,7 +3,7 @@
 <package format="3">
   <name>project_4_differential_drive_robot</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Project 4: Differential Drive Robot Model</description>
   <maintainer email="casonkchance@gmail.com">Cason</maintainer>
   <license>Apache-2.0</license>
 
