@@ -5,6 +5,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 /**
  * @brief Provides a teleop controller to control the robot model using keyboard input.
@@ -26,6 +27,10 @@ public:
 
 private:
   SDL_Window * window_ {nullptr}; // SDL window for keyboard input, must be focused.
+  SDL_Renderer * renderer_ = nullptr;
+  TTF_Font * font_ = nullptr;
+  SDL_Texture * textTexture_ = nullptr;
+  SDL_Rect textRect_;
   bool upPressed_ {false};
   bool downPressed_ {false};
   bool leftPressed_ {false};

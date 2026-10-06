@@ -84,7 +84,7 @@ void Robot::commandVelocityTopicCallback(geometry_msgs::msg::Twist::UniquePtr me
     return;
   }
 
-  RCLCPP_INFO(this->get_logger(), "Updating velocity command with: \n"
+  RCLCPP_DEBUG(this->get_logger(), "Updating velocity command with: \n"
                                     "\tLinear: %.2f m/s\n"
                                     "\tAngular: %.2f rad/s", message->linear.x,
                                                                message->angular.z);

@@ -15,6 +15,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
+find_package(SDL2_ttf REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
@@ -40,6 +42,8 @@ target_link_libraries(${PROJECT_NAME}_lib
     ${sensor_msgs_TARGETS}
     SDL2::SDL2
     tf2::tf2
+    SDL2_ttf::SDL2_ttf
+    ament_index_cpp::ament_index_cpp
 )
 
 add_executable(Robot src/RobotMain.cpp)
@@ -98,6 +102,11 @@ install(DIRECTORY
 
 install(DIRECTORY
   rviz
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  assets
   DESTINATION share/${PROJECT_NAME}
 )
 
