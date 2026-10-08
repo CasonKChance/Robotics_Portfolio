@@ -1,5 +1,7 @@
 #include <Transformation/Transformation.h>
 
+#include <cmath>
+
 namespace Transformation {
     Eigen::Matrix3d rotationMatrixX(double theta) {
         Eigen::Matrix3d R;
@@ -37,6 +39,6 @@ namespace Transformation {
 
         double det_R = R.determinant();
 
-        return (R*R_T).isApprox(I) && (det_R - 1) < 1e-6 && (det_R - 1) > -1e-6;
+        return (R*R_T).isApprox(I, 1e-6) && std::abs(det_R - 1.0) < 1e-6;
     }
 }
