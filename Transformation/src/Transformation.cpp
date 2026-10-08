@@ -31,12 +31,12 @@ namespace Transformation {
         return R;
     }
 
-    bool someFunction(const Eigen::Matrix3d& R) {
+    bool isRotationMatrix(const Eigen::Matrix3d& R) {
         Eigen::Matrix3d R_T = R.transpose();
         Eigen::Matrix3d I = Eigen::Matrix3d::Identity();
 
-        float det_R = R.determinant();
+        double det_R = R.determinant();
 
-        return R*R_T == I && det_R == 1;
+        return (R*R_T).isApprox(I) && (det_R - 1) < 1e-6 && (det_R - 1) > -1e-6;
     }
 }

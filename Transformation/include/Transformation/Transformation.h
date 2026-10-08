@@ -1,9 +1,9 @@
-#ifndef TRANSFORMATIONS_H
-#define TRANSFORMATIONS_H
+#ifndef TRANSFORMATION_H
+#define TRANSFORMATION_H
 
 #include <Eigen/Dense>
 
-namespace Transformations {
+namespace Transformation {
     /**
      * @brief Provides a rotation maxtrix about x by the given theta
      * @param theta the angle to rotate about x by
