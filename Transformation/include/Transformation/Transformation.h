@@ -22,9 +22,9 @@ namespace Transformation {
 
     /**
      * @brief Composes two 4x4 transformation matrices.
-     * @param T_ab The first transformation matrix (the orientation of frame B expressed in frame A).
-     * @param T_bc The second transformation matrix (the orientation of frame C expressed in frame B).
-     * @return The composed transformation matrix (frame C expressed in frame A).
+     * @param T_ab The first transformation matrix (the pose of frame B expressed in frame A).
+     * @param T_bc The second transformation matrix (the pose of frame C expressed in frame B).
+     * @return The composed transformation matrix (the pose of frame C expressed in frame A).
      */
     Eigen::Matrix4d composeTransforms(const Eigen::Matrix4d& T_ab, const Eigen::Matrix4d& T_bc);
 }
