@@ -12,12 +12,18 @@ find_package(Eigen3 REQUIRED)
 
 include(CTest)
 
-add_library(Transformation src/Transformation.cpp)
-
-add_library(Transformation::Transformation
-    ALIAS Transformation
+add_library(Rotation src/Rotation.cpp)
+target_include_directories(Rotation
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(Rotation
+    PUBLIC
+        Eigen3::Eigen
 )
 
+add_library(Transformation src/Transformation.cpp)
 target_include_directories(Transformation
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -32,7 +38,7 @@ option(BUILD_TESTING "Enable testing and build tests" ON)
 
 if(BUILD_TESTING)
     find_package(GTest REQUIRED)
-    
+
     add_executable(TransformationTests
         tests/TestTransformation.cpp
     )
@@ -40,6 +46,7 @@ if(BUILD_TESTING)
     target_link_libraries(TransformationTests
         PRIVATE
             Transformation
+            Rotation
             GTest::gtest
     )
 
