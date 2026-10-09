@@ -222,7 +222,7 @@ TEST(RotationMatrixTestSuite, RotateVectorTest) {
     EXPECT_TRUE(v_rotated.isApprox(v_expected, 1e-6));
 }
 
-TEST(TransformMatrixTestSuite, MakeTransformTest) {
+TEST(TransformationMatrixTestSuite, MakeTransformTest) {
     Eigen::Matrix3d R = Rotation::rotationMatrixZ(std::numbers::pi / 2);
     Eigen::Vector3d translation(1.0, 2.0, 3.0);
 
@@ -235,7 +235,7 @@ TEST(TransformMatrixTestSuite, MakeTransformTest) {
     EXPECT_TRUE(T.isApprox(T_expected, 1e-6));
 }
 
-TEST(TransformMatrixTestSuite, TransformPointTest) {
+TEST(TransformationMatrixTestSuite, TransformPointTest) {
     Eigen::Matrix3d R = Rotation::rotationMatrixZ(std::numbers::pi / 2);
     Eigen::Vector3d translation(1.0, 2.0, 3.0);
     Eigen::Matrix4d T = Transformation::makeTransform(R, translation);
@@ -247,7 +247,7 @@ TEST(TransformMatrixTestSuite, TransformPointTest) {
     EXPECT_TRUE(point_transformed.isApprox(point_expected, 1e-6));
 }
 
-TEST(TransformMatrixTestSuite, ComposeTransformsTest) {
+TEST(TransformationMatrixTestSuite, ComposeTransformsTest) {
     Eigen::Matrix3d R1 = Rotation::rotationMatrixZ(std::numbers::pi / 4);
     Eigen::Vector3d translation1(1.0, 0.0, 0.0);
     Eigen::Matrix4d T1 = Transformation::makeTransform(R1, translation1);
@@ -260,6 +260,16 @@ TEST(TransformMatrixTestSuite, ComposeTransformsTest) {
     Eigen::Matrix4d T_expected = T1 * T2;
 
     EXPECT_TRUE(T_composed.isApprox(T_expected, 1e-6));
+}
+
+TEST(TransformationMatrixTestSuite, InverseTransformTest) {
+    Eigen::Matrix3d R = Rotation::rotationMatrixZ(std::numbers::pi / 2);
+    Eigen::Vector3d translation(1.0, 2.0, 3.0);
+    Eigen::Matrix4d T = Transformation::makeTransform(R, translation);
+
+    Eigen::Matrix4d T_inverse = Transformation::inverseTransform(T);
+
+    EXPECT_TRUE((T*T_inverse).isApprox(Eigen::Matrix4d::Identity(), 1e-6));
 }
 
 int main(int argc, char **argv) {

@@ -27,6 +27,13 @@ namespace Transformation {
      * @return The composed transformation matrix (the pose of frame C expressed in frame A).
      */
     Eigen::Matrix4d composeTransforms(const Eigen::Matrix4d& T_ab, const Eigen::Matrix4d& T_bc);
+
+    /**
+     * @brief Computes the inverse of a 4x4 transformation matrix.
+     * @param T The 4x4 transformation matrix.
+     * @return The inverse of the transformation matrix.
+     */
+    Eigen::Matrix4d inverseTransform(const Eigen::Matrix4d& T);
 }
 
 #endif
