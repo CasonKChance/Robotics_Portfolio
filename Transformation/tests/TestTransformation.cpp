@@ -1,4 +1,5 @@
 #include <Transformation/Rotation.h>
+#include <Transformation/Transformation.h>
 
 #include <gtest/gtest.h>
 
@@ -219,6 +220,46 @@ TEST(RotationMatrixTestSuite, RotateVectorTest) {
 
     v_expected << 1.0, 0.0, 0.0;
     EXPECT_TRUE(v_rotated.isApprox(v_expected, 1e-6));
+}
+
+TEST(TransformMatrixTestSuite, MakeTransformTest) {
+    Eigen::Matrix3d R = Rotation::rotationMatrixZ(std::numbers::pi / 2);
+    Eigen::Vector3d translation(1.0, 2.0, 3.0);
+
+    Eigen::Matrix4d T = Transformation::makeTransform(R, translation);
+
+    Eigen::Matrix4d T_expected = Eigen::Matrix4d::Identity();
+    T_expected.block<3, 3>(0, 0) = R;
+    T_expected.block<3, 1>(0, 3) = translation;
+
+    EXPECT_TRUE(T.isApprox(T_expected, 1e-6));
+}
+
+TEST(TransformMatrixTestSuite, TransformPointTest) {
+    Eigen::Matrix3d R = Rotation::rotationMatrixZ(std::numbers::pi / 2);
+    Eigen::Vector3d translation(1.0, 2.0, 3.0);
+    Eigen::Matrix4d T = Transformation::makeTransform(R, translation);
+
+    Eigen::Vector3d point(1.0, 0.0, 0.0);
+    Eigen::Vector3d point_transformed = Transformation::transformPoint(T, point);
+
+    Eigen::Vector3d point_expected = R * point + translation;
+    EXPECT_TRUE(point_transformed.isApprox(point_expected, 1e-6));
+}
+
+TEST(TransformMatrixTestSuite, ComposeTransformsTest) {
+    Eigen::Matrix3d R1 = Rotation::rotationMatrixZ(std::numbers::pi / 4);
+    Eigen::Vector3d translation1(1.0, 0.0, 0.0);
+    Eigen::Matrix4d T1 = Transformation::makeTransform(R1, translation1);
+
+    Eigen::Matrix3d R2 = Rotation::rotationMatrixX(std::numbers::pi / 4);
+    Eigen::Vector3d translation2(0.0, 1.0, 0.0);
+    Eigen::Matrix4d T2 = Transformation::makeTransform(R2, translation2);
+
+    Eigen::Matrix4d T_composed = Transformation::composeTransforms(T1, T2);
+    Eigen::Matrix4d T_expected = T1 * T2;
+
+    EXPECT_TRUE(T_composed.isApprox(T_expected, 1e-6));
 }
 
 int main(int argc, char **argv) {
