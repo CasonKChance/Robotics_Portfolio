@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Eigen3 REQUIRED)
-find_package(GTest REQUIRED)
 
 include(CTest)
 
@@ -32,6 +31,8 @@ target_link_libraries(Transformation
 option(BUILD_TESTING "Enable testing and build tests" ON)
 
 if(BUILD_TESTING)
+    find_package(GTest REQUIRED)
+    
     add_executable(TransformationTests
         tests/TestTransformation.cpp
     )

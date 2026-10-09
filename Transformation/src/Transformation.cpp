@@ -7,8 +7,8 @@ namespace Transformation {
         Eigen::Matrix3d R;
 
         R << 1, 0, 0,
-             0, cos(theta), -sin(theta),
-             0, sin(theta), cos(theta);
+             0, std::cos(theta), -std::sin(theta),
+             0, std::sin(theta), std::cos(theta);
 
         return R;
     }
@@ -16,9 +16,9 @@ namespace Transformation {
     Eigen::Matrix3d rotationMatrixY(double theta) {
         Eigen::Matrix3d R;
 
-        R << cos(theta), 0, sin(theta),
+        R << std::cos(theta), 0, std::sin(theta),
              0, 1, 0,
-             -sin(theta), 0, cos(theta);
+             -std::sin(theta), 0, std::cos(theta);
 
         return R;
     }
@@ -26,8 +26,8 @@ namespace Transformation {
     Eigen::Matrix3d rotationMatrixZ(double theta) {
         Eigen::Matrix3d R;
 
-        R << cos(theta), -sin(theta), 0,
-             sin(theta), cos(theta), 0,
+        R << std::cos(theta), -std::sin(theta), 0,
+             std::sin(theta), std::cos(theta), 0,
              0, 0, 1;
 
         return R;

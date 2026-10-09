@@ -5,21 +5,21 @@
 
 namespace Transformation {
     /**
-     * @brief Provides a rotation maxtrix about x by the given theta
+     * @brief Provides a rotation matrix about x by the given theta
      * @param theta the angle to rotate about x by
      * @return the rotation matrix about x by the given theta
      */
     Eigen::Matrix3d rotationMatrixX(double theta);
 
     /**
-     * @brief Provides a rotation maxtrix about y by the given theta
+     * @brief Provides a rotation matrix about y by the given theta
      * @param theta the angle to rotate about y by
      * @return the rotation matrix about y by the given theta
      */
     Eigen::Matrix3d rotationMatrixY(double theta);
 
     /**
-     * @brief Provides a rotation maxtrix about z by the given theta
+     * @brief Provides a rotation matrix about z by the given theta
      * @param theta the angle to rotate about z by
      * @return the rotation matrix about z by the given theta
      */
@@ -34,8 +34,8 @@ namespace Transformation {
 
     /**
      * @brief Composes two rotation matrices R_ab and R_bc to produce the resulting rotation matrix R_ac
-     * @param R_ab the rotation matrix from frame a to frame b
-     * @param R_bc the rotation matrix from frame b to frame c
+     * @param R_ab the orientation of frame b expressed in frame a
+     * @param R_bc the orientation of frame c expressed in frame b
      * @return the resulting rotation matrix R_ac
      */
     Eigen::Matrix3d composeRotations(const Eigen::Matrix3d& R_ab, const Eigen::Matrix3d& R_bc);

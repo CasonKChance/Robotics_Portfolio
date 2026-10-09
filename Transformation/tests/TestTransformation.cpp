@@ -168,9 +168,9 @@ TEST(RotationMatrixTestSuite, ComposeRotationsTest) {
     Eigen::Matrix3d R_ac = Transformation::composeRotations(R_ab, R_bc);
 
     Eigen::Matrix3d R_ac_expected;
-    R_ac_expected << cos(std::numbers::pi / 6) * cos(std::numbers::pi / 9), -cos(std::numbers::pi / 6) * sin(std::numbers::pi / 9), sin(std::numbers::pi / 6),
-                     sin(std::numbers::pi / 9), cos(std::numbers::pi / 9), 0,
-                     -sin(std::numbers::pi / 6) * cos(std::numbers::pi / 9), sin(std::numbers::pi / 6) * sin(std::numbers::pi / 9), cos(std::numbers::pi / 6);
+    R_ac_expected << std::cos(std::numbers::pi / 6) * std::cos(std::numbers::pi / 9), -std::cos(std::numbers::pi / 6) * std::sin(std::numbers::pi / 9), std::sin(std::numbers::pi / 6),
+                     std::sin(std::numbers::pi / 9), std::cos(std::numbers::pi / 9), 0,
+                     -std::sin(std::numbers::pi / 6) * std::cos(std::numbers::pi / 9), std::sin(std::numbers::pi / 6) * std::sin(std::numbers::pi / 9), std::cos(std::numbers::pi / 6);
 
     EXPECT_TRUE(R_ac.isApprox(R_ac_expected, 1e-6));
 
@@ -180,9 +180,9 @@ TEST(RotationMatrixTestSuite, ComposeRotationsTest) {
     Eigen::Matrix3d R_df = Transformation::composeRotations(R_de, R_ef);
 
     Eigen::Matrix3d R_df_expected;
-    R_df_expected << cos(std::numbers::pi / 9), -sin(std::numbers::pi / 9), 0,
-                     cos(std::numbers::pi / 6) * sin(std::numbers::pi / 9), cos(std::numbers::pi / 6) * cos(std::numbers::pi / 9), -sin(std::numbers::pi / 6),
-                     sin(std::numbers::pi / 6) * sin(std::numbers::pi / 9), sin(std::numbers::pi / 6) * cos(std::numbers::pi / 9), cos(std::numbers::pi / 6);
+    R_df_expected << std::cos(std::numbers::pi / 9), -std::sin(std::numbers::pi / 9), 0,
+                     std::cos(std::numbers::pi / 6) * std::sin(std::numbers::pi / 9), std::cos(std::numbers::pi / 6) * std::cos(std::numbers::pi / 9), -std::sin(std::numbers::pi / 6),
+                     std::sin(std::numbers::pi / 6) * std::sin(std::numbers::pi / 9), std::sin(std::numbers::pi / 6) * std::cos(std::numbers::pi / 9), std::cos(std::numbers::pi / 6);
 
     EXPECT_TRUE(R_df.isApprox(R_df_expected, 1e-6));
 
@@ -192,9 +192,9 @@ TEST(RotationMatrixTestSuite, ComposeRotationsTest) {
     Eigen::Matrix3d R_gi = Transformation::composeRotations(R_gh, R_hi);
 
     Eigen::Matrix3d R_gi_expected;
-    R_gi_expected << cos(std::numbers::pi / 6), -sin(std::numbers::pi / 6) * cos(std::numbers::pi / 9), sin(std::numbers::pi / 6) * sin(std::numbers::pi / 9),
-                     sin(std::numbers::pi / 6), cos(std::numbers::pi / 6) * cos(std::numbers::pi / 9), -cos(std::numbers::pi / 6) * sin(std::numbers::pi / 9),
-                     0, sin(std::numbers::pi / 9), cos(std::numbers::pi / 9);
+    R_gi_expected << std::cos(std::numbers::pi / 6), -std::sin(std::numbers::pi / 6) * std::cos(std::numbers::pi / 9), std::sin(std::numbers::pi / 6) * std::sin(std::numbers::pi / 9),
+                     std::sin(std::numbers::pi / 6), std::cos(std::numbers::pi / 6) * std::cos(std::numbers::pi / 9), -std::cos(std::numbers::pi / 6) * std::sin(std::numbers::pi / 9),
+                     0, std::sin(std::numbers::pi / 9), std::cos(std::numbers::pi / 9);
 
     EXPECT_TRUE(R_gi.isApprox(R_gi_expected, 1e-6));
 }
