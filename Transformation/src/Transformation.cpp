@@ -41,4 +41,12 @@ namespace Transformation {
 
         return (R*R_T).isApprox(I, 1e-6) && std::abs(det_R - 1.0) < 1e-6;
     }
+
+    Eigen::Matrix3d composeRotations(const Eigen::Matrix3d& R_ab, const Eigen::Matrix3d& R_bc) {
+        return R_ab * R_bc;
+    }
+
+    Eigen::Vector3d rotateVector(const Eigen::Matrix3d& R, const Eigen::Vector3d& v) {
+        return R * v;
+    }
 }
