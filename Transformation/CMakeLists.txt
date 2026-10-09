@@ -1,11 +1,17 @@
-cmake_minimum_required(3.20)
+cmake_minimum_required(VERSION 3.20)
 project(
     Transformation
     VERSION 0.1.0
     LANGUAGES CXX
 )
 
-find_package(Eigen3 REQUIRED NO_MODULE)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Eigen3 REQUIRED)
+find_package(GTest REQUIRED)
+
+include(CTest)
 
 add_library(Transformation src/Transformation.cpp)
 
@@ -22,3 +28,20 @@ target_link_libraries(Transformation
     PUBLIC
         Eigen3::Eigen
 )
+
+option(BUILD_TESTING "Enable testing and build tests" ON)
+
+if(BUILD_TESTING)
+    add_executable(TransformationTests
+        tests/TestTransformation.cpp
+    )
+
+    target_link_libraries(TransformationTests
+        PRIVATE
+            Transformation
+            GTest::gtest
+    )
+
+    include(GoogleTest)
+    gtest_discover_tests(TransformationTests)
+endif()
