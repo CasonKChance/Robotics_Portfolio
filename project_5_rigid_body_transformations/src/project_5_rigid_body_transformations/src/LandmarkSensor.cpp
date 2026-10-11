@@ -22,9 +22,7 @@ LandmarkSensor::LandmarkSensor(const rclcpp::NodeOptions & options)
 
 void LandmarkSensor::getTransforms()
 {
-    rclcpp::Time now = this->get_clock()->now();
-
-    auto Twb = tfBuffer_->lookupTransform("world", "base_link", now, 50ms);
+    auto Twb = tfBuffer_->lookupTransform("world", "base_link", tf2::TimePointZero);
     Eigen::Quaterniond quaternionTwb = Eigen::Quaterniond(Twb.transform.rotation.w, Twb.transform.rotation.x, Twb.transform.rotation.y, Twb.transform.rotation.z);
     Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
     Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y, Twb.transform.translation.z);

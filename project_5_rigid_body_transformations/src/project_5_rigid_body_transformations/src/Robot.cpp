@@ -32,6 +32,10 @@ Robot::Robot(const Pose & initialPose, const rclcpp::NodeOptions & options)
     "cmd_vel", 10, std::bind(&Robot::commandVelocityTopicCallback, this, _1)
   );
 
+  sensorDataSubscription_ = this->create_subscription<geometry_msgs::msg::Point>(
+    "sensor_data", 10, std::bind(&Robot::sensorDataTopicCallback, this, _1)
+  );
+
   tfBroadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
   jointStatePublisher_ = this->create_publisher<sensor_msgs::msg::JointState>(
@@ -50,6 +54,9 @@ Robot::Robot(const Pose & initialPose, const rclcpp::NodeOptions & options)
 
       this->update(dt);
     });
+
+  tfBuffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  tfListener_ = std::make_shared<tf2_ros::TransformListener>(*tfBuffer_);
 }
 
 /* Private Member Functions */
@@ -232,6 +239,37 @@ void Robot::robotDescriptionTopicCallback(
     maximumWheelEffort_);
 }
 
+void Robot::sensorDataTopicCallback(geometry_msgs::msg::Point::UniquePtr message)
+{
+  if (!tfBuffer_) {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "TF buffer not initialized. Cannot transform sensor data.");
+    return;
+  }
+
+  geometry_msgs::msg::Point landmarkPosition;
+  landmarkPosition.x = message->x;
+  landmarkPosition.y = message->y;
+  landmarkPosition.z = message->z;
+
+  getTransforms();
+
+  Eigen::Vector4d landmarkInSensorFrame(landmarkPosition.x, landmarkPosition.y, landmarkPosition.z, 1.0);
+  Eigen::Matrix4d worldToSensorTransform = worldToRobotTransform_ * robotToSensorTransform_;
+  Eigen::Vector4d landmarkInWorldFrame = worldToSensorTransform * landmarkInSensorFrame;
+
+  RCLCPP_INFO_THROTTLE(
+    this->get_logger(),
+    *this->get_clock(),
+    5000,
+    "Object detected at: [%.2f, %.2f, %.2f]",
+    landmarkInWorldFrame.x(),
+    landmarkInWorldFrame.y(),
+    landmarkInWorldFrame.z()
+  );
+}
+
 double Robot::normalizeAngle(double angle) const
 {
   // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
@@ -390,4 +428,19 @@ void Robot::publishJointStates() const
   };
 
   jointStatePublisher_->publish(message);
+}
+
+void Robot::getTransforms()
+{
+  auto Twb = tfBuffer_->lookupTransform("world", "base_link", tf2::TimePointZero);
+  Eigen::Quaterniond quaternionTwb = Eigen::Quaterniond(Twb.transform.rotation.w, Twb.transform.rotation.x, Twb.transform.rotation.y, Twb.transform.rotation.z);
+  Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
+  Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y, Twb.transform.translation.z);
+  worldToRobotTransform_ = Transformation::makeTransform(rotationTwb, translationTwb);
+
+  auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
+  Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w, Tbs.transform.rotation.x, Tbs.transform.rotation.y, Tbs.transform.rotation.z);
+  Eigen::Matrix3d rotationTbs = quaternionTbs.toRotationMatrix();
+  Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y, Tbs.transform.translation.z);
+  robotToSensorTransform_ = Transformation::makeTransform(rotationTbs, translationTbs);
 }

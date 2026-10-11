@@ -4,9 +4,15 @@
 #include "Pose.h"
 #include "Twist.h"
 
+#include <Transformation/Transformation.h>
+#include <Transformation/Rotation.h>
+
 #include "rclcpp/rclcpp.hpp"
 #include "urdf/model.hpp"
 #include "tf2_ros/transform_broadcaster.hpp"
+#include "tf2_ros/transform_listener.hpp"
+#include "tf2_ros/buffer.hpp"
+#include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
@@ -35,6 +41,8 @@ private:
   Pose pose_;                               // Current state [x, y, θ]ᵀ in the World frame.
   Twist velocityCommand_;                   // Current active velocity command [v, ω]ᵀ.
   Twist currentTwist_;                      // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command and physical limits.
+  Eigen::Matrix4d worldToRobotTransform_;   // The transform describing the robot's pose in the World frame.
+  Eigen::Matrix4d robotToSensorTransform_;  // The transform describing the sensor's position in the robot's frame.
   double leftWheelVelocity_ {0.0};          // Actual velocity of the left wheel (rads/s)
   double rightWheelVelocity_ {0.0};         // Actual velocity of the right wheel (rads/s)
   double leftWheelPosition_ {0.0};          // Position of the left wheel
@@ -48,7 +56,10 @@ private:
 
   rclcpp::Subscription < geometry_msgs::msg::Twist > ::SharedPtr commandVelocitySubscription_;
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robotDescriptionSubscription_;
+  rclcpp::Subscription < geometry_msgs::msg::Point > ::SharedPtr sensorDataSubscription_;
   std::shared_ptr < tf2_ros::TransformBroadcaster > tfBroadcaster_;
+  std::shared_ptr<tf2_ros::TransformListener> tfListener_{nullptr};
+  std::unique_ptr<tf2_ros::Buffer> tfBuffer_;
   rclcpp::Publisher < sensor_msgs::msg::JointState > ::SharedPtr jointStatePublisher_;
   rclcpp::TimerBase::SharedPtr updateTimer_;
   rclcpp::Time lastUpdateTime_;
@@ -71,6 +82,12 @@ private:
   void robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr message);
 
   /**
+   * @brief Reads data from the /sensor_data topic and transforms it into the World frame.
+   * @param message Pointer to received geometry_msgs::msg::Point sensor data.
+   */
+  void sensorDataTopicCallback(geometry_msgs::msg::Point::UniquePtr message);
+
+  /**
    * @brief Normalizes an angle into the range [-π, π] radians.
    * @param angle Angle in radians.
    * @return Equivalent angle wrapped within [-π, π].
@@ -91,6 +108,11 @@ private:
    * @brief Publishes the joint states of the robot.
    */
   void publishJointStates() const;
+
+  /**
+   * @brief Retrieves the transforms describing World->robot and robot->sensor.
+   */
+  void getTransforms();
 };
 
 #endif
