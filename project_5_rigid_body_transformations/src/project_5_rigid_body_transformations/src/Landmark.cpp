@@ -9,14 +9,15 @@ using namespace std::chrono_literals;
 
 int main(int argc, char ** argv)
 {
-    rclcpp::init(argc, argv);
+  rclcpp::init(argc, argv);
 
-    auto node = rclcpp::Node::make_shared("landmark");
-    auto markerPublisher = node->create_publisher<visualization_msgs::msg::Marker>(
+  auto node = rclcpp::Node::make_shared("landmark");
+  auto markerPublisher = node->create_publisher<visualization_msgs::msg::Marker>(
         "/visualization_marker", 10);
-    auto positionPublisher = node->create_publisher<geometry_msgs::msg::Point>("/landmark_position", 10);
+  auto positionPublisher = node->create_publisher<geometry_msgs::msg::Point>("/landmark_position",
+    10);
 
-    auto timer = node->create_wall_timer(1000ms, [&]() {
+  auto timer = node->create_wall_timer(1000ms, [&]() {
         visualization_msgs::msg::Marker marker;
         marker.header.frame_id = "world";
         marker.header.stamp = rclcpp::Clock().now();
@@ -49,8 +50,8 @@ int main(int argc, char ** argv)
         positionPublisher->publish(position);
     });
 
-    rclcpp::spin(node);
-    rclcpp::shutdown();
+  rclcpp::spin(node);
+  rclcpp::shutdown();
 
-    return 0;
+  return 0;
 }

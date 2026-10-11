@@ -58,8 +58,8 @@ private:
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robotDescriptionSubscription_;
   rclcpp::Subscription < geometry_msgs::msg::Point > ::SharedPtr sensorDataSubscription_;
   std::shared_ptr < tf2_ros::TransformBroadcaster > tfBroadcaster_;
-  std::shared_ptr<tf2_ros::TransformListener> tfListener_{nullptr};
-  std::unique_ptr<tf2_ros::Buffer> tfBuffer_;
+  std::shared_ptr < tf2_ros::TransformListener > tfListener_ {nullptr};
+  std::unique_ptr < tf2_ros::Buffer > tfBuffer_;
   rclcpp::Publisher < sensor_msgs::msg::JointState > ::SharedPtr jointStatePublisher_;
   rclcpp::TimerBase::SharedPtr updateTimer_;
   rclcpp::Time lastUpdateTime_;

@@ -255,7 +255,8 @@ void Robot::sensorDataTopicCallback(geometry_msgs::msg::Point::UniquePtr message
 
   getTransforms();
 
-  Eigen::Vector4d landmarkInSensorFrame(landmarkPosition.x, landmarkPosition.y, landmarkPosition.z, 1.0);
+  Eigen::Vector4d landmarkInSensorFrame(landmarkPosition.x, landmarkPosition.y, landmarkPosition.z,
+    1.0);
   Eigen::Matrix4d worldToSensorTransform = worldToRobotTransform_ * robotToSensorTransform_;
   Eigen::Vector4d landmarkInWorldFrame = worldToSensorTransform * landmarkInSensorFrame;
 
@@ -433,14 +434,18 @@ void Robot::publishJointStates() const
 void Robot::getTransforms()
 {
   auto Twb = tfBuffer_->lookupTransform("world", "base_link", tf2::TimePointZero);
-  Eigen::Quaterniond quaternionTwb = Eigen::Quaterniond(Twb.transform.rotation.w, Twb.transform.rotation.x, Twb.transform.rotation.y, Twb.transform.rotation.z);
+  Eigen::Quaterniond quaternionTwb = Eigen::Quaterniond(Twb.transform.rotation.w,
+    Twb.transform.rotation.x, Twb.transform.rotation.y, Twb.transform.rotation.z);
   Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
-  Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y, Twb.transform.translation.z);
+  Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y,
+    Twb.transform.translation.z);
   worldToRobotTransform_ = Transformation::makeTransform(rotationTwb, translationTwb);
 
   auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
-  Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w, Tbs.transform.rotation.x, Tbs.transform.rotation.y, Tbs.transform.rotation.z);
+  Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w,
+    Tbs.transform.rotation.x, Tbs.transform.rotation.y, Tbs.transform.rotation.z);
   Eigen::Matrix3d rotationTbs = quaternionTbs.toRotationMatrix();
-  Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y, Tbs.transform.translation.z);
+  Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y,
+    Tbs.transform.translation.z);
   robotToSensorTransform_ = Transformation::makeTransform(rotationTbs, translationTbs);
 }
