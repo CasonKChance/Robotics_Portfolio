@@ -257,7 +257,7 @@ void Robot::sensorDataTopicCallback(geometry_msgs::msg::Point::UniquePtr message
 
   Eigen::Vector4d landmarkInSensorFrame(landmarkPosition.x, landmarkPosition.y, landmarkPosition.z,
     1.0);
-  Eigen::Matrix4d T_world_sensor = T_world_robot * T_robot_sensor_;
+  Eigen::Matrix4d T_world_sensor = T_world_robot_ * T_robot_sensor_;
   Eigen::Vector4d landmarkInWorldFrame = T_world_sensor * landmarkInSensorFrame;
 
   RCLCPP_INFO_THROTTLE(
