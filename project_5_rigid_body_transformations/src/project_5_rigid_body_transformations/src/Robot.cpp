@@ -440,7 +440,7 @@ void Robot::getTransforms()
     Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
     Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y,
       Twb.transform.translation.z);
-    T_world_robot = Transformation::makeTransform(rotationTwb, translationTwb);
+    T_world_robot_ = Transformation::makeTransform(rotationTwb, translationTwb);
 
     auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
     Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w,
