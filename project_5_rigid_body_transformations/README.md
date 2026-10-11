@@ -6,13 +6,13 @@ A differential-drive robot and simulated landmark sensor used to demonstrate rig
 
 ## Demo
 
-INSERT DEMO VIDEO
+https://github.com/user-attachments/assets/73ee9a0b-c132-4b94-8eed-7a4241a4e14f
 
 ---
 
 ## Overview
 
-This project extends the differential-drive robot model and simulated motion from Project 4. It instantiates a landmark object in the world which publishes it's position in the world to the `/landmark_position` topic. A "landmark sensor" which is rigidly attached to the robot simulates sensor data by reading data from the /landmark_position topic and converting the read position to the sensor's frame and publishing the transformed position to the `/sensor_data` topic. The robot reads the /sensor_data position and transforms it back into the world frame then logs the position. All transformation calculations are done with a custom `Transformations` library build specially for this project. Relationships between the world frame and robot frame and the robot frame and sensor frame are provided by `TF2` and formed into `Eigen` transformation matrices using the Transformations library.
+This project extends the differential-drive robot model and simulated motion from Project 4. It instantiates a landmark object in the world which publishes it's position in the world to the `/landmark_position` topic. A "landmark sensor" which is rigidly attached to the robot simulates sensor data by reading data from the /landmark_position topic and converting the read position to the sensor's frame and publishing the transformed position to the `/sensor_data` topic. The robot reads the /sensor_data position and transforms it back into the world frame then logs the position. All transformation calculations are done with a custom `Transformations` library built specially for this project. Relationships between the world frame and robot frame and the robot frame and sensor frame are provided by `TF2` and formed into `Eigen` transformation matrices using the Transformations library.
 
 ---
 
@@ -63,13 +63,13 @@ Responsibilities:
 
 ## ROS Graph
 
-INSERT ROS GRAPH
+<img width="1356" height="651" alt="Screenshot 2026-10-11 at 5 29 05 PM" src="https://github.com/user-attachments/assets/1c6849eb-928f-46ac-8ae6-441ca27f12fc" />
 
 ---
 
 ## TF Tree
 
-INSERT TF TREE
+<img width="1015" height="696" alt="Screenshot 2026-10-11 at 5 29 59 PM" src="https://github.com/user-attachments/assets/0819dc41-7a77-47f2-9f0f-4181e36c7e31" />
 
 ### TF Hierarchy
 
@@ -83,16 +83,34 @@ world
         │   └── right_wheel_link
         ├── caster_wheel_base_link
         │   └── caster_wheel_link
-        ├── landmark_sensor_link
+        └── landmark_sensor_link
 ```
 
 A more detailed description of the TF hierarch can be found in the Project 4 README with the exception of the landmark_sensor_link which replaces Project 4's non-functional camera_sensor_link and laser_sensor_link.
 
 ---
 
-## Rigid Body Transformations
+## Transformation Library
 
-INSERT RIGID BODY TRANSFORMATIONS HERE
+The Transformation library is a standalone C++ library built on Eigen that implements the following functions:
+
+```text
+rotationMatrixX()
+rotationMatrixY()
+rotationMatrixZ()
+
+isRotationMatrix()
+
+makeTransform()
+
+transformPoint()
+
+composeTransforms()
+
+inverseTransform()
+```
+
+These functions implement the underlying SO(3)/SE(3) mathematics rather than relying on TF2 or Eigen transformation helpers to perform the calculations. This library was created as an exercise to get comfortable with the transformation mathematics.
 
 ---
 
