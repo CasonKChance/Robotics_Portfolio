@@ -22,21 +22,25 @@ LandmarkSensor::LandmarkSensor(const rclcpp::NodeOptions & options)
 
 void LandmarkSensor::getTransforms()
 {
-  auto Twb = tfBuffer_->lookupTransform("world", "base_link", tf2::TimePointZero);
-  Eigen::Quaterniond quaternionTwb = Eigen::Quaterniond(Twb.transform.rotation.w,
-    Twb.transform.rotation.x, Twb.transform.rotation.y, Twb.transform.rotation.z);
-  Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
-  Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y,
-    Twb.transform.translation.z);
-  T_world_robot_ = Transformation::makeTransform(rotationTwb, translationTwb);
+  try {
+    auto Twb = tfBuffer_->lookupTransform("world", "base_link", tf2::TimePointZero);
+    Eigen::Quaterniond quaternionTwb = Eigen::Quaterniond(Twb.transform.rotation.w,
+      Twb.transform.rotation.x, Twb.transform.rotation.y, Twb.transform.rotation.z);
+    Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
+    Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y,
+      Twb.transform.translation.z);
+    T_world_robot_ = Transformation::makeTransform(rotationTwb, translationTwb);
 
-  auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
-  Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w,
-    Tbs.transform.rotation.x, Tbs.transform.rotation.y, Tbs.transform.rotation.z);
-  Eigen::Matrix3d rotationTbs = quaternionTbs.toRotationMatrix();
-  Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y,
-    Tbs.transform.translation.z);
-  T_robot_sensor_ = Transformation::makeTransform(rotationTbs, translationTbs);
+    auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
+    Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w,
+      Tbs.transform.rotation.x, Tbs.transform.rotation.y, Tbs.transform.rotation.z);
+    Eigen::Matrix3d rotationTbs = quaternionTbs.toRotationMatrix();
+    Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y,
+      Tbs.transform.translation.z);
+    T_robot_sensor_ = Transformation::makeTransform(rotationTbs, translationTbs);
+  } catch (const tf2::TransformException & ex) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to get transforms: %s", ex.what());
+  }
 }
 
 void LandmarkSensor::landmarkTopicCallback(const geometry_msgs::msg::Point::SharedPtr message)
