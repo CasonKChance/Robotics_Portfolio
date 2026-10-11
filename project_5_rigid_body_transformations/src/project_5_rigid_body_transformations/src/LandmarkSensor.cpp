@@ -28,7 +28,7 @@ void LandmarkSensor::getTransforms()
   Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
   Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y,
     Twb.transform.translation.z);
-  worldToRobotTransform_ = Transformation::makeTransform(rotationTwb, translationTwb);
+  T_world_robot_ = Transformation::makeTransform(rotationTwb, translationTwb);
 
   auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
   Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w,
@@ -36,7 +36,7 @@ void LandmarkSensor::getTransforms()
   Eigen::Matrix3d rotationTbs = quaternionTbs.toRotationMatrix();
   Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y,
     Tbs.transform.translation.z);
-  robotToSensorTransform_ = Transformation::makeTransform(rotationTbs, translationTbs);
+  T_robot_sensor_ = Transformation::makeTransform(rotationTbs, translationTbs);
 }
 
 void LandmarkSensor::landmarkTopicCallback(const geometry_msgs::msg::Point::SharedPtr message)
@@ -45,9 +45,9 @@ void LandmarkSensor::landmarkTopicCallback(const geometry_msgs::msg::Point::Shar
 
   Eigen::Vector3d landmarkPosition(message->x, message->y, message->z);
 
-    // Transform the position from the world frame to the sensor frame
-  landmarkPosition = (Transformation::inverseTransform(worldToRobotTransform_ *
-    robotToSensorTransform_) * landmarkPosition.homogeneous()).head<3>();
+  // Transform the position from the world frame to the sensor frame
+  landmarkPosition = (Transformation::inverseTransform(T_world_robot_ *
+    T_robot_sensor_) * landmarkPosition.homogeneous()).head<3>();
 
   publishLandmarkPosition(landmarkPosition);
 }

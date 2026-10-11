@@ -41,8 +41,8 @@ private:
   Pose pose_;                               // Current state [x, y, θ]ᵀ in the World frame.
   Twist velocityCommand_;                   // Current active velocity command [v, ω]ᵀ.
   Twist currentTwist_;                      // Actual velocity ([v, ω]ᵀ) of the robot, clamped from the command and physical limits.
-  Eigen::Matrix4d worldToRobotTransform_;   // The transform describing the robot's pose in the World frame.
-  Eigen::Matrix4d robotToSensorTransform_;  // The transform describing the sensor's position in the robot's frame.
+  Eigen::Matrix4d T_world_robot_;           // The transform describing the robot's pose in the World frame.
+  Eigen::Matrix4d T_robot_sensor_;          // The transform describing the sensor's position in the robot's frame.
   double leftWheelVelocity_ {0.0};          // Actual velocity of the left wheel (rads/s)
   double rightWheelVelocity_ {0.0};         // Actual velocity of the right wheel (rads/s)
   double leftWheelPosition_ {0.0};          // Position of the left wheel

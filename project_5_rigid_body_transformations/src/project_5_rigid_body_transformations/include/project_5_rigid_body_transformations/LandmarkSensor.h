@@ -26,8 +26,8 @@ public:
   explicit LandmarkSensor(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
-  Eigen::Matrix4d worldToRobotTransform_;     // The transform describing the robot's pose in the World frame.
-  Eigen::Matrix4d robotToSensorTransform_;    // The transform describing the sensor's position in the robot's frame.
+  Eigen::Matrix4d T_world_robot__;    // The transform describing the robot's pose in the World frame.
+  Eigen::Matrix4d T_robot_sensor_;    // The transform describing the sensor's position in the robot's frame.
 
   rclcpp::Publisher < geometry_msgs::msg::Point > ::SharedPtr landmarkPublisher_;
   rclcpp::Subscription < geometry_msgs::msg::Point > ::SharedPtr landmarkSubscription_;

@@ -257,8 +257,8 @@ void Robot::sensorDataTopicCallback(geometry_msgs::msg::Point::UniquePtr message
 
   Eigen::Vector4d landmarkInSensorFrame(landmarkPosition.x, landmarkPosition.y, landmarkPosition.z,
     1.0);
-  Eigen::Matrix4d worldToSensorTransform = worldToRobotTransform_ * robotToSensorTransform_;
-  Eigen::Vector4d landmarkInWorldFrame = worldToSensorTransform * landmarkInSensorFrame;
+  Eigen::Matrix4d T_world_sensor = T_world_robot * T_robot_sensor_;
+  Eigen::Vector4d landmarkInWorldFrame = T_world_sensor * landmarkInSensorFrame;
 
   RCLCPP_INFO_THROTTLE(
     this->get_logger(),
@@ -439,7 +439,7 @@ void Robot::getTransforms()
   Eigen::Matrix3d rotationTwb = quaternionTwb.toRotationMatrix();
   Eigen::Vector3d translationTwb(Twb.transform.translation.x, Twb.transform.translation.y,
     Twb.transform.translation.z);
-  worldToRobotTransform_ = Transformation::makeTransform(rotationTwb, translationTwb);
+  T_world_robot = Transformation::makeTransform(rotationTwb, translationTwb);
 
   auto Tbs = tfBuffer_->lookupTransform("base_link", "landmark_sensor_link", tf2::TimePointZero);
   Eigen::Quaterniond quaternionTbs = Eigen::Quaterniond(Tbs.transform.rotation.w,
@@ -447,5 +447,5 @@ void Robot::getTransforms()
   Eigen::Matrix3d rotationTbs = quaternionTbs.toRotationMatrix();
   Eigen::Vector3d translationTbs(Tbs.transform.translation.x, Tbs.transform.translation.y,
     Tbs.transform.translation.z);
-  robotToSensorTransform_ = Transformation::makeTransform(rotationTbs, translationTbs);
+  T_robot_sensor_ = Transformation::makeTransform(rotationTbs, translationTbs);
 }
