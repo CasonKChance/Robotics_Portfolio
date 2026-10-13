@@ -2,6 +2,3 @@
 .vscode/
 .idea/
 *.swp
-
-# Build files
-build/
