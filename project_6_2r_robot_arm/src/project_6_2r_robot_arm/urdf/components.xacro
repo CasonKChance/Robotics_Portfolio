@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- Inertia tag. -->
-  <xacro:macro name="box_inertia" params="mass x y z">
+  <xacro:macro name="box_inertia" params="origin_xyz mass base_width base_length base_height">
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="${origin_xyz}" rpy="0 0 0"/>
       <mass value="${mass}"/>
       <inertia
-        ixx="${mass * (y*y + z*z) / 12.0}"
+        ixx="${mass * (base_length*base_length + base_height*base_height) / 12.0}"
         ixy="0"
         ixz="0"
-        iyy="${mass * (x*x + z*z) / 12.0}"
+        iyy="${mass * (base_width*base_width + base_height*base_height) / 12.0}"
         iyz="0"
-        izz="${mass * (x*x + y*y) / 12.0}"/>
+        izz="${mass * (base_width*base_width + base_length*base_length) / 12.0}"/>
     </inertial>
   </xacro:macro>
 
-  <xacro:macro name="cylinder_inertia" params="mass radius length">
+  <xacro:macro name="z_aligned_cylinder_inertia" params="origin_xyz mass radius length">
     <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="${origin_xyz}" rpy="0 0 0"/>
       <mass value="${mass}"/>
       <inertia
         ixx="${mass * (3*radius*radius + length*length) / 12.0}"
@@ -29,16 +29,48 @@
     </inertial>
   </xacro:macro>
 
+  <xacro:macro name="y_aligned_cylinder_inertia" params="origin_xyz mass radius length">
+    <inertial>
+      <origin xyz="${origin_xyz}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass * (3*radius*radius + length*length) / 12.0}"
+        ixy="0"
+        ixz="0"
+        iyy="${mass * radius*radius / 2.0}"
+        iyz="0"
+        izz="${mass * (3*radius*radius + length*length) / 12.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="x_aligned_cylinder_inertia" params="origin_xyz mass radius length">
+    <inertial>
+      <origin xyz="${origin_xyz}" rpy="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass * radius*radius / 2.0}"
+        ixy="0"
+        ixz="0"
+        iyy="${mass * (3*radius*radius + length*length) / 12.0}"
+        iyz="0"
+        izz="${mass * (3*radius*radius + length*length) / 12.0}"/>
+    </inertial>
+  </xacro:macro>
+
   <!-- Cylinder representing the body of the arm -->
   <xacro:macro name="arm_body" params="length radius material">
     <visual>
       <origin xyz="${-length / 2.0} 0 0" rpy="0 ${-pi / 2.0} 0"/>
-      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      <geometry>
+        <cylinder radius="${radius}" length="${length}"/>
+      </geometry>
       <material name="${material}"/>
     </visual>
     <collision>
       <origin xyz="${-length / 2.0} 0 0" rpy="0 ${-pi / 2.0} 0"/>
-      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      <geometry>
+        <cylinder radius="${radius}" length="${length}"/>
+      </geometry>
     </collision>
   </xacro:macro>
 
@@ -46,15 +78,23 @@
   <xacro:macro name="arm_joint_disc" params="radius length material">
     <visual>
       <origin xyz="0 0 0" rpy="${-pi / 2.0} 0 0"/>
-      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      <geometry>
+        <cylinder radius="${radius}" length="${length}"/>
+      </geometry>
       <material name="${material}"/>
     </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${-pi / 2.0} 0 0"/>
+      <geometry>
+        <cylinder radius="${radius}" length="${length}"/>
+      </geometry>
+    </collision>
   </xacro:macro>
 
   <!-- Rotating arm segment and its circular mounting flange. -->
   <xacro:macro name="arm_segment" params="length mass">
     <xacro:arm_joint_disc radius="${joint_radius}" length="${joint_length}" material="arm_silver"/>
     <xacro:arm_body length="${length}" radius="${arm_radius}" material="arm_silver"/>
-    <xacro:cylinder_inertia mass="${mass}" radius="${arm_radius}" length="${length}"/>
+    <xacro:x_aligned_cylinder_inertia origin_xyz="${-length / 2.0} 0 0" mass="${mass}" radius="${arm_radius}" length="${length}"/>
   </xacro:macro>
 </robot>
