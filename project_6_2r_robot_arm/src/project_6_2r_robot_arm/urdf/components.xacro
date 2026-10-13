@@ -95,6 +95,6 @@
   <xacro:macro name="arm_segment" params="length mass">
     <xacro:arm_joint_disc radius="${joint_radius}" length="${joint_length}" material="arm_silver"/>
     <xacro:arm_body length="${length}" radius="${arm_radius}" material="arm_silver"/>
-    <xacro:x_aligned_cylinder_inertia origin_xyz="${-length / 2.0} 0 0" mass="${mass}" radius="${arm_radius}" length="${length}"/>
+    <xacro:x_aligned_cylinder_inertia origin_xyz="${length / 2.0} 0 0" mass="${mass}" radius="${arm_radius}" length="${length}"/>
   </xacro:macro>
 </robot>

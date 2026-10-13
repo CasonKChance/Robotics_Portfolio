@@ -96,7 +96,7 @@
     <parent link="shoulder_link"/>
     <child link="arm_link_1"/>
     <origin xyz="0 ${(shoulder_length + joint_length) / 2.0} 0" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>
+    <axis xyz="0 -1 0"/>
     <limit effort="${joint_effort}" velocity="${joint_velocity}"/>
     <dynamics damping="0.15" friction="0.02"/>
   </joint>
@@ -108,7 +108,7 @@
     <parent link="arm_link_1"/>
     <child link="arm_link_2"/>
     <origin xyz="${arm_length} ${joint_length} 0" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>
+    <axis xyz="0 -1 0"/>
     <limit effort="${joint_effort}" velocity="${joint_velocity}"/>
     <dynamics damping="0.10" friction="0.02"/>
   </joint>
