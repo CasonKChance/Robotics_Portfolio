@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/cason/robotics_portfolio/Transformation/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

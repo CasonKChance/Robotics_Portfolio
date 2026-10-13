@@ -1,0 +1,5 @@
+if(EXISTS "/home/cason/robotics_portfolio/Transformation/build/TransformationTests[1]_tests.cmake")
+  include("/home/cason/robotics_portfolio/Transformation/build/TransformationTests[1]_tests.cmake")
+else()
+  add_test(TransformationTests_NOT_BUILT TransformationTests_NOT_BUILT)
+endif()
