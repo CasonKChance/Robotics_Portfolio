@@ -1,7 +1,7 @@
 #ifndef KINEMATICS_H
 #define KINEMATICS_H
 
-#include "Point2d.h"
+#include "Point2D.h"
 
 #include <vector>
 

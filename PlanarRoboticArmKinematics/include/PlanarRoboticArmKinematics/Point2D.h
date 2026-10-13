@@ -6,8 +6,8 @@
  */
 struct Point2D
 {
-    double x;
-    double y;
+    double x{0.0};
+    double y{0.0};
 };
 
 #endif

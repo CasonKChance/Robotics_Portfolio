@@ -18,6 +18,6 @@ namespace Kinematics {
             y += linkLengths[i] * std::sin(totalAngle);
         }
 
-        return Point2D(x, y);
+        return Point2D{x, y};
     }
 }
