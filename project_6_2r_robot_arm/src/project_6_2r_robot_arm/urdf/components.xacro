@@ -60,14 +60,14 @@
   <!-- Cylinder representing the body of the arm -->
   <xacro:macro name="arm_body" params="length radius material">
     <visual>
-      <origin xyz="${-length / 2.0} 0 0" rpy="0 ${-pi / 2.0} 0"/>
+      <origin xyz="${length / 2.0} 0 0" rpy="0 ${-pi / 2.0} 0"/>
       <geometry>
         <cylinder radius="${radius}" length="${length}"/>
       </geometry>
       <material name="${material}"/>
     </visual>
     <collision>
-      <origin xyz="${-length / 2.0} 0 0" rpy="0 ${-pi / 2.0} 0"/>
+      <origin xyz="${length / 2.0} 0 0" rpy="0 ${-pi / 2.0} 0"/>
       <geometry>
         <cylinder radius="${radius}" length="${length}"/>
       </geometry>
