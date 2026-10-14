@@ -6,6 +6,42 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(urdf REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+
+add_subdirectory(
+    ../../../PlanarRoboticArmKinematics
+    ${CMAKE_CURRENT_BINARY_DIR}/PlanarRoboticArmKinematics
+)
+
+# Declare C++ library for core classes
+add_library(${PROJECT_NAME}_lib
+  src/RobotArmAnalyzer.cpp
+)
+
+# Export include directories
+target_include_directories(${PROJECT_NAME}_lib
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
+
+target_link_libraries(${PROJECT_NAME}_lib
+  PUBLIC
+    rclcpp::rclcpp
+    urdf::urdf
+    ${geometry_msgs_TARGETS}
+    ${std_msgs_TARGETS}
+    Kinematics
+)
+
+add_executable(RobotArmAnalyzer src/RobotArmAnalyzerMain.cpp)
+target_link_libraries(RobotArmAnalyzer
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -13,6 +49,22 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+# Installation rules
+install(
+  TARGETS
+    ${PROJECT_NAME}_lib
+    RobotArmAnalyzer
+  EXPORT ${PROJECT_NAME}_libTargets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
 
 install(DIRECTORY
   launch
