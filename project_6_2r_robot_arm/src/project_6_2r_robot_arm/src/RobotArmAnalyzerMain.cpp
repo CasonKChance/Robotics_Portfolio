@@ -4,9 +4,9 @@
 
 int main(int argc, char *argv[])
 {
-    rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<RobotArmAnalyzer>());
-    rclcpp::shutdown();
+  rclcpp::init(argc, argv);
+  rclcpp::spin(std::make_shared<RobotArmAnalyzer>());
+  rclcpp::shutdown();
 
-    return 0;
+  return 0;
 }

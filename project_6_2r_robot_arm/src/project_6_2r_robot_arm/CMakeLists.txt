@@ -53,6 +53,7 @@ endif()
 # Installation rules
 install(
   TARGETS
+    Kinematics
     ${PROJECT_NAME}_lib
     RobotArmAnalyzer
   EXPORT ${PROJECT_NAME}_libTargets
@@ -79,6 +80,13 @@ install(DIRECTORY
 install(DIRECTORY
   rviz
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  PROGRAMS
+    src/AnalysisVisualization.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME AnalysisVisualization
 )
 
 ament_package()

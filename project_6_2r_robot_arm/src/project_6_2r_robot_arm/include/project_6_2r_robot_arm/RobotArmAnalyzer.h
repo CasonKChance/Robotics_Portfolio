@@ -7,23 +7,45 @@
 
 #include <memory>
 
+/**
+ * @brief Analyzes the physical properties of the robot arm
+ * Currently, this includes the task space
+ */
 class RobotArmAnalyzer: public rclcpp::Node
 {
 public:
 
-    RobotArmAnalyzer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  /**
+   * @brief Constructs the analyzer node
+   * @param options options to pass to the node
+   */
+  RobotArmAnalyzer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
-    double armLink1Length_ {0.0};
-    double armLink2Length_ {0.0};
-    bool robotDescriptionReady_ {false};
+  double armLink1Length_ {0.0};  // Length of the first arm link in the chain
+  double armLink2Length_ {0.0};  // Length of the second arm link in the chain
+  bool robotDescriptionReady_ {false}; // Describes whether or not the robot description has been loaded
+  bool taskSpacePublished_ {false}; // Describes whether or not the task space has already been published
 
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robotDescriptionSubscription_;
-    rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr taskSpacePublisher_;
+  rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robotDescriptionSubscription_;
+  rclcpp::Publisher < geometry_msgs::msg::Point > ::SharedPtr taskSpacePublisher_;
+  rclcpp::TimerBase::SharedPtr subscriberCheckTimer_;
 
-    void robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr message);
+  /**
+   * @brief Loads and saves the robot description into member variables
+   * @param message the String message containing the robot description
+   */
+  void robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr message);
 
-    void publishTaskSpace() const;
+  /**
+   * @brief Checks if the task space publisher has an active subscriber
+   */
+  void checkTaskSpaceSubscriber();
+
+  /**
+   * @brief Publishes points to the /task_space topic
+   */
+  void publishTaskSpace() const;
 };
 
 #endif
