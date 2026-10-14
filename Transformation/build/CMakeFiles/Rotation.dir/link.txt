@@ -1,2 +1,0 @@
-/usr/bin/ar qc libRotation.a CMakeFiles/Rotation.dir/src/Rotation.cpp.o
-/usr/bin/ranlib libRotation.a
