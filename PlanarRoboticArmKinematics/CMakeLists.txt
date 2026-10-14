@@ -12,7 +12,7 @@ find_package(Eigen3 REQUIRED)
 
 include(CTest)
 
-add_library(Kinematics src/Kinematics.cpp)
+add_library(Kinematics SHARED src/Kinematics.cpp)
 target_include_directories(Kinematics
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
