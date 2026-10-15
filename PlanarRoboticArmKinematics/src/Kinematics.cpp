@@ -124,7 +124,7 @@ namespace Kinematics {
             throw std::invalid_argument("One, and only one, axis of rotation may be defined");
         }
 
-        Eigen::VectorXd spacialTwist = endEffectorTwist(jointAngles, linkLengths, jointVelocities, axisOfRotation);
+        Eigen::VectorXd spatialTwist = endEffectorTwist(jointAngles, linkLengths, jointVelocities, axisOfRotation);
 
         Point2D FK = forwardKinematics(jointAngles, linkLengths);
         Eigen::Vector3d omegaAxis = axisOfRotation.normalized();
@@ -141,8 +141,8 @@ namespace Kinematics {
         Eigen::Vector3d endEffectorPosition =
             axisU * FK.x + axisV * FK.y;
 
-        Eigen::Vector3d omega = spacialTwist.head(3);
-        Eigen::Vector3d v = spacialTwist.tail(3);
+        Eigen::Vector3d omega = spatialTwist.head(3);
+        Eigen::Vector3d v = spatialTwist.tail(3);
 
         return omega.cross(endEffectorPosition) + v;
     }
