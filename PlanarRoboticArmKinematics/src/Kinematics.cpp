@@ -4,7 +4,8 @@
 #include <stdexcept>
 
 namespace Kinematics {
-    Point2D forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths) {
+    Point2D forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths)
+    {
         if (jointAngles.size() != linkLengths.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links.");
         }
@@ -21,7 +22,8 @@ namespace Kinematics {
         return Point2D{x, y};
     }
 
-    bool isReachable(const Point2D& point, const std::vector<double>& linkLengths) {
+    bool isReachable(const Point2D& point, const std::vector<double>& linkLengths)
+    {
         if (linkLengths.empty()) {
             throw std::invalid_argument("The number of links must be greater than zero.");
         }
@@ -44,5 +46,70 @@ namespace Kinematics {
         const double minReach = std::max(0.0, 2.0 * longestLink - totalLength);
 
         return (distance >= minReach - tolerance) && (distance <= maxReach + tolerance);
+    }
+
+    Eigen::Matrix<double, 6, Eigen::Dynamic> jacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
+    {
+        if (jointAngles.size() != linkLengths.size()) {
+            throw std::invalid_argument("The number of joints must be equal to the number of links.");
+        }
+
+        int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
+        if (nonZeroAxes != 1) {
+            throw std::invalid_argument("One, and only one, axis of rotation may be defined");
+        }
+
+        Eigen::Matrix<double, 6, Eigen::Dynamic> J(6, jointAngles.size());
+
+        // Define the axes of the plane
+        Eigen::Vector3d omega = axisOfRotation.normalized();
+
+        Eigen::Vector3d axisU;
+        Eigen::Vector3d axisV;
+        
+        if (omega.x()) {
+            // If rotating about X, arm stretches along Y at zero configuration
+            axisU << 0, 1, 0;
+            axisV = omega.cross(axisU);
+        } else {
+            // If rotating about Y or Z, arm stretches along X at zero configuration
+            axisU << 1, 0, 0;
+            axisV = omega.cross(axisU);
+        }
+
+        Eigen::Vector3d q_current = Eigen::Vector3d::Zero();
+        double totalAngle = 0.0;
+
+        for (size_t i = 0; i < jointAngles.size(); ++i) {
+            // Angular velocity is unit length about the axis of rotation
+            Eigen::Vector3d omega_i = omega;
+
+            // Linear velocity of joint in space frame
+            Eigen::Vector3d v_i = -omega_i.cross(q_current);
+
+            // Screw vector composed of angular velocity vector and linear velocity vector
+            Eigen::Vector6d S;
+            S << omega_i, v_i;
+
+            // Add screw vector to jacobian matrix
+            J.col(i) = S;
+
+            // Update q_current for next iteration
+            totalAngle += jointAngles[i];
+            q_current += linkLengths[i] * (axisU * std::cos(totalAngle) + axisV * std::sin(totalAngle));
+        }
+
+        return J;
+    }
+
+    Eigen::Vector6d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::RowVectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
+    {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointVelocities.size()) {
+            throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
+        }
+
+        auto jacobian = jacobian(jointAngles, linkLengths, axisOfRotation);
+
+        return jacobian * jointVelocities;
     }
 }
