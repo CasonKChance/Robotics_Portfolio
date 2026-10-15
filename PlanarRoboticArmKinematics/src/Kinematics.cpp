@@ -102,7 +102,7 @@ namespace Kinematics {
         return J;
     }
 
-    Eigen::VectorXd endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::RowVectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
+    Eigen::VectorXd endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
     {
         if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
             throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
