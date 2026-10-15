@@ -112,4 +112,34 @@ namespace Kinematics {
 
         return J * jointVelocities;
     }
+
+    Eigen::Vector3d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
+    {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
+            throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
+        }
+
+        int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
+        if (nonZeroAxes != 1) {
+            throw std::invalid_argument("One, and only one, axis of rotation may be defined");
+        }
+
+        Eigen::VectorXd spacialTwist = endEffectorTwist(jointAngles, linkLengths, jointVelocities, axisOfRotation);
+
+        Point2D FK = forwardKinematics(jointAngles, linkLengths);
+        Eigen::Vector3d endEffectorPosition;
+        Eigen::Vector3d axisOfRotationNormalized = axisOfRotation.normalized();
+        if (axisOfRotationNormalized.x()) {
+            endEffectorPosition << 0, FK.x, FK.y;
+        } else if (axisOfRotation.y()) {
+            endEffectorPosition << FK.x, 0, FK.y;
+        } else {
+            endEffectorPosition << FK.x, FK.y, 0;
+        }
+
+        Eigen::Vector3d omega = spacialTwist.head(3);
+        Eigen::Vector3d v = spacialTwist.tail(3);
+
+        return omega.cross(endEffectorPosition) + v;
+    }
 }

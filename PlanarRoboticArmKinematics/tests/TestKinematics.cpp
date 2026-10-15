@@ -250,6 +250,72 @@ TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorTwistTest) {
     EXPECT_TRUE(twist4.isApprox(expectedTwist4, tolerance));
 }
 
+TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorVelocityTest) {
+    const double tolerance = 1e-6;
+
+    // Test case 1: Two-link arm fully extended, rotating about Z
+    std::vector<double> jointAngles1 = {0.0, 0.0};
+    std::vector<double> linkLengths1 = {1.0, 1.0};
+    Eigen::VectorXd jointVelocities1(2);
+    jointVelocities1 << 1.0, 2.0;
+    Eigen::Vector3d axisOfRotation1(0.0, 0.0, 1.0);
+
+    Eigen::Vector3d velocity1 = Kinematics::endEffectorVelocity(
+        jointAngles1, linkLengths1, jointVelocities1, axisOfRotation1
+    );
+
+    Eigen::Vector3d expectedVelocity1(0.0, 4.0, 0.0);
+
+    EXPECT_TRUE(velocity1.isApprox(expectedVelocity1, tolerance));
+
+    // Test case 2: Two-link arm bent 90 degrees, rotating about Z
+    std::vector<double> jointAngles2 = {std::numbers::pi / 2, 0.0};
+    std::vector<double> linkLengths2 = {2.0, 1.0};
+    Eigen::VectorXd jointVelocities2(2);
+    jointVelocities2 << 1.0, -0.5;
+    Eigen::Vector3d axisOfRotation2(0.0, 0.0, 1.0);
+
+    Eigen::Vector3d velocity2 = Kinematics::endEffectorVelocity(
+        jointAngles2, linkLengths2, jointVelocities2, axisOfRotation2
+    );
+
+    Eigen::Vector3d expectedVelocity2(-2.5, 0.0, 0.0);
+
+    EXPECT_TRUE(velocity2.isApprox(expectedVelocity2, tolerance));
+
+    // Test case 3: Three-link arm with mixed angles, rotating about Y
+    std::vector<double> jointAngles3 = {
+        0.0, std::numbers::pi / 2, -std::numbers::pi / 2
+    };
+    std::vector<double> linkLengths3 = {1.0, 2.0, 1.0};
+    Eigen::VectorXd jointVelocities3(3);
+    jointVelocities3 << 1.0, 2.0, -1.0;
+    Eigen::Vector3d axisOfRotation3(0.0, 1.0, 0.0);
+
+    Eigen::Vector3d velocity3 = Kinematics::endEffectorVelocity(
+        jointAngles3, linkLengths3, jointVelocities3, axisOfRotation3
+    );
+
+    Eigen::Vector3d expectedVelocity3(2.0, 0.0, -3.0);
+
+    EXPECT_TRUE(velocity3.isApprox(expectedVelocity3, tolerance));
+
+    // Test case 4: Two-link arm rotating about X
+    std::vector<double> jointAngles4 = {0.0, 0.0};
+    std::vector<double> linkLengths4 = {2.0, 1.0};
+    Eigen::VectorXd jointVelocities4(2);
+    jointVelocities4 << 0.5, 1.5;
+    Eigen::Vector3d axisOfRotation4(1.0, 0.0, 0.0);
+
+    Eigen::Vector3d velocity4 = Kinematics::endEffectorVelocity(
+        jointAngles4, linkLengths4, jointVelocities4, axisOfRotation4
+    );
+
+    Eigen::Vector3d expectedVelocity4(0.0, 0.0, 3.0);
+
+    EXPECT_TRUE(velocity4.isApprox(expectedVelocity4, tolerance));
+}
+
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
