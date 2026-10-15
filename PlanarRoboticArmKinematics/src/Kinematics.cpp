@@ -138,8 +138,7 @@ namespace Kinematics {
 
         Eigen::Vector3d axisV = omegaAxis.cross(axisU);
 
-        Eigen::Vector3d endEffectorPosition =
-            axisU * FK.x + axisV * FK.y;
+        Eigen::Vector3d endEffectorPosition = axisU * FK.x + axisV * FK.y;
 
         Eigen::Vector3d omega = spatialTwist.head(3);
         Eigen::Vector3d v = spatialTwist.tail(3);
