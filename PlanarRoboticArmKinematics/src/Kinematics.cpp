@@ -88,7 +88,7 @@ namespace Kinematics {
             Eigen::Vector3d v_i = -omega_i.cross(q_current);
 
             // Screw vector composed of angular velocity vector and linear velocity vector
-            Eigen::Vector6d S;
+            Eigen::VectorXd S;
             S << omega_i, v_i;
 
             // Add screw vector to jacobian matrix
@@ -102,14 +102,14 @@ namespace Kinematics {
         return J;
     }
 
-    Eigen::Vector6d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::RowVectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
+    Eigen::VectorXd endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::RowVectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
     {
         if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointVelocities.size()) {
             throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
         }
 
-        auto jacobian = jacobian(jointAngles, linkLengths, axisOfRotation);
+        auto J = jacobian(jointAngles, linkLengths, axisOfRotation);
 
-        return jacobian * jointVelocities;
+        return J * jointVelocities;
     }
 }

@@ -39,9 +39,9 @@ namespace Kinematics{
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param jointVelocities The angular velocities of the joints in radians.
      * @param axisOfRotation 3-vector of unit length describing which axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
-     * @return the end-effector velocity as a vector of form [ẋ, ẏ]ᵀ
+     * @return the end-effector velocity as a Twist
      */
-    Eigen::Vector2d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::RowVectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation);
+    Eigen::VectorXd endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::RowVectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation);
 }
 
 #endif
