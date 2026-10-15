@@ -127,15 +127,19 @@ namespace Kinematics {
         Eigen::VectorXd spacialTwist = endEffectorTwist(jointAngles, linkLengths, jointVelocities, axisOfRotation);
 
         Point2D FK = forwardKinematics(jointAngles, linkLengths);
-        Eigen::Vector3d endEffectorPosition;
-        Eigen::Vector3d axisOfRotationNormalized = axisOfRotation.normalized();
-        if (axisOfRotationNormalized.x()) {
-            endEffectorPosition << 0, FK.x, FK.y;
-        } else if (axisOfRotation.y()) {
-            endEffectorPosition << FK.x, 0, FK.y;
+        Eigen::Vector3d omegaAxis = axisOfRotation.normalized();
+
+        Eigen::Vector3d axisU;
+        if (omegaAxis.x() != 0.0) {
+            axisU << 0.0, 1.0, 0.0;
         } else {
-            endEffectorPosition << FK.x, FK.y, 0;
+            axisU << 1.0, 0.0, 0.0;
         }
+
+        Eigen::Vector3d axisV = omegaAxis.cross(axisU);
+
+        Eigen::Vector3d endEffectorPosition =
+            axisU * FK.x + axisV * FK.y;
 
         Eigen::Vector3d omega = spacialTwist.head(3);
         Eigen::Vector3d v = spacialTwist.tail(3);

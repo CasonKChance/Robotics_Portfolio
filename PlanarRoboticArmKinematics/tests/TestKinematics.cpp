@@ -296,7 +296,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorVelocityTest) {
         jointAngles3, linkLengths3, jointVelocities3, axisOfRotation3
     );
 
-    Eigen::Vector3d expectedVelocity3(2.0, 0.0, -3.0);
+    Eigen::Vector3d expectedVelocity3(-6.0, 0.0, -3.0);
 
     EXPECT_TRUE(velocity3.isApprox(expectedVelocity3, tolerance));
 
