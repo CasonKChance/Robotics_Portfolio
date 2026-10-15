@@ -88,7 +88,7 @@ namespace Kinematics {
             Eigen::Vector3d v_i = -omega_i.cross(q_current);
 
             // Screw vector composed of angular velocity vector and linear velocity vector
-            Eigen::VectorXd S;
+            Eigen::Matrix<double, 6, 1> S;
             S << omega_i, v_i;
 
             // Add screw vector to jacobian matrix
