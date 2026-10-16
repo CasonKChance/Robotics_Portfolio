@@ -153,8 +153,8 @@ void RobotArmAnalyzer::publishTaskSpace() const
         // The library calculates in the x,y plane but our robot operates in the x,z plane.
         // The mapping is 1:1.
         geometry_msgs::msg::Point point;
-        point.x = pointCandidate.x;
-        point.z = pointCandidate.y;
+        point.x = pointCandidate.x();
+        point.z = pointCandidate.y();
 
         taskSpacePublisher_->publish(point);
       }
