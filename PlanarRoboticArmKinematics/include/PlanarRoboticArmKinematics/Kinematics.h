@@ -68,6 +68,11 @@ namespace Kinematics{
      */
     std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths);
 
+    /**
+     * @brief Uses numerical inverse kinematics to converge on a joint angles solution to place the end-effector at a target position.
+     * @param targetPosition The target position for the end-effector.
+     * @return The closest solution to the initial guess.
+     */
     std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation, const std::vector<double>& initialGuess, const Eigen::Vector2d& errorTolerance, const int maximumIterations);
 }
 
