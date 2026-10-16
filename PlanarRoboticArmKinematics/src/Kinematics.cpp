@@ -291,6 +291,9 @@ namespace Kinematics {
             return std::vector<double>{std::atan2(targetPosition.y(), targetPosition.x())};
         }
 
+        double previousErrorNorm = std::numeric_limits<double>::max();
+        double finalErrorNorm = 0.0;
+
         std::vector<double> currentGuess = initialGuess;
         for (int i = 0; i < maximumIterations; ++i) {
             Eigen::Vector2d currentPosition = forwardKinematics(currentGuess, linkLengths);
@@ -298,6 +301,11 @@ namespace Kinematics {
             Eigen::Vector2d currentError = targetPosition - currentPosition;
             if ((currentError.array().abs() <= errorTolerance.array()).all()) {
                 return currentGuess;
+            }
+
+            finalErrorNorm = currentError.norm();
+            if (i == maximumIterations - 2) {
+                previousErrorNorm = finalErrorNorm;
             }
 
             auto jacobian = linearVelocityJacobian(currentGuess, linkLengths, axisOfRotation);
@@ -327,6 +335,11 @@ namespace Kinematics {
             currentGuess.assign(q.data(), q.data() + q.size());
         }
 
-        return currentGuess;
+        double errorReduction = previousErrorNorm - finalErrorNorm;
+        if (errorReduction > 1e-5) {
+            return currentGuess;
+        }
+
+        return {};
     }
 }
