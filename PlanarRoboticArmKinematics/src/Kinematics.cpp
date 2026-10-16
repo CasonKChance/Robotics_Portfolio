@@ -43,6 +43,10 @@ namespace Kinematics {
         const double tolerance = 1e-9;
         const double distance = std::hypot(point.x(), point.y());
 
+        if (linkLengths.size() == 1) {
+            return std::abs(distance - linkLengths[0]) < tolerance;
+        }
+
         double totalLength = 0.0;
         double longestLink = 0.0;
         for (const double length : linkLengths) {
