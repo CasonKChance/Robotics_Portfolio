@@ -10,6 +10,12 @@ namespace Kinematics {
             throw std::invalid_argument("The number of joints must be equal to the number of links.");
         }
 
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
+        }
+
         double x = 0.0;
         double y = 0.0;
         double totalAngle = 0.0;
@@ -26,6 +32,12 @@ namespace Kinematics {
     {
         if (linkLengths.empty()) {
             throw std::invalid_argument("The number of links must be greater than zero.");
+        }
+
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
         }
 
         const double tolerance = 1e-9;
@@ -52,6 +64,12 @@ namespace Kinematics {
     {
         if (jointAngles.size() != linkLengths.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links.");
+        }
+
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
         }
 
         int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
@@ -108,6 +126,12 @@ namespace Kinematics {
             throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
         }
 
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
+        }
+
         auto J = jacobian(jointAngles, linkLengths, axisOfRotation);
 
         return J * jointVelocities;
@@ -117,6 +141,12 @@ namespace Kinematics {
     {
         if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
             throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
+        }
+
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
         }
 
         int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
@@ -152,6 +182,12 @@ namespace Kinematics {
             throw std::invalid_argument("Analytic Inverse Kinematics with no orientation target only works for arms with 2 degrees of freedom or less");
         } else if (linkLengths.empty()) {
             throw std::invalid_argument("Robot must have at least 1 link");
+        }
+
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
         }
 
         if (!isReachable(targetPosition, linkLengths)) {
