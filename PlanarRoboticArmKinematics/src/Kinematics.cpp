@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace Kinematics {
-    Point2D forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths)
+    Eigen::Vector2d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths)
     {
         if (jointAngles.size() != linkLengths.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links.");
@@ -19,17 +19,17 @@ namespace Kinematics {
             y += linkLengths[i] * std::sin(totalAngle);
         }
 
-        return Point2D{x, y};
+        return Eigen::Vector2d(x, y);
     }
 
-    bool isReachable(const Point2D& point, const std::vector<double>& linkLengths)
+    bool isReachable(const Eigen::Vector2d& point, const std::vector<double>& linkLengths)
     {
         if (linkLengths.empty()) {
             throw std::invalid_argument("The number of links must be greater than zero.");
         }
 
         const double tolerance = 1e-9;
-        const double distance = std::hypot(point.x, point.y);
+        const double distance = std::hypot(point.x(), point.y());
 
         double totalLength = 0.0;
         double longestLink = 0.0;
@@ -126,7 +126,7 @@ namespace Kinematics {
 
         Eigen::VectorXd spatialTwist = endEffectorTwist(jointAngles, linkLengths, jointVelocities, axisOfRotation);
 
-        Point2D FK = forwardKinematics(jointAngles, linkLengths);
+        Eigen::Vector2d FK = forwardKinematics(jointAngles, linkLengths);
         Eigen::Vector3d omegaAxis = axisOfRotation.normalized();
 
         Eigen::Vector3d axisU;
@@ -138,7 +138,7 @@ namespace Kinematics {
 
         Eigen::Vector3d axisV = omegaAxis.cross(axisU);
 
-        Eigen::Vector3d endEffectorPosition = axisU * FK.x + axisV * FK.y;
+        Eigen::Vector3d endEffectorPosition = axisU * FK.x() + axisV * FK.y();
 
         Eigen::Vector3d omega = spatialTwist.head(3);
         Eigen::Vector3d v = spatialTwist.tail(3);

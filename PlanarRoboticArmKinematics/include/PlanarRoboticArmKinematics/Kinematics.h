@@ -1,8 +1,6 @@
 #ifndef KINEMATICS_H
 #define KINEMATICS_H
 
-#include "Point2D.h"
-
 #include <Eigen/Dense>
 
 #include <vector>
@@ -14,7 +12,7 @@ namespace Kinematics{
      * @param linkLengths The lengths of the links in the robotic arm.
      * @return The position of the end effector in the base frame.
      */
-    Point2D forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths);
+    Eigen::Vector2d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths);
 
     /**
      * @brief Determines if a provided point is within the planar robotic arm's task space.
@@ -22,7 +20,7 @@ namespace Kinematics{
      * @param linkLengths The lengths of the links in the robotic arm.
      * @return True if the point is reachable, false otherwise.
      */
-    bool isReachable(const Point2D& point, const std::vector<double>& linkLengths);
+    bool isReachable(const Eigen::Vector2d& point, const std::vector<double>& linkLengths);
 
     /**
      * @brief Calculates the jacobian of a planar robot arm
