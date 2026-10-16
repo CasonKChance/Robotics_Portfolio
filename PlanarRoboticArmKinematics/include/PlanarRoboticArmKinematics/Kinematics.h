@@ -23,13 +23,22 @@ namespace Kinematics{
     bool isReachable(const Eigen::Vector2d& point, const std::vector<double>& linkLengths);
 
     /**
-     * @brief Calculates the jacobian of a planar robot arm.
+     * @brief Calculates the spatial jacobian of a planar robot arm.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
-     * @return The jacobian matrix.
+     * @return The spatial jacobian matrix.
      */
-    Eigen::Matrix<double, 6, Eigen::Dynamic> jacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
+    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
+
+    /**
+     * @brief Calculates the position (linear velocity) jacobian of a planar robot arm.
+     * @param jointAngles The angles of the joints in the robotic arm.
+     * @param linkLengths The lengths of the links in the robotic arm.
+     * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
+     * @return The position jacobian matrix.
+     */
+    Eigen::Matrix<double, 3, Eigen::Dynamic> positionJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
 
     /**
      * @brief Calculates the end-effector twist.
@@ -58,6 +67,8 @@ namespace Kinematics{
      * @return The set of solutions with each solution containing the necessary joint angles. Can return 0, 1, or 2 solutions.
      */
     std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths);
+
+    std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const std::vector<double>& initialGuess, const double maximumIterations);
 }
 
 #endif

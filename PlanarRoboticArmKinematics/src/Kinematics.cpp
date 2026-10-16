@@ -64,7 +64,7 @@ namespace Kinematics {
         return (distance >= minReach - tolerance) && (distance <= maxReach + tolerance);
     }
 
-    Eigen::Matrix<double, 6, Eigen::Dynamic> jacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
+    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
     {
         if (jointAngles.size() != linkLengths.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links.");
@@ -124,6 +124,52 @@ namespace Kinematics {
         return J;
     }
 
+    Eigen::Matrix<double, 3, Eigen::Dynamic> positionJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
+    {
+        if (jointAngles.size() != linkLengths.size()) {
+            throw std::invalid_argument("The number of joints must be equal to the number of links.");
+        }
+
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
+        }
+
+        int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
+        if (nonZeroAxes != 1) {
+            throw std::invalid_argument("One, and only one, axis of rotation may be defined");
+        }
+
+        auto spatialJ = spatialJacobian(jointAngles, linkLengths, axisOfRotation);
+
+        Eigen::Vector2d FK = forwardKinematics(jointAngles, linkLengths);
+
+        Eigen::Vector3d omegaAxis = axisOfRotation.normalized();
+
+        Eigen::Vector3d axisU;
+        if (omegaAxis.x() != 0.0) {
+            axisU << 0.0, 1.0, 0.0;
+        } else {
+            axisU << 1.0, 0.0, 0.0;
+        }
+
+        Eigen::Vector3d axisV = omegaAxis.cross(axisU);
+
+        Eigen::Vector3d endEffectorPosition = axisU * FK.x() + axisV * FK.y();
+
+        Eigen::Matrix<double, 3, Eigen::Dynamic> positionJ(3, jointAngles.size());
+
+        for (Eigen::Index i = 0; i < spatialJ.cols(); ++i) {
+            Eigen::Vector3d omega = spatialJ.col(i).head<3>();
+            Eigen::Vector3d v = spatialJ.col(i).tail<3>();
+
+            positionJ.col(i) = omega.cross(endEffectorPosition) + v;
+        }
+
+        return positionJ;
+    }
+
     Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
     {
         if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
@@ -136,7 +182,7 @@ namespace Kinematics {
             }
         }
 
-        auto J = jacobian(jointAngles, linkLengths, axisOfRotation);
+        auto J = spatialJacobian(jointAngles, linkLengths, axisOfRotation);
 
         return J * jointVelocities;
     }
@@ -158,26 +204,9 @@ namespace Kinematics {
             throw std::invalid_argument("One, and only one, axis of rotation may be defined");
         }
 
-        Eigen::VectorXd spatialTwist = endEffectorTwist(jointAngles, linkLengths, jointVelocities, axisOfRotation);
+        auto J = positionJacobian(jointAngles, linkLengths, axisOfRotation);
 
-        Eigen::Vector2d FK = forwardKinematics(jointAngles, linkLengths);
-        Eigen::Vector3d omegaAxis = axisOfRotation.normalized();
-
-        Eigen::Vector3d axisU;
-        if (omegaAxis.x() != 0.0) {
-            axisU << 0.0, 1.0, 0.0;
-        } else {
-            axisU << 1.0, 0.0, 0.0;
-        }
-
-        Eigen::Vector3d axisV = omegaAxis.cross(axisU);
-
-        Eigen::Vector3d endEffectorPosition = axisU * FK.x() + axisV * FK.y();
-
-        Eigen::Vector3d omega = spatialTwist.head(3);
-        Eigen::Vector3d v = spatialTwist.tail(3);
-
-        return omega.cross(endEffectorPosition) + v;
+        return J * jointVelocities;
     }
 
     std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths)
@@ -228,13 +257,13 @@ namespace Kinematics {
             return std::vector<std::vector<double>>{{std::atan2(-y, -x), std::numbers::pi}};
         }
 
-        double c2 = (std::pow(x, 2) + std::pow(y, 2) - std::pow(l1, 2) - std::pow(l2, 2))/(2*l1*l2);
+        double cosTheta2 = (std::pow(x, 2) + std::pow(y, 2) - std::pow(l1, 2) - std::pow(l2, 2))/(2*l1*l2);
 
         // Protect acos() against floating-point overshoot.
-        c2 = std::clamp(c2, -1.0, 1.0);
+        cosTheta2 = std::clamp(cosTheta2, -1.0, 1.0);
 
-        double leftyTheta2 = std::acos(c2);
-        double rightyTheta2 = -std::acos(c2);
+        double leftyTheta2 = std::acos(cosTheta2);
+        double rightyTheta2 = -std::acos(cosTheta2);
 
         double leftyTheta1 = std::atan2(y, x) - std::atan2(l2 * std::sin(leftyTheta2), l1 + l2 * std::cos(leftyTheta2));
         double rightyTheta1 = std::atan2(y, x) - std::atan2(l2 * std::sin(rightyTheta2), l1 + l2 * std::cos(rightyTheta2));
