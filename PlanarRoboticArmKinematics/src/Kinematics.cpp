@@ -124,7 +124,7 @@ namespace Kinematics {
         return J;
     }
 
-    Eigen::Matrix<double, 3, Eigen::Dynamic> positionJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
+    Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
     {
         if (jointAngles.size() != linkLengths.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links.");
@@ -158,16 +158,16 @@ namespace Kinematics {
 
         Eigen::Vector3d endEffectorPosition = axisU * FK.x() + axisV * FK.y();
 
-        Eigen::Matrix<double, 3, Eigen::Dynamic> positionJ(3, jointAngles.size());
+        Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJ(3, jointAngles.size());
 
         for (Eigen::Index i = 0; i < spatialJ.cols(); ++i) {
             Eigen::Vector3d omega = spatialJ.col(i).head<3>();
             Eigen::Vector3d v = spatialJ.col(i).tail<3>();
 
-            positionJ.col(i) = omega.cross(endEffectorPosition) + v;
+            linearVelocityJ.col(i) = omega.cross(endEffectorPosition) + v;
         }
 
-        return positionJ;
+        return linearVelocityJ;
     }
 
     Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
@@ -204,7 +204,7 @@ namespace Kinematics {
             throw std::invalid_argument("One, and only one, axis of rotation may be defined");
         }
 
-        auto J = positionJacobian(jointAngles, linkLengths, axisOfRotation);
+        auto J = linearVelocityJacobian(jointAngles, linkLengths, axisOfRotation);
 
         return J * jointVelocities;
     }
@@ -269,5 +269,64 @@ namespace Kinematics {
         double rightyTheta1 = std::atan2(y, x) - std::atan2(l2 * std::sin(rightyTheta2), l1 + l2 * std::cos(rightyTheta2));
 
         return std::vector<std::vector<double>>{{leftyTheta1, leftyTheta2}, {rightyTheta1, rightyTheta2}};
+    }
+
+    std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation, const std::vector<double>& initialGuess, const Eigen::Vector2d& errorTolerance, const int maximumIterations)
+    {
+        if (linkLengths.empty()) {
+            throw std::invalid_argument("Robot must have at least 1 link");
+        }
+
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
+        }
+
+        if (!isReachable(targetPosition, linkLengths)) {
+            // No solution
+            return {};
+        } else if (linkLengths.size() == 1) {
+            // Solution for single link robotic arm
+            return std::vector<double>{std::atan2(targetPosition.y(), targetPosition.x())};
+        }
+
+        std::vector<double> currentGuess = initialGuess;
+        for (int i = 0; i < maximumIterations; ++i) {
+            Eigen::Vector2d currentPosition = forwardKinematics(currentGuess, linkLengths);
+
+            Eigen::Vector2d currentError = targetPosition - currentPosition;
+            if ((currentError.array().abs() <= errorTolerance.array()).all()) {
+                return currentGuess;
+            }
+
+            auto jacobian = linearVelocityJacobian(currentGuess, linkLengths, axisOfRotation);
+            
+            Eigen::MatrixXd planarJacobian(2, linkLengths.size());
+
+            // Select the two dimensions perpendicular to the rotation axis
+            if (std::abs(axisOfRotation.x()) > 0.5) {
+                // Rotation about X: YZ plane
+                planarJacobian.row(0) = jacobian.row(1);
+                planarJacobian.row(1) = jacobian.row(2);
+            } else if (std::abs(axisOfRotation.y()) > 0.5) {
+                // Rotation about Y: XZ plane
+                planarJacobian.row(0) = jacobian.row(0);
+                planarJacobian.row(1) = jacobian.row(2);
+            } else {
+                // Rotation about Z: XY plane
+                planarJacobian.row(0) = jacobian.row(0);
+                planarJacobian.row(1) = jacobian.row(1);
+            }
+
+            auto jacobianPseudoInverse = planarJacobian.completeOrthogonalDecomposition().pseudoInverse();
+
+            Eigen::VectorXd q = Eigen::Map<Eigen::VectorXd>(currentGuess.data(), currentGuess.size());
+            q += jacobianPseudoInverse * currentError;
+
+            currentGuess.assign(q.data(), q.data() + q.size());
+        }
+
+        return currentGuess;
     }
 }

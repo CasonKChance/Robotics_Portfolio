@@ -180,7 +180,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, SpatialJacobianTest) {
     EXPECT_TRUE(J4.isApprox(expectedJ4, tolerance));
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, PositionJacobianTest) {
+TEST(PlanarRoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
     const double tolerance = 1e-6;
 
     // Test case 1: Two-link arm fully extended along X, rotating about Z
@@ -188,7 +188,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, PositionJacobianTest) {
     std::vector<double> linkLengths1 = {1.0, 1.0};
     Eigen::Vector3d axisOfRotation1(0.0, 0.0, 1.0);
 
-    auto J1 = Kinematics::positionJacobian(jointAngles1, linkLengths1, axisOfRotation1);
+    auto J1 = Kinematics::linearVelocityJacobian(jointAngles1, linkLengths1, axisOfRotation1);
 
     Eigen::Matrix<double, 3, 2> expectedJ1;
     expectedJ1 << 0.0, 0.0,
@@ -202,7 +202,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, PositionJacobianTest) {
     std::vector<double> linkLengths2 = {2.0, 1.0};
     Eigen::Vector3d axisOfRotation2(0.0, 0.0, 1.0);
 
-    auto J2 = Kinematics::positionJacobian(jointAngles2, linkLengths2, axisOfRotation2);
+    auto J2 = Kinematics::linearVelocityJacobian(jointAngles2, linkLengths2, axisOfRotation2);
 
     Eigen::Matrix<double, 3, 2> expectedJ2;
     expectedJ2 << -3.0, -1.0,
@@ -218,7 +218,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, PositionJacobianTest) {
     std::vector<double> linkLengths3 = {1.0, 2.0, 1.0};
     Eigen::Vector3d axisOfRotation3(0.0, 1.0, 0.0);
 
-    auto J3 = Kinematics::positionJacobian(jointAngles3, linkLengths3, axisOfRotation3);
+    auto J3 = Kinematics::linearVelocityJacobian(jointAngles3, linkLengths3, axisOfRotation3);
 
     Eigen::Matrix<double, 3, 3> expectedJ3;
     expectedJ3 << -2.0, -2.0,  0.0,
@@ -232,7 +232,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, PositionJacobianTest) {
     std::vector<double> linkLengths4 = {2.0, 1.0};
     Eigen::Vector3d axisOfRotation4(1.0, 0.0, 0.0);
 
-    auto J4 = Kinematics::positionJacobian(jointAngles4, linkLengths4, axisOfRotation4);
+    auto J4 = Kinematics::linearVelocityJacobian(jointAngles4, linkLengths4, axisOfRotation4);
 
     Eigen::Matrix<double, 3, 2> expectedJ4;
     expectedJ4 << 0.0, 0.0,
@@ -544,8 +544,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, AnalyticInverseKinematicsTest) {
     for (const auto& solution : solutions12) {
         ASSERT_EQ(solution.size(), 2);
 
-        Eigen::Vector2d calculatedPosition =
-            Kinematics::forwardKinematics(solution, linkLengths12);
+        Eigen::Vector2d calculatedPosition = Kinematics::forwardKinematics(solution, linkLengths12);
 
         EXPECT_TRUE(calculatedPosition.isApprox(targetPosition12, tolerance));
     }
@@ -587,6 +586,214 @@ TEST(PlanarRoboticArmKinematicsTestSuite, AnalyticInverseKinematicsTest) {
     );
 }
 
+TEST(PlanarRoboticArmKinematicsTestSuite, NumericalInverseKinematicsTest) {
+    const double tolerance = 1e-6;
+    const Eigen::Vector2d errorTolerance(1e-8, 1e-8);
+    const Eigen::Vector3d axisOfRotation(0.0, 0.0, 1.0);
+    const int maximumIterations = 100;
+
+    // Test case 1: Single-link arm along the x-axis
+    Eigen::Vector2d targetPosition1(2.0, 0.0);
+    std::vector<double> linkLengths1 = {2.0};
+    std::vector<double> initialGuess1 = {0.5};
+
+    auto solution1 = Kinematics::numericalInverseKinematics(
+        targetPosition1, linkLengths1, axisOfRotation,
+        initialGuess1, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution1.size(), 1);
+    EXPECT_NEAR(solution1[0], 0.0, tolerance);
+
+    // Test case 2: Single-link arm along the y-axis
+    Eigen::Vector2d targetPosition2(0.0, 2.0);
+    std::vector<double> linkLengths2 = {2.0};
+    std::vector<double> initialGuess2 = {0.0};
+
+    auto solution2 = Kinematics::numericalInverseKinematics(
+        targetPosition2, linkLengths2, axisOfRotation,
+        initialGuess2, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution2.size(), 1);
+    EXPECT_NEAR(solution2[0], std::numbers::pi / 2, tolerance);
+
+    // Test case 3: Two-link arm reaching a target within its workspace
+    Eigen::Vector2d targetPosition3(1.0, 1.0);
+    std::vector<double> linkLengths3 = {1.0, 1.0};
+    std::vector<double> initialGuess3 = {0.2, 1.2};
+
+    auto solution3 = Kinematics::numericalInverseKinematics(
+        targetPosition3, linkLengths3, axisOfRotation,
+        initialGuess3, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution3.size(), 2);
+
+    Eigen::Vector2d calculatedPosition3 =
+        Kinematics::forwardKinematics(solution3, linkLengths3);
+
+    EXPECT_TRUE(calculatedPosition3.isApprox(targetPosition3, tolerance));
+
+    // Test case 4: Two-link arm with unequal link lengths
+    Eigen::Vector2d targetPosition4(2.0, 1.0);
+    std::vector<double> linkLengths4 = {2.0, 1.0};
+    std::vector<double> initialGuess4 = {0.1, 1.3};
+
+    auto solution4 = Kinematics::numericalInverseKinematics(
+        targetPosition4, linkLengths4, axisOfRotation,
+        initialGuess4, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution4.size(), 2);
+
+    Eigen::Vector2d calculatedPosition4 =
+        Kinematics::forwardKinematics(solution4, linkLengths4);
+
+    EXPECT_TRUE(calculatedPosition4.isApprox(targetPosition4, tolerance));
+
+    // Test case 5: Three-link arm reaching a target within its workspace
+    std::vector<double> linkLengths5 = {1.0, 1.0, 1.0};
+    std::vector<double> expectedAngles5 = {0.3, 0.5, -0.4};
+    Eigen::Vector2d targetPosition5 =
+        Kinematics::forwardKinematics(expectedAngles5, linkLengths5);
+    std::vector<double> initialGuess5 = {0.4, 0.4, -0.3};
+
+    auto solution5 = Kinematics::numericalInverseKinematics(
+        targetPosition5, linkLengths5, axisOfRotation,
+        initialGuess5, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution5.size(), 3);
+
+    Eigen::Vector2d calculatedPosition5 =
+        Kinematics::forwardKinematics(solution5, linkLengths5);
+
+    EXPECT_TRUE(calculatedPosition5.isApprox(targetPosition5, tolerance));
+
+    // Test case 6: Four-link arm reaching a target within its workspace
+    std::vector<double> linkLengths6 = {1.0, 1.0, 1.0, 1.0};
+    std::vector<double> expectedAngles6 = {0.2, 0.4, -0.3, 0.5};
+    Eigen::Vector2d targetPosition6 =
+        Kinematics::forwardKinematics(expectedAngles6, linkLengths6);
+    std::vector<double> initialGuess6 = {0.3, 0.3, -0.2, 0.4};
+
+    auto solution6 = Kinematics::numericalInverseKinematics(
+        targetPosition6, linkLengths6, axisOfRotation,
+        initialGuess6, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution6.size(), 4);
+
+    Eigen::Vector2d calculatedPosition6 =
+        Kinematics::forwardKinematics(solution6, linkLengths6);
+
+    EXPECT_TRUE(calculatedPosition6.isApprox(targetPosition6, tolerance));
+
+    // Test case 7: Initial guess already satisfies the target
+    std::vector<double> linkLengths7 = {1.0, 1.0};
+    std::vector<double> initialGuess7 = {0.4, 0.8};
+    Eigen::Vector2d targetPosition7 =
+        Kinematics::forwardKinematics(initialGuess7, linkLengths7);
+
+    auto solution7 = Kinematics::numericalInverseKinematics(
+        targetPosition7, linkLengths7, axisOfRotation,
+        initialGuess7, errorTolerance, maximumIterations
+    );
+
+    ASSERT_EQ(solution7.size(), 2);
+    EXPECT_NEAR(solution7[0], initialGuess7[0], tolerance);
+    EXPECT_NEAR(solution7[1], initialGuess7[1], tolerance);
+
+    // Test case 8: Two-link arm with unreachable target beyond maximum reach
+    Eigen::Vector2d targetPosition8(3.0, 0.0);
+    std::vector<double> linkLengths8 = {1.0, 1.0};
+    std::vector<double> initialGuess8 = {0.5, 0.5};
+
+    auto solution8 = Kinematics::numericalInverseKinematics(
+        targetPosition8, linkLengths8, axisOfRotation,
+        initialGuess8, errorTolerance, maximumIterations
+    );
+
+    EXPECT_TRUE(solution8.empty());
+
+    // Test case 9: Two-link arm with unreachable target inside minimum reach
+    Eigen::Vector2d targetPosition9(0.0, 0.0);
+    std::vector<double> linkLengths9 = {2.0, 1.0};
+    std::vector<double> initialGuess9 = {0.5, 0.5};
+
+    auto solution9 = Kinematics::numericalInverseKinematics(
+        targetPosition9, linkLengths9, axisOfRotation,
+        initialGuess9, errorTolerance, maximumIterations
+    );
+
+    EXPECT_TRUE(solution9.empty());
+
+    // Test case 10: Single-link arm with unreachable target
+    Eigen::Vector2d targetPosition10(1.0, 1.0);
+    std::vector<double> linkLengths10 = {1.0};
+    std::vector<double> initialGuess10 = {0.0};
+
+    auto solution10 = Kinematics::numericalInverseKinematics(
+        targetPosition10, linkLengths10, axisOfRotation,
+        initialGuess10, errorTolerance, maximumIterations
+    );
+
+    EXPECT_TRUE(solution10.empty());
+
+    // Test case 11: Zero maximum iterations should return the initial guess
+    Eigen::Vector2d targetPosition11(1.0, 1.0);
+    std::vector<double> linkLengths11 = {1.0, 1.0};
+    std::vector<double> initialGuess11 = {0.2, 0.5};
+
+    auto solution11 = Kinematics::numericalInverseKinematics(
+        targetPosition11, linkLengths11, axisOfRotation,
+        initialGuess11, errorTolerance, 0
+    );
+
+    ASSERT_EQ(solution11.size(), 2);
+    EXPECT_NEAR(solution11[0], initialGuess11[0], tolerance);
+    EXPECT_NEAR(solution11[1], initialGuess11[1], tolerance);
+
+    // Test case 12: Empty link lengths should throw an exception
+    Eigen::Vector2d targetPosition12(1.0, 1.0);
+    std::vector<double> linkLengths12 = {};
+    std::vector<double> initialGuess12 = {};
+
+    EXPECT_THROW(
+        Kinematics::numericalInverseKinematics(
+            targetPosition12, linkLengths12, axisOfRotation,
+            initialGuess12, errorTolerance, maximumIterations
+        ),
+        std::invalid_argument
+    );
+
+    // Test case 13: Zero link length should throw an exception
+    Eigen::Vector2d targetPosition13(1.0, 1.0);
+    std::vector<double> linkLengths13 = {1.0, 0.0};
+    std::vector<double> initialGuess13 = {0.0, 0.0};
+
+    EXPECT_THROW(
+        Kinematics::numericalInverseKinematics(
+            targetPosition13, linkLengths13, axisOfRotation,
+            initialGuess13, errorTolerance, maximumIterations
+        ),
+        std::invalid_argument
+    );
+
+    // Test case 14: Negative link length should throw an exception
+    Eigen::Vector2d targetPosition14(1.0, 1.0);
+    std::vector<double> linkLengths14 = {1.0, -1.0};
+    std::vector<double> initialGuess14 = {0.0, 0.0};
+
+    EXPECT_THROW(
+        Kinematics::numericalInverseKinematics(
+            targetPosition14, linkLengths14, axisOfRotation,
+            initialGuess14, errorTolerance, maximumIterations
+        ),
+        std::invalid_argument
+    );
+}
 
 int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);

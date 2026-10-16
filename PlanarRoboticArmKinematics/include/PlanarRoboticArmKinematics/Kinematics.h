@@ -32,13 +32,13 @@ namespace Kinematics{
     Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
 
     /**
-     * @brief Calculates the position (linear velocity) jacobian of a planar robot arm.
+     * @brief Calculates the linear velocity jacobian of a planar robot arm.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
-     * @return The position jacobian matrix.
+     * @return The linear velocity jacobian matrix.
      */
-    Eigen::Matrix<double, 3, Eigen::Dynamic> positionJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
+    Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
 
     /**
      * @brief Calculates the end-effector twist.
@@ -68,7 +68,7 @@ namespace Kinematics{
      */
     std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths);
 
-    std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const std::vector<double>& initialGuess, const double maximumIterations);
+    std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation, const std::vector<double>& initialGuess, const Eigen::Vector2d& errorTolerance, const int maximumIterations);
 }
 
 #endif
