@@ -145,4 +145,60 @@ namespace Kinematics {
 
         return omega.cross(endEffectorPosition) + v;
     }
+
+    std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths)
+    {
+        if (linkLengths.size() > 2) {
+            throw std::invalid_argument("Analytic Inverse Kinematics with no orientation target only works for arms with 2 degrees of freedom or less");
+        } else if (linkLengths.empty()) {
+            throw std::invalid_argument("Robot must have at least 1 link");
+        }
+
+        if (!isReachable(targetPosition, linkLengths)) {
+            // No solution
+            return {};
+        } else if (linkLengths.size() == 1) {
+            // Solution for single link robotic arm
+            return std::vector<std::vector<double>>{{std::atan2(targetPosition.y(), targetPosition.x())}};
+        }
+
+        double tolerance = 1e-9;
+
+        const double x = targetPosition.x();
+        const double y = targetPosition.y();
+
+        const double l1 = linkLengths[0];
+        const double l2 = linkLengths[1];
+
+        const double radius = std::hypot(x, y);
+
+        // Singular solution cases
+        if (std::abs(radius - (l1 + l2)) < tolerance) {
+            // Target position lies on the outer border of the task space.
+            return std::vector<std::vector<double>>{{std::atan2(y, x), 0.0}};
+        } else if (std::abs(x) < tolerance && std::abs(y) < tolerance) {
+            // Case where target position is [0, 0]ᵀ.
+            // This case could techincally provide infinite solutions, instead we use [0, 𝛑].
+            return std::vector<std::vector<double>>{{0.0, std::numbers::pi}};
+        } else if (l1 > l2 && std::abs(radius - (l1 - l2)) < tolerance) {
+            // Case where target position lies on the inner border of the task space and link1 is longer than link2.
+            return std::vector<std::vector<double>>{{std::atan2(y, x), std::numbers::pi}};
+        } else if (l1 < l2 && std::abs(radius - (l2 - l1)) < tolerance) {
+            // Case where target position lies on the inner border of the task space and link2 is longer than link1.
+            return std::vector<std::vector<double>>{{std::atan2(-y, -x), std::numbers::pi}};
+        }
+
+        double c2 = (std::pow(x, 2) + std::pow(y, 2) - std::pow(l1, 2) - std::pow(l2, 2))/(2*l1*l2);
+
+        // Protect acos() against floating-point overshoot.
+        c2 = std::clamp(c2, -1.0, 1.0);
+
+        double leftyTheta2 = std::acos(c2);
+        double rightyTheta2 = -std::acos(c2);
+
+        double leftyTheta1 = std::atan2(y, x) - std::atan2(l2 * std::sin(leftyTheta2), l1 + l2 * std::cos(leftyTheta2));
+        double rightyTheta1 = std::atan2(y, x) - std::atan2(l2 * std::sin(rightyTheta2), l1 + l2 * std::cos(rightyTheta2));
+
+        return std::vector<std::vector<double>>{{leftyTheta1, leftyTheta2}, {rightyTheta1, rightyTheta2}};
+    }
 }

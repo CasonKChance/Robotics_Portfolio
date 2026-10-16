@@ -23,33 +23,41 @@ namespace Kinematics{
     bool isReachable(const Eigen::Vector2d& point, const std::vector<double>& linkLengths);
 
     /**
-     * @brief Calculates the jacobian of a planar robot arm
+     * @brief Calculates the jacobian of a planar robot arm.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
-     * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X)
-     * @return the jacobian matrix.
+     * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
+     * @return The jacobian matrix.
      */
     Eigen::Matrix<double, 6, Eigen::Dynamic> jacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
 
     /**
-     * @brief Calculates the end-effector twist
+     * @brief Calculates the end-effector twist.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param jointVelocities The angular velocities of the joints in radians.
      * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
-     * @return the end-effector twist
+     * @return The end-effector twist.
      */
     Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation);
 
     /**
-     * @brief Calculates the end-effector velocity
+     * @brief Calculates the end-effector velocity.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param jointVelocities The angular velocities of the joints in radians.
      * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
-     * @return the end-effector velocity
+     * @return The end-effector velocity.
      */    
     Eigen::Vector3d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation);
+
+    /**
+     * @brief Uses analytic inverse kinematics to calculate the possible joint angle solutions to place the end-effector at a target position.
+     *        Only works for robotic arms with 1 or 2 links, robots with arbitrary n links where n > 2 must use the numerical inverse kinematics.
+     * @param targetPosition The target position for the end-effector.
+     * @return The set of solutions with each solution containing the necessary joint angles. Can return 0, 1, or 2 solutions.
+     */
+    std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths);
 }
 
 #endif
