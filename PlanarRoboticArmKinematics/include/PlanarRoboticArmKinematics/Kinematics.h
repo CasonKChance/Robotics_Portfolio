@@ -66,9 +66,10 @@ namespace Kinematics{
      * @brief Uses analytic inverse kinematics to calculate the possible joint angle solutions to place the end-effector at a target position.
      *        Only works for robotic arms with 1 or 2 links, robots with arbitrary n links where n > 2 must use the numerical inverse kinematics.
      * @param targetPosition The target position for the end-effector.
+     * @param linkLengths The lengths of the links in the robotic arm.
      * @return The set of solutions with each solution containing the necessary joint angles. Can return 0, 1, or 2 solutions.
      */
-    std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths);
+    std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector3d& targetPosition, const std::vector<double>& linkLengths);
 
     /**
      * @brief Uses numerical inverse kinematics to converge on a joint angles solution to place the end-effector at a target position.
