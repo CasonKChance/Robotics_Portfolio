@@ -6,20 +6,22 @@
 namespace Kinematics {
     Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes)
     {
-        if (jointAngles.size() != linkLengths.size()
-            || jointAngles.size() != jointAxes.size()) {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointAxes.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links and the number of joint axes.");
         }
 
         Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
 
         for (size_t i = 0; i < jointAngles.size(); ++i) {
-            if (linkLengths[i] <= 0) {
-                throw::std::invalid_argument("Links must have positive length.");
+            if (!std::isfinite(jointAngles[i])) {
+                throw std::invalid_argument("Joint angles must be finite.");
             }
 
-            if (!jointAxes[i].allFinite()
-                || jointAxes[i].norm() < 1e-9) {
+            if (!std::isfinite(linkLengths[i]) || linkLengths[i] <= 0) {
+                throw::std::invalid_argument("Links must be finite and have positive length.");
+            }
+
+            if (!jointAxes[i].allFinite() || jointAxes[i].norm() < 1e-9) {
                 throw std::invalid_argument("Joint axes must be finite and nonzero.");
             }
 
@@ -48,17 +50,15 @@ namespace Kinematics {
         }
 
         if (!point.allFinite()) {
-            throw std::invalid_argument(
-                "Target position must be finite."
-            );
+            throw std::invalid_argument("Target position must be finite.");
         }
 
         double totalLength = 0.0;
         double longestLink = 0.0;
 
         for (size_t i = 0; i < linkLengths.size(); ++i) {
-            if (linkLengths[i] <= 0) {
-                throw::std::invalid_argument("Links must have positive length.");
+            if (!std::isfinite(linkLengths[i]) || linkLengths[i] <= 0) {
+                throw::std::invalid_argument("Links must be finite and have positive length.");
             }
 
             totalLength += linkLengths[i];
@@ -74,65 +74,60 @@ namespace Kinematics {
         return (distance >= minReach - tolerance) && (distance <= maxReach + tolerance);
     }
 
-    // Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
-    // {
-    //     if (jointAngles.size() != linkLengths.size()) {
-    //         throw std::invalid_argument("The number of joints must be equal to the number of links.");
-    //     }
+    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes)
+    {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointAxes.size()) {
+            throw std::invalid_argument("The number of joints must be equal to the number of links and the number of joint axes.");
+        }
 
-    //     for (double length : linkLengths) {
-    //         if (length <= 0.0) {
-    //             throw std::invalid_argument("Link lengths must be greater than zero");
-    //         }
-    //     }
+        Eigen::Matrix<double, 6, Eigen::Dynamic> J(6, jointAngles.size());
 
-    //     int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
-    //     if (nonZeroAxes != 1) {
-    //         throw std::invalid_argument("One, and only one, axis of rotation may be defined");
-    //     }
+        Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
 
-    //     Eigen::Matrix<double, 6, Eigen::Dynamic> J(6, jointAngles.size());
+        for (size_t i = 0; i < jointAngles.size(); ++i) {
+            if (!std::isfinite(jointAngles[i])) {
+                throw std::invalid_argument("Joint angles must be finite.");
+            }
 
-    //     // Define the axes of the plane
-    //     Eigen::Vector3d omega = axisOfRotation.normalized();
+            if (!std::isfinite(linkLengths[i]) || linkLengths[i] <= 0.0) {
+                throw std::invalid_argument("Links must be finite and have positive length.");
+            }
 
-    //     Eigen::Vector3d axisU;
-    //     Eigen::Vector3d axisV;
-        
-    //     if (omega.x()) {
-    //         // If rotating about X, arm stretches along Y at zero configuration
-    //         axisU << 0, 1, 0;
-    //         axisV = omega.cross(axisU);
-    //     } else {
-    //         // If rotating about Y or Z, arm stretches along X at zero configuration
-    //         axisU << 1, 0, 0;
-    //         axisV = omega.cross(axisU);
-    //     }
+            if (!jointAxes[i].allFinite() || jointAxes[i].norm() < 1e-9) {
+                throw std::invalid_argument("Joint axes must be finite and nonzero.");
+            }
 
-    //     Eigen::Vector3d q_current = Eigen::Vector3d::Zero();
-    //     double totalAngle = 0.0;
+            // Current joint's axis and origin in the space frame
+            Eigen::Matrix3d R_i = T.block<3, 3>(0, 0);
+            Eigen::Vector3d q_i = T.block<3, 1>(0, 3);
 
-    //     for (size_t i = 0; i < jointAngles.size(); ++i) {
-    //         // Angular velocity is unit length about the axis of rotation
-    //         Eigen::Vector3d omega_i = omega;
+            Eigen::Vector3d omega_i = R_i * jointAxes[i].normalized();
+            Eigen::Vector3d v_i = -omega_i.cross(q_i);
 
-    //         // Linear velocity of joint in space frame
-    //         Eigen::Vector3d v_i = -omega_i.cross(q_current);
+            // Screw vector composed of angular velocity vector and linear velocity vector
+            Eigen::Matrix<double, 6, 1> S;
+            S << omega_i, v_i;
 
-    //         // Screw vector composed of angular velocity vector and linear velocity vector
-    //         Eigen::Matrix<double, 6, 1> S;
-    //         S << omega_i, v_i;
+            // Add screw vector to jacobian matrix
+            J.col(i) = S;
 
-    //         // Add screw vector to jacobian matrix
-    //         J.col(i) = S;
+            // Update T for next iteration
+            Eigen::Matrix4d transformation = Eigen::Matrix4d::Identity();
 
-    //         // Update q_current for next iteration
-    //         totalAngle += jointAngles[i];
-    //         q_current += linkLengths[i] * (axisU * std::cos(totalAngle) + axisV * std::sin(totalAngle));
-    //     }
+            Eigen::Matrix3d rotation =
+                Eigen::AngleAxisd(
+                    jointAngles[i],
+                    jointAxes[i].normalized()
+                ).toRotationMatrix();
 
-    //     return J;
-    // }
+            transformation.block<3, 3>(0, 0) = rotation;
+            transformation.block<3, 1>(0, 3) = rotation * Eigen::Vector3d(linkLengths[i], 0.0, 0.0);
+
+            T *= transformation;
+        }
+
+        return J;
+    }
 
     // Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
     // {
