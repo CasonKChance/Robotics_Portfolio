@@ -207,7 +207,6 @@ TEST(RoboticArmKinematicsTestSuite, SpatialJacobianTest) {
 }
 
 TEST(RoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
-    const double pi = std::numbers::pi;
     const double tolerance = 1e-6;
 
     // Test case 1: Two-link arm fully extended along X, rotating about Z

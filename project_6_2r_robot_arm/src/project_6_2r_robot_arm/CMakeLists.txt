@@ -17,25 +17,24 @@ add_subdirectory(
 )
 
 # Declare C++ library for core classes
-add_library(${PROJECT_NAME}_lib
-  src/RobotArmAnalyzer.cpp
-)
+# add_library(${PROJECT_NAME}_lib
+# )
 
 # Export include directories
-target_include_directories(${PROJECT_NAME}_lib
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-)
+# target_include_directories(${PROJECT_NAME}_lib
+#   PUBLIC
+#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+# )
 
-target_link_libraries(${PROJECT_NAME}_lib
-  PUBLIC
-    rclcpp::rclcpp
-    urdf::urdf
-    ${geometry_msgs_TARGETS}
-    ${std_msgs_TARGETS}
-    Kinematics
-)
+# target_link_libraries(${PROJECT_NAME}_lib
+#   PUBLIC
+#     rclcpp::rclcpp
+#     urdf::urdf
+#     ${geometry_msgs_TARGETS}
+#     ${std_msgs_TARGETS}
+#     Kinematics
+# )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -48,7 +47,7 @@ endif()
 install(
   TARGETS
     Kinematics
-    ${PROJECT_NAME}_lib
+#    ${PROJECT_NAME}_lib
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
