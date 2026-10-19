@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="2r_robot_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="3r_robot_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:include filename="properties.xacro"/>
   <xacro:include filename="components.xacro"/>
 
@@ -31,53 +31,34 @@
 
   <link name="pedestal_link">
     <visual>
-      <origin xyz="0 0 ${base_height + pedestal_height / 2.0}"/>
+      <origin xyz="0 0 ${pedestal_height / 2.0}"/>
       <geometry>
         <cylinder length="${pedestal_height}" radius="${pedestal_radius}"/>
       </geometry>
       <material name="base_gray"/>
     </visual>
     <collision>
-      <origin xyz="0 0 ${base_height + pedestal_height / 2.0}"/>
+      <origin xyz="0 0 ${pedestal_height / 2.0}"/>
       <geometry>
         <cylinder length="${pedestal_height}" radius="${pedestal_radius}"/>
       </geometry>
     </collision>
-    <xacro:z_aligned_cylinder_inertia origin_xyz="0 0 ${base_height + pedestal_height / 2.0}" mass="${pedestal_mass}" radius="${pedestal_radius}" length="${pedestal_height}"/>
+    <xacro:z_aligned_cylinder_inertia
+      origin_xyz="0 0 ${pedestal_height / 2.0}"
+      mass="${pedestal_mass}"
+      radius="${pedestal_radius}"
+      length="${pedestal_height}"/>
   </link>
   <joint name="joint_base_pedestal" type="fixed">
     <parent link="base_link"/>
     <child link="pedestal_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 ${base_height}" rpy="0 0 0"/>
   </joint>
 
-  <!-- Circular shoulder pivot housing is fixed to the pedestal. -->
-  <link name="shoulder_link">
-    <visual>
-      <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0"/>
-      <geometry>
-        <cylinder radius="${shoulder_radius}" length="${shoulder_length}"/>
-      </geometry>
-      <material name="joint_dark"/>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="${pi / 2.0} 0 0"/>
-      <geometry>
-        <cylinder radius="${shoulder_radius}" length="${shoulder_length}"/>
-      </geometry>
-    </collision>
-    <xacro:y_aligned_cylinder_inertia origin_xyz="0 0 0" mass="${shoulder_mass}" radius="${shoulder_radius}" length="${shoulder_length}"/>
-  </link>
-  <joint name="joint_pedestal_shoulder" type="fixed">
-    <parent link="pedestal_link"/>
-    <child link="shoulder_link"/>
-    <origin xyz="0 ${shoulder_length / 4.0} ${base_height + pedestal_height}"/>
-  </joint>
-
-  <!-- Both rotation axes point along +Y, producing motion in the X-Z plane. -->
+  <!-- Circular shoulder pivot housing is rotates about the Z axis. -->
   <link name="arm_link_1">
-    <xacro:arm_segment length="${arm_length}" mass="${arm_mass}"/>
-    <!-- Elbow housing, located at the far end of link 1. -->
+    <xacro:arm_segment length="${arm_length}" mass="${arm_mass}" joint_axis="z"/>
+    <!-- Shoulder housing, located at the far end of link 1. -->
     <visual>
       <origin xyz="${arm_length} 0 0" rpy="${-pi / 2.0} 0 0"/>
       <geometry>
@@ -92,23 +73,50 @@
       </geometry>
     </collision>
   </link>
-  <joint name="joint_shoulder_arm1" type="continuous">
-    <parent link="shoulder_link"/>
+  <joint name="joint_pedestal_arm1" type="continuous">
+    <parent link="pedestal_link"/>
     <child link="arm_link_1"/>
-    <origin xyz="0 ${(shoulder_length + joint_length) / 2.0} 0" rpy="0 0 0"/>
-    <axis xyz="0 -1 0"/>
+    <origin xyz="0 0 ${pedestal_height}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
     <limit effort="${joint_effort}" velocity="${joint_velocity}"/>
     <dynamics damping="0.15" friction="0.02"/>
   </joint>
 
+  <!-- Planar arm. Both joints rotate about the same axis -->
   <link name="arm_link_2">
-    <xacro:arm_segment length="${arm_length}" mass="0.6"/>
+    <xacro:arm_segment length="${arm_length}" mass="${arm_mass}"/>
+    <!-- Elbow housing, located at the far end of link 2. -->
+    <visual>
+      <origin xyz="${arm_length} 0 0" rpy="${-pi / 2.0} 0 0"/>
+      <geometry>
+        <cylinder radius="${joint_radius}" length="${joint_length}"/>
+      </geometry>
+      <material name="arm_silver"/>
+    </visual>
+    <collision>
+      <origin xyz="${arm_length} 0 0" rpy="${-pi / 2.0} 0 0"/>
+      <geometry>
+        <cylinder radius="${joint_radius}" length="${joint_length}"/>
+      </geometry>
+    </collision>
   </link>
   <joint name="joint_arm1_arm2" type="continuous">
     <parent link="arm_link_1"/>
     <child link="arm_link_2"/>
     <origin xyz="${arm_length} ${joint_length} 0" rpy="0 0 0"/>
-    <axis xyz="0 -1 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="${joint_effort}" velocity="${joint_velocity}"/>
+    <dynamics damping="0.15" friction="0.02"/>
+  </joint>
+
+  <link name="arm_link_3">
+    <xacro:arm_segment length="${arm_length}" mass="0.6"/>
+  </link>
+  <joint name="joint_arm2_arm3" type="continuous">
+    <parent link="arm_link_2"/>
+    <child link="arm_link_3"/>
+    <origin xyz="${arm_length} ${joint_length} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
     <limit effort="${joint_effort}" velocity="${joint_velocity}"/>
     <dynamics damping="0.10" friction="0.02"/>
   </joint>
@@ -131,7 +139,7 @@
     <xacro:x_aligned_cylinder_inertia origin_xyz="${end_effector_length / 2.0} 0 0" mass="${end_effector_mass}" radius="${end_effector_radius}" length="${end_effector_length}"/>
   </link>
   <joint name="joint_arm2_end-effector" type="fixed">
-    <parent link="arm_link_2"/>
+    <parent link="arm_link_3"/>
     <child link="end_effector_link"/>
     <origin xyz="${arm_length} 0 0" rpy="0 0 0"/>
   </joint>

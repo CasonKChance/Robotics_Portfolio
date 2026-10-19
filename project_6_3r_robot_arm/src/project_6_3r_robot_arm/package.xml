@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>project_6_2r_robot_arm</name>
+  <name>project_6_3r_robot_arm</name>
   <version>0.0.0</version>
-  <description>Project 6: Robot Arm with 2 revolute joints</description>
+  <description>Project 6: Robot Arm with 3 revolute joints</description>
   <maintainer email="casonkchance@gmail.com">Cason</maintainer>
   <license>Apache-2.0</license>
 

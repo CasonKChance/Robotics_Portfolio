@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(project_6_2r_robot_arm)
+project(project_6_3r_robot_arm)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
