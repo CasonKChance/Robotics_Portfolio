@@ -13,7 +13,7 @@ namespace Kinematics{
      * @param jointAxes The axes about which each joint rotates.
      * @return The position of the end effector in the base frame.
      */
-    Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes);
+    Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes);
 
     /**
      * @brief Determines if a provided point is within the robotic arm's task space.
@@ -31,16 +31,16 @@ namespace Kinematics{
      * @param jointAxes The axes about which each joint rotates.
      * @return The spatial jacobian matrix.
      */
-    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes);
+    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes);
 
     /**
      * @brief Calculates the linear velocity jacobian of a planar robot arm.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
-     * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
+     * @param jointAxes The axes about which each joint rotates.
      * @return The linear velocity jacobian matrix.
      */
-    Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation);
+    Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes);
 
     /**
      * @brief Calculates the end-effector twist.

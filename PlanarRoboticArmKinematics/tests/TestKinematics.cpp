@@ -10,7 +10,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, ForwardKinematicsTest) {
     const double tolerance = 1e-6;
 
     std::vector<double> linkLengths = {1.0, 1.0, 1.0};
-    std::vector<Eigen::Vector3d> jointAxes = {
+    std::vector<Eigen::VectorXd> jointAxes = {
         Eigen::Vector3d::UnitZ(),
         Eigen::Vector3d::UnitY(),
         Eigen::Vector3d::UnitY()
@@ -135,7 +135,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, IsWithinReachBoundsTest) {
 TEST(PlanarRoboticArmKinematicsTestSuite, SpatialJacobianTest) {
     const double pi = std::numbers::pi;
     const double tolerance = 1e-6;
-    const std::vector<Eigen::Vector3d> jointAxes = {
+    const std::vector<Eigen::VectorXd> jointAxes = {
         Eigen::Vector3d::UnitZ(),
         Eigen::Vector3d::UnitY(),
         Eigen::Vector3d::UnitY()
@@ -206,67 +206,81 @@ TEST(PlanarRoboticArmKinematicsTestSuite, SpatialJacobianTest) {
     EXPECT_TRUE(J4.isApprox(expectedJ4, tolerance));
 }
 
-// TEST(PlanarRoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
-//     const double tolerance = 1e-6;
+TEST(PlanarRoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
+    const double pi = std::numbers::pi;
+    const double tolerance = 1e-6;
 
-//     // Test case 1: Two-link arm fully extended along X, rotating about Z
-//     std::vector<double> jointAngles1 = {0.0, 0.0};
-//     std::vector<double> linkLengths1 = {1.0, 1.0};
-//     Eigen::Vector3d axisOfRotation1(0.0, 0.0, 1.0);
+    // Test case 1: Two-link arm fully extended along X, rotating about Z
+    std::vector<double> jointAngles1 = {0.0, 0.0};
+    std::vector<double> linkLengths1 = {1.0, 1.0};
+    const std::vector<Eigen::VectorXd> jointAxes1 = {
+        Eigen::Vector3d::UnitZ(),
+        Eigen::Vector3d::UnitZ()
+    };
 
-//     auto J1 = Kinematics::linearVelocityJacobian(jointAngles1, linkLengths1, axisOfRotation1);
+    auto J1 = Kinematics::linearVelocityJacobian(jointAngles1, linkLengths1, jointAxes1);
 
-//     Eigen::Matrix<double, 3, 2> expectedJ1;
-//     expectedJ1 << 0.0, 0.0,
-//                   2.0, 1.0,
-//                   0.0, 0.0;
+    Eigen::Matrix<double, 3, 2> expectedJ1;
+    expectedJ1 << 0.0, 0.0,
+                  2.0, 1.0,
+                  0.0, 0.0;
 
-//     EXPECT_TRUE(J1.isApprox(expectedJ1, tolerance));
+    EXPECT_TRUE(J1.isApprox(expectedJ1, tolerance));
 
-//     // Test case 2: Two-link arm straight at 90 degrees, rotating about Z
-//     std::vector<double> jointAngles2 = {std::numbers::pi / 2, 0.0};
-//     std::vector<double> linkLengths2 = {2.0, 1.0};
-//     Eigen::Vector3d axisOfRotation2(0.0, 0.0, 1.0);
+    // Test case 2: Two-link arm straight at 90 degrees, rotating about Z
+    std::vector<double> jointAngles2 = {std::numbers::pi / 2, 0.0};
+    std::vector<double> linkLengths2 = {2.0, 1.0};
+    const std::vector<Eigen::VectorXd> jointAxes2 = {
+        Eigen::Vector3d::UnitZ(),
+        Eigen::Vector3d::UnitZ()
+    };
 
-//     auto J2 = Kinematics::linearVelocityJacobian(jointAngles2, linkLengths2, axisOfRotation2);
+    auto J2 = Kinematics::linearVelocityJacobian(jointAngles2, linkLengths2, jointAxes2);
 
-//     Eigen::Matrix<double, 3, 2> expectedJ2;
-//     expectedJ2 << -3.0, -1.0,
-//                    0.0,  0.0,
-//                    0.0,  0.0;
+    Eigen::Matrix<double, 3, 2> expectedJ2;
+    expectedJ2 << -3.0, -1.0,
+                   0.0,  0.0,
+                   0.0,  0.0;
 
-//     EXPECT_TRUE(J2.isApprox(expectedJ2, tolerance));
+    EXPECT_TRUE(J2.isApprox(expectedJ2, tolerance));
 
-//     // Test case 3: Three-link arm with mixed joint angles, rotating about Y
-//     std::vector<double> jointAngles3 = {
-//         0.0, std::numbers::pi / 2, -std::numbers::pi / 2
-//     };
-//     std::vector<double> linkLengths3 = {1.0, 2.0, 1.0};
-//     Eigen::Vector3d axisOfRotation3(0.0, 1.0, 0.0);
+    // Test case 3: Three-link arm with mixed joint angles, rotating about Y
+    std::vector<double> jointAngles3 = {
+        0.0, std::numbers::pi / 2, -std::numbers::pi / 2
+    };
+    std::vector<double> linkLengths3 = {1.0, 2.0, 1.0};
+    const std::vector<Eigen::VectorXd> jointAxes3 = {
+        Eigen::Vector3d::UnitZ(),
+        Eigen::Vector3d::UnitY(),
+        Eigen::Vector3d::UnitY()
+    };
 
-//     auto J3 = Kinematics::linearVelocityJacobian(jointAngles3, linkLengths3, axisOfRotation3);
+    auto J3 = Kinematics::linearVelocityJacobian(jointAngles3, linkLengths3, jointAxes3);
 
-//     Eigen::Matrix<double, 3, 3> expectedJ3;
-//     expectedJ3 << -2.0, -2.0,  0.0,
-//                    0.0,  0.0,  0.0,
-//                   -2.0, -1.0, -1.0;
+    Eigen::Matrix<double, 3, 3> expectedJ3;
+    expectedJ3 << 0.0, -2.0,  0.0,
+                2.0,  0.0,  0.0,
+                0.0, -1.0, -1.0;
 
-//     EXPECT_TRUE(J3.isApprox(expectedJ3, tolerance));
+    EXPECT_TRUE(J3.isApprox(expectedJ3, tolerance));
 
-//     // Test case 4: Two-link arm fully extended along Y, rotating about X
-//     std::vector<double> jointAngles4 = {0.0, 0.0};
-//     std::vector<double> linkLengths4 = {2.0, 1.0};
-//     Eigen::Vector3d axisOfRotation4(1.0, 0.0, 0.0);
+    // Test case 4: Two-link arm fully extended along X, rotating about X
+    std::vector<double> jointAngles4 = {0.0, 0.0};
+    std::vector<double> linkLengths4 = {2.0, 1.0};
+    const std::vector<Eigen::VectorXd> jointAxes4 = {
+        Eigen::Vector3d::UnitX(),
+        Eigen::Vector3d::UnitX()
+    };
 
-//     auto J4 = Kinematics::linearVelocityJacobian(jointAngles4, linkLengths4, axisOfRotation4);
+    auto J4 = Kinematics::linearVelocityJacobian(jointAngles4, linkLengths4, jointAxes4);
 
-//     Eigen::Matrix<double, 3, 2> expectedJ4;
-//     expectedJ4 << 0.0, 0.0,
-//                   0.0, 0.0,
-//                   3.0, 1.0;
+    Eigen::Matrix<double, 3, 2> expectedJ4;
+    expectedJ4 << 0.0, 0.0,
+                0.0, 0.0,
+                0.0, 0.0;
 
-//     EXPECT_TRUE(J4.isApprox(expectedJ4, tolerance));
-// }
+    EXPECT_TRUE(J4.isApprox(expectedJ4, tolerance));
+}
 
 // TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorTwistTest) {
 //     const double tolerance = 1e-6;

@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 namespace Kinematics {
-    Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes)
+    Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes)
     {
         if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointAxes.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links and the number of joint axes.");
@@ -74,7 +74,7 @@ namespace Kinematics {
         return (distance >= minReach - tolerance) && (distance <= maxReach + tolerance);
     }
 
-    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes)
+    Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes)
     {
         if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointAxes.size()) {
             throw std::invalid_argument("The number of joints must be equal to the number of links and the number of joint axes.");
@@ -129,51 +129,26 @@ namespace Kinematics {
         return J;
     }
 
-    // Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation)
-    // {
-    //     if (jointAngles.size() != linkLengths.size()) {
-    //         throw std::invalid_argument("The number of joints must be equal to the number of links.");
-    //     }
+    Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes)
+    {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != jointAxes.size()) {
+            throw std::invalid_argument("The number of joints must be equal to the number of links and the number of joint axes.");
+        }
 
-    //     for (double length : linkLengths) {
-    //         if (length <= 0.0) {
-    //             throw std::invalid_argument("Link lengths must be greater than zero");
-    //         }
-    //     }
+        const auto spatialJ = spatialJacobian(jointAngles, linkLengths, jointAxes);
+        const Eigen::Vector3d endEffectorPosition = forwardKinematics(jointAngles, linkLengths, jointAxes);
 
-    //     int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
-    //     if (nonZeroAxes != 1) {
-    //         throw std::invalid_argument("One, and only one, axis of rotation may be defined");
-    //     }
+        Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJ(3, jointAngles.size());
 
-    //     auto spatialJ = spatialJacobian(jointAngles, linkLengths, axisOfRotation);
+        for (Eigen::Index i = 0; i < spatialJ.cols(); ++i) {
+            Eigen::Vector3d omega = spatialJ.col(i).head<3>();
+            Eigen::Vector3d v = spatialJ.col(i).tail<3>();
 
-    //     Eigen::Vector2d FK = forwardKinematics(jointAngles, linkLengths);
+            linearVelocityJ.col(i) = omega.cross(endEffectorPosition) + v;
+        }
 
-    //     Eigen::Vector3d omegaAxis = axisOfRotation.normalized();
-
-    //     Eigen::Vector3d axisU;
-    //     if (omegaAxis.x() != 0.0) {
-    //         axisU << 0.0, 1.0, 0.0;
-    //     } else {
-    //         axisU << 1.0, 0.0, 0.0;
-    //     }
-
-    //     Eigen::Vector3d axisV = omegaAxis.cross(axisU);
-
-    //     Eigen::Vector3d endEffectorPosition = axisU * FK.x() + axisV * FK.y();
-
-    //     Eigen::Matrix<double, 3, Eigen::Dynamic> linearVelocityJ(3, jointAngles.size());
-
-    //     for (Eigen::Index i = 0; i < spatialJ.cols(); ++i) {
-    //         Eigen::Vector3d omega = spatialJ.col(i).head<3>();
-    //         Eigen::Vector3d v = spatialJ.col(i).tail<3>();
-
-    //         linearVelocityJ.col(i) = omega.cross(endEffectorPosition) + v;
-    //     }
-
-    //     return linearVelocityJ;
-    // }
+        return linearVelocityJ;
+    }
 
     // Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
     // {
