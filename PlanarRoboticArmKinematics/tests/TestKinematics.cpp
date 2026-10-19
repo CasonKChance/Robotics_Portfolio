@@ -69,68 +69,68 @@ TEST(PlanarRoboticArmKinematicsTestSuite, ForwardKinematicsTest) {
     EXPECT_NEAR(endEffectorPosition4.z(), expectedZ4, tolerance);
 }
 
-// TEST(PlanarRoboticArmKinematicsTestSuite, IsReachableTest) {
-//     // Line lengths are equal, so minimum reach is 0 and maximum reach is the sum of the lengths.
-//     std::vector<double> linkLengths = {1.0, 1.0};
+TEST(PlanarRoboticArmKinematicsTestSuite, IsWithinReachBoundsTest) {
+    // Line lengths are equal, so minimum reach is 0 and maximum reach is the sum of the lengths.
+    std::vector<double> linkLengths = {1.0, 1.0, 1.0};
     
-//     // Test case 1: Point within reach
-//     Eigen::Vector2d point1(1.0, 1.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point1, linkLengths));
+    // Test case 1: Point within reach
+    Eigen::Vector3d point1(1.0, 1.0, 1.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point1, linkLengths));
 
-//     // Test case 2: Point at maximum reach
-//     Eigen::Vector2d point2(2.0, 0.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point2, linkLengths));
+    // Test case 2: Point at maximum reach
+    Eigen::Vector3d point2(3.0, 0.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point2, linkLengths));
 
-//     // Test case 3: Point at minimum reach (0,0)
-//     Eigen::Vector2d point3(0.0, 0.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point3, linkLengths));
+    // Test case 3: Point at minimum reach (0,0)
+    Eigen::Vector3d point3(0.0, 0.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point3, linkLengths));
 
-//     // Test case 4: Point outside reach
-//     Eigen::Vector2d point4(3.0, 0.0);
-//     EXPECT_FALSE(Kinematics::isReachable(point4, linkLengths));
+    // Test case 4: Point outside reach
+    Eigen::Vector3d point4(4.0, 0.0, 0.0);
+    EXPECT_FALSE(Kinematics::isWithinReachBounds(point4, linkLengths));
 
-//     // Link lengths are unequal, so minimum reach is the difference of the lengths and maximum reach is the sum of the lengths.
-//     std::vector<double> linkLengthsUnequal = {1.0, 2.0};
+    // Link lengths are unequal, so minimum reach is the difference of the longest link length and the sum of the rest of the links lengths and maximum reach is the sum of the lengths.
+    std::vector<double> linkLengthsUnequal = {3.0, 1.0, 1.0};
 
-//     // Test case 5: Point within reach
-//     Eigen::Vector2d point5(1.0, 1.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point5, linkLengthsUnequal));
+    // Test case 5: Point within reach
+    Eigen::Vector3d point5(1.0, 1.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point5, linkLengthsUnequal));
 
-//     // Test case 6: Point at maximum reach
-//     Eigen::Vector2d point6(3.0, 0.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point6, linkLengthsUnequal));
+    // Test case 6: Point at maximum reach
+    Eigen::Vector3d point6(5.0, 0.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point6, linkLengthsUnequal));
 
-//     // Test case 7: Point at minimum reach (1,0)
-//     Eigen::Vector2d point7(1.0, 0.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point7, linkLengthsUnequal));
+    // Test case 7: Point at minimum reach (1,0)
+    Eigen::Vector3d point7(1.0, 0.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point7, linkLengthsUnequal));
 
-//     // Test case 8: Point outside reach
-//     Eigen::Vector2d point8(4.0, 0.0);
-//     EXPECT_FALSE(Kinematics::isReachable(point8, linkLengthsUnequal));
+    // Test case 8: Point outside reach
+    Eigen::Vector3d point8(6.0, 0.0, 0.0);
+    EXPECT_FALSE(Kinematics::isWithinReachBounds(point8, linkLengthsUnequal));
 
-//     // Test case 9: Point outside reach (less than minimum reach)
-//     Eigen::Vector2d point9(0.0, 0.0);
-//     EXPECT_FALSE(Kinematics::isReachable(point9, linkLengthsUnequal));
+    // Test case 9: Point outside reach (less than minimum reach)
+    Eigen::Vector3d point9(0.0, 0.0, 0.0);
+    EXPECT_FALSE(Kinematics::isWithinReachBounds(point9, linkLengthsUnequal));
 
-//     // Link lengths are unequal but the longest link is less than the sum of the other links, so minimum reach is 0 and maximum reach is the sum of the lengths.
-//     std::vector<double> linkLengthsUnequal2 = {2.0, 1.5, 1.5};
+    // Link lengths are unequal but the longest link is less than the sum of the other links, so minimum reach is 0 and maximum reach is the sum of the lengths.
+    std::vector<double> linkLengthsUnequal2 = {2.0, 1.5, 1.5};
 
-//     // Test case 10: Point within reach
-//     Eigen::Vector2d point10(1.0, 1.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point10, linkLengthsUnequal2));
+    // Test case 10: Point within reach
+    Eigen::Vector3d point10(1.0, 1.0, 1.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point10, linkLengthsUnequal2));
 
-//     // Test case 11: Point at maximum reach
-//     Eigen::Vector2d point11(5.0, 0.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point11, linkLengthsUnequal2));
+    // Test case 11: Point at maximum reach
+    Eigen::Vector3d point11(5.0, 0.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point11, linkLengthsUnequal2));
 
-//     // Test case 12: Point at minimum reach (0,0)
-//     Eigen::Vector2d point12(0.0, 0.0);
-//     EXPECT_TRUE(Kinematics::isReachable(point12, linkLengthsUnequal2));
+    // Test case 12: Point at minimum reach (0,0)
+    Eigen::Vector3d point12(0.0, 0.0, 0.0);
+    EXPECT_TRUE(Kinematics::isWithinReachBounds(point12, linkLengthsUnequal2));
 
-//     // Test case 13: Point outside reach
-//     Eigen::Vector2d point13(6.0, 0.0);
-//     EXPECT_FALSE(Kinematics::isReachable(point13, linkLengthsUnequal2));
-// }
+    // Test case 13: Point outside reach
+    Eigen::Vector3d point13(6.0, 0.0, 0.0);
+    EXPECT_FALSE(Kinematics::isWithinReachBounds(point13, linkLengthsUnequal2));
+}
 
 // TEST(PlanarRoboticArmKinematicsTestSuite, SpatialJacobianTest) {
 //     const double tolerance = 1e-6;

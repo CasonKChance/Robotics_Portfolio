@@ -10,6 +10,7 @@ namespace Kinematics{
      * @brief Computes the position of the end effector of a robotic arm using forward kinematics.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
+     * @param jointAxes The axes about which each joint rotates.
      * @return The position of the end effector in the base frame.
      */
     Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes);
@@ -20,7 +21,7 @@ namespace Kinematics{
      * @param linkLengths The lengths of the links in the robotic arm.
      * @return True if the point is reachable, false otherwise.
      */
-    bool isReachable(const Eigen::Vector2d& point, const std::vector<double>& linkLengths);
+    bool isWithinReachBounds(const Eigen::Vector3d& point, const std::vector<double>& linkLengths);
 
     /**
      * @brief Calculates the spatial jacobian of a planar robot arm.

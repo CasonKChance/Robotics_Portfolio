@@ -41,35 +41,32 @@ namespace Kinematics {
         return T.block<3, 1>(0, 3);
     }
 
-    bool isReachable(const Eigen::Vector2d& point, const std::vector<double>& linkLengths)
+    bool isWithinReachBounds(const Eigen::Vector3d& point, const std::vector<double>& linkLengths)
     {
         if (linkLengths.empty()) {
             throw std::invalid_argument("The number of links must be greater than zero.");
         }
 
-        for (double length : linkLengths) {
-            if (length <= 0.0) {
-                throw std::invalid_argument("Link lengths must be greater than zero");
-            }
-        }
-
-        const double tolerance = 1e-9;
-        const double distance = std::hypot(point.x(), point.y());
-
-        if (linkLengths.size() == 1) {
-            return std::abs(distance - linkLengths[0]) < tolerance;
+        if (!point.allFinite()) {
+            throw std::invalid_argument(
+                "Target position must be finite."
+            );
         }
 
         double totalLength = 0.0;
         double longestLink = 0.0;
-        for (const double length : linkLengths) {
-            if (length < 0.0) {
-                throw std::invalid_argument("Link lengths must be non-negative.");
+
+        for (size_t i = 0; i < linkLengths.size(); ++i) {
+            if (linkLengths[i] <= 0) {
+                throw::std::invalid_argument("Links must have positive length.");
             }
 
-            totalLength += length;
-            longestLink = std::max(longestLink, length);
+            totalLength += linkLengths[i];
+            longestLink = std::max(longestLink, linkLengths[i]);
         }
+
+        const double tolerance = 1e-9;
+        const double distance = point.norm();
 
         const double maxReach = totalLength;
         const double minReach = std::max(0.0, 2.0 * longestLink - totalLength);
