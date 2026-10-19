@@ -12,8 +12,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 add_subdirectory(
-    ../../../PlanarRoboticArmKinematics
-    ${CMAKE_CURRENT_BINARY_DIR}/PlanarRoboticArmKinematics
+    ../../../RoboticArmKinematics
+    ${CMAKE_CURRENT_BINARY_DIR}/RoboticArmKinematics
 )
 
 # Declare C++ library for core classes
@@ -37,12 +37,6 @@ target_link_libraries(${PROJECT_NAME}_lib
     Kinematics
 )
 
-add_executable(RobotArmAnalyzer src/RobotArmAnalyzerMain.cpp)
-target_link_libraries(RobotArmAnalyzer
-  PUBLIC
-    ${PROJECT_NAME}_lib
-)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
@@ -55,7 +49,6 @@ install(
   TARGETS
     Kinematics
     ${PROJECT_NAME}_lib
-    RobotArmAnalyzer
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -80,13 +73,6 @@ install(DIRECTORY
 install(DIRECTORY
   rviz
   DESTINATION share/${PROJECT_NAME}
-)
-
-install(
-  PROGRAMS
-    src/AnalysisVisualization.py
-  DESTINATION lib/${PROJECT_NAME}
-  RENAME AnalysisVisualization
 )
 
 ament_package()
