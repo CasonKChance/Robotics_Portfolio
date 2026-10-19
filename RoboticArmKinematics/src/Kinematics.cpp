@@ -1,4 +1,4 @@
-#include <PlanarRoboticArmKinematics/Kinematics.h>
+#include <RoboticArmKinematics/Kinematics.h>
 
 #include <cmath>
 #include <stdexcept>

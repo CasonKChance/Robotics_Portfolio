@@ -1,11 +1,11 @@
-#include <PlanarRoboticArmKinematics/Kinematics.h>
+#include <RoboticArmKinematics/Kinematics.h>
 
 #include <gtest/gtest.h>
 
 #include <numbers>
 #include <cmath>
 
-TEST(PlanarRoboticArmKinematicsTestSuite, ForwardKinematicsTest) {
+TEST(RoboticArmKinematicsTestSuite, ForwardKinematicsTest) {
     const double pi = std::numbers::pi;
     const double tolerance = 1e-6;
 
@@ -69,7 +69,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, ForwardKinematicsTest) {
     EXPECT_NEAR(endEffectorPosition4.z(), expectedZ4, tolerance);
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, IsWithinReachBoundsTest) {
+TEST(RoboticArmKinematicsTestSuite, IsWithinReachBoundsTest) {
     // Line lengths are equal, so minimum reach is 0 and maximum reach is the sum of the lengths.
     std::vector<double> linkLengths = {1.0, 1.0, 1.0};
     
@@ -132,7 +132,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, IsWithinReachBoundsTest) {
     EXPECT_FALSE(Kinematics::isWithinReachBounds(point13, linkLengthsUnequal2));
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, SpatialJacobianTest) {
+TEST(RoboticArmKinematicsTestSuite, SpatialJacobianTest) {
     const double pi = std::numbers::pi;
     const double tolerance = 1e-6;
     const std::vector<Eigen::VectorXd> jointAxes = {
@@ -206,7 +206,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, SpatialJacobianTest) {
     EXPECT_TRUE(J4.isApprox(expectedJ4, tolerance));
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
+TEST(RoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
     const double pi = std::numbers::pi;
     const double tolerance = 1e-6;
 
@@ -282,7 +282,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, LinearVelocityJacobianTest) {
     EXPECT_TRUE(J4.isApprox(expectedJ4, tolerance));
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorTwistTest) {
+TEST(RoboticArmKinematicsTestSuite, EndEffectorTwistTest) {
     const double tolerance = 1e-6;
 
     // Test case 1: Two-link arm fully extended, rotating about Z
@@ -365,7 +365,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorTwistTest) {
     EXPECT_TRUE(twist4.isApprox(expectedTwist4, tolerance));
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, endEffectorLinearVelocityTest) {
+TEST(RoboticArmKinematicsTestSuite, endEffectorLinearVelocityTest) {
     const double tolerance = 1e-6;
 
     // Test case 1: Two-link arm fully extended, rotating about Z
@@ -471,7 +471,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, endEffectorLinearVelocityTest) {
     EXPECT_TRUE(velocity5.isApprox(expectedVelocity5, tolerance));
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, AnalyticInverseKinematicsTest) {
+TEST(RoboticArmKinematicsTestSuite, AnalyticInverseKinematicsTest) {
     const double tolerance = 1e-6;
 
     // Test case 1: Single-link arm along the x-axis
@@ -648,7 +648,7 @@ TEST(PlanarRoboticArmKinematicsTestSuite, AnalyticInverseKinematicsTest) {
     );
 }
 
-TEST(PlanarRoboticArmKinematicsTestSuite, NumericalInverseKinematicsTest) {
+TEST(RoboticArmKinematicsTestSuite, NumericalInverseKinematicsTest) {
     const double tolerance = 1e-6;
     const Eigen::Vector3d errorTolerance(1e-8, 1e-8, 1e-8);
     const int maximumIterations = 100;
