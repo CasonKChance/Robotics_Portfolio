@@ -53,14 +53,14 @@ namespace Kinematics{
     Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const std::vector<Eigen::VectorXd>& jointAxes);
 
     /**
-     * @brief Calculates the end-effector velocity.
+     * @brief Calculates the end-effector's linear velocity.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param jointVelocities The angular velocities of the joints in radians.
-     * @param axisOfRotation 3-vector of unit length describing which cardinal axis the joints are rotating about (e.g. [1, 0, 0]ᵀ when rotating about the X).
-     * @return The end-effector velocity.
+     * @param jointAxes The axes about which each joint rotates.
+     * @return The end-effector's linear velocity.
      */    
-    Eigen::Vector3d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation);
+    Eigen::Vector3d endEffectorLinearVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const std::vector<Eigen::VectorXd>& jointAxes);
 
     /**
      * @brief Uses analytic inverse kinematics to calculate the possible joint angle solutions to place the end-effector at a target position.

@@ -156,38 +156,27 @@ namespace Kinematics {
             throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
         }
 
+        auto J = spatialJacobian(jointAngles, linkLengths, jointAxes);
+
+        return J * jointVelocities;
+    }
+
+    Eigen::Vector3d endEffectorLinearVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const std::vector<Eigen::VectorXd>& jointAxes)
+    {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
+            throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
+        }
+
         for (double length : linkLengths) {
             if (length <= 0.0) {
                 throw std::invalid_argument("Link lengths must be greater than zero");
             }
         }
 
-        auto J = spatialJacobian(jointAngles, linkLengths, jointAxes);
+        auto J = linearVelocityJacobian(jointAngles, linkLengths, jointAxes);
 
         return J * jointVelocities;
     }
-
-    // Eigen::Vector3d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
-    // {
-    //     if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
-    //         throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
-    //     }
-
-    //     for (double length : linkLengths) {
-    //         if (length <= 0.0) {
-    //             throw std::invalid_argument("Link lengths must be greater than zero");
-    //         }
-    //     }
-
-    //     int nonZeroAxes = (axisOfRotation.x() != 0) + (axisOfRotation.y() != 0) + (axisOfRotation.z() != 0);
-    //     if (nonZeroAxes != 1) {
-    //         throw std::invalid_argument("One, and only one, axis of rotation may be defined");
-    //     }
-
-    //     auto J = linearVelocityJacobian(jointAngles, linkLengths, axisOfRotation);
-
-    //     return J * jointVelocities;
-    // }
 
     // std::vector<std::vector<double>> analyticInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths)
     // {

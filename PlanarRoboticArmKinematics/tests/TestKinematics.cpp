@@ -365,106 +365,111 @@ TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorTwistTest) {
     EXPECT_TRUE(twist4.isApprox(expectedTwist4, tolerance));
 }
 
-// TEST(PlanarRoboticArmKinematicsTestSuite, EndEffectorVelocityTest) {
-//     const double tolerance = 1e-6;
+TEST(PlanarRoboticArmKinematicsTestSuite, endEffectorLinearVelocityTest) {
+    const double tolerance = 1e-6;
 
-//     // Test case 1: Two-link arm fully extended, rotating about Z
-//     std::vector<double> jointAngles1 = {0.0, 0.0};
-//     std::vector<double> linkLengths1 = {1.0, 1.0};
-//     Eigen::VectorXd jointVelocities1(2);
-//     jointVelocities1 << 1.0, 2.0;
-//     Eigen::Vector3d axisOfRotation1(0.0, 0.0, 1.0);
+    // Test case 1: Two-link arm fully extended, rotating about Z
+    std::vector<double> jointAngles1 = {0.0, 0.0};
+    std::vector<double> linkLengths1 = {1.0, 1.0};
+    Eigen::VectorXd jointVelocities1(2);
+    jointVelocities1 << 1.0, 2.0;
+    const std::vector<Eigen::VectorXd> jointAxes1 = {
+        Eigen::Vector3d::UnitZ(),
+        Eigen::Vector3d::UnitZ()
+    };
 
-//     Eigen::Vector3d velocity1 = Kinematics::endEffectorVelocity(
-//         jointAngles1, linkLengths1, jointVelocities1, axisOfRotation1
-//     );
+    Eigen::Vector3d velocity1 = Kinematics::endEffectorLinearVelocity(
+        jointAngles1, linkLengths1, jointVelocities1, jointAxes1
+    );
 
-//     Eigen::Vector3d expectedVelocity1(0.0, 4.0, 0.0);
+    Eigen::Vector3d expectedVelocity1(0.0, 4.0, 0.0);
 
-//     EXPECT_TRUE(velocity1.isApprox(expectedVelocity1, tolerance));
+    EXPECT_TRUE(velocity1.isApprox(expectedVelocity1, tolerance));
 
-//     // Test case 2: Two-link arm straight at 90 degrees, rotating about Z
-//     std::vector<double> jointAngles2 = {std::numbers::pi / 2, 0.0};
-//     std::vector<double> linkLengths2 = {2.0, 1.0};
-//     Eigen::VectorXd jointVelocities2(2);
-//     jointVelocities2 << 1.0, -0.5;
-//     Eigen::Vector3d axisOfRotation2(0.0, 0.0, 1.0);
+    // Test case 2: Two-link arm straight at 90 degrees, rotating about Z
+    std::vector<double> jointAngles2 = {std::numbers::pi / 2, 0.0};
+    std::vector<double> linkLengths2 = {2.0, 1.0};
+    Eigen::VectorXd jointVelocities2(2);
+    jointVelocities2 << 1.0, -0.5;
+    const std::vector<Eigen::VectorXd> jointAxes2 = {
+        Eigen::Vector3d::UnitZ(),
+        Eigen::Vector3d::UnitZ()
+    };
 
-//     Eigen::Vector3d velocity2 = Kinematics::endEffectorVelocity(
-//         jointAngles2, linkLengths2, jointVelocities2, axisOfRotation2
-//     );
+    Eigen::Vector3d velocity2 = Kinematics::endEffectorLinearVelocity(
+        jointAngles2, linkLengths2, jointVelocities2, jointAxes2
+    );
 
-//     Eigen::Vector3d expectedVelocity2(-2.5, 0.0, 0.0);
+    Eigen::Vector3d expectedVelocity2(-2.5, 0.0, 0.0);
 
-//     EXPECT_TRUE(velocity2.isApprox(expectedVelocity2, tolerance));
+    EXPECT_TRUE(velocity2.isApprox(expectedVelocity2, tolerance));
 
-//     // Test case 3: Three-link arm with mixed angles, rotating about Y
-//     std::vector<double> jointAngles3 = {
-//         0.0, std::numbers::pi / 2, -std::numbers::pi / 2
-//     };
-//     std::vector<double> linkLengths3 = {1.0, 2.0, 1.0};
-//     Eigen::VectorXd jointVelocities3(3);
-//     jointVelocities3 << 1.0, 2.0, -1.0;
-//     Eigen::Vector3d axisOfRotation3(0.0, 1.0, 0.0);
+    // Test case 3: Three-link arm with mixed angles, rotating about Y
+    std::vector<double> jointAngles3 = {
+        0.0, std::numbers::pi / 2, -std::numbers::pi / 2
+    };
+    std::vector<double> linkLengths3 = {1.0, 2.0, 1.0};
+    Eigen::VectorXd jointVelocities3(3);
+    jointVelocities3 << 1.0, 2.0, -1.0;
+    const std::vector<Eigen::VectorXd> jointAxes3 = {
+        Eigen::Vector3d::UnitY(),
+        Eigen::Vector3d::UnitY(),
+        Eigen::Vector3d::UnitY()
+    };
 
-//     Eigen::Vector3d velocity3 = Kinematics::endEffectorVelocity(
-//         jointAngles3, linkLengths3, jointVelocities3, axisOfRotation3
-//     );
+    Eigen::Vector3d velocity3 = Kinematics::endEffectorLinearVelocity(
+        jointAngles3, linkLengths3, jointVelocities3, jointAxes3
+    );
 
-//     Eigen::Vector3d expectedVelocity3(-6.0, 0.0, -3.0);
+    Eigen::Vector3d expectedVelocity3(-6.0, 0.0, -3.0);
 
-//     EXPECT_TRUE(velocity3.isApprox(expectedVelocity3, tolerance));
+    EXPECT_TRUE(velocity3.isApprox(expectedVelocity3, tolerance));
 
-//     // Test case 4: Two-link arm rotating about X
-//     std::vector<double> jointAngles4 = {0.0, 0.0};
-//     std::vector<double> linkLengths4 = {2.0, 1.0};
-//     Eigen::VectorXd jointVelocities4(2);
-//     jointVelocities4 << 0.5, 1.5;
-//     Eigen::Vector3d axisOfRotation4(1.0, 0.0, 0.0);
+    // Test case 4: Two-link arm rotating about X
+    std::vector<double> jointAngles4 = {0.0, 0.0};
+    std::vector<double> linkLengths4 = {2.0, 1.0};
+    Eigen::VectorXd jointVelocities4(2);
+    jointVelocities4 << 0.5, 1.5;
+    const std::vector<Eigen::VectorXd> jointAxes4 = {
+        Eigen::Vector3d::UnitX(),
+        Eigen::Vector3d::UnitX()
+    };
 
-//     Eigen::Vector3d velocity4 = Kinematics::endEffectorVelocity(
-//         jointAngles4, linkLengths4, jointVelocities4, axisOfRotation4
-//     );
+    Eigen::Vector3d velocity4 = Kinematics::endEffectorLinearVelocity(
+        jointAngles4, linkLengths4, jointVelocities4, jointAxes4
+    );
 
-//     Eigen::Vector3d expectedVelocity4(0.0, 0.0, 3.0);
+    Eigen::Vector3d expectedVelocity4(0.0, 0.0, 0.0);
 
-//     EXPECT_TRUE(velocity4.isApprox(expectedVelocity4, tolerance));
+    EXPECT_TRUE(velocity4.isApprox(expectedVelocity4, tolerance));
 
-//     // Test case 5: Test calculated velocity against Forward Kinematics derived velocity
-//     std::vector<double> jointAngles5 = {0.0, 0.0};
-//     std::vector<double> linkLengths5 = {1.0, 1.0};
-//     Eigen::VectorXd jointVelocities5(2);
-//     jointVelocities5 << 1.0, 2.0;
-//     Eigen::Vector3d axisOfRotation5(0.0, 0.0, 1.0);
+    // Test case 5: Test calculated velocity against Forward Kinematics derived velocity
+    std::vector<double> jointAngles5 = {0.0, 0.0};
+    std::vector<double> linkLengths5 = {1.0, 1.0};
+    Eigen::VectorXd jointVelocities5(2);
+    jointVelocities5 << 1.0, 2.0;
+    const std::vector<Eigen::VectorXd> jointAxes5 = {
+        Eigen::Vector3d::UnitZ(),
+        Eigen::Vector3d::UnitZ()
+    };
 
-//     Eigen::Vector3d velocity5 = Kinematics::endEffectorVelocity(
-//         jointAngles5, linkLengths5, jointVelocities5, axisOfRotation5
-//     );
+    Eigen::Vector3d velocity5 = Kinematics::endEffectorLinearVelocity(
+        jointAngles5, linkLengths5, jointVelocities5, jointAxes5
+    );
 
-//     Eigen::Vector2d p1 = Kinematics::forwardKinematics(jointAngles5, linkLengths5);
+    Eigen::Vector3d p1 = Kinematics::forwardKinematics(jointAngles5, linkLengths5, jointAxes5);
 
-//     double dt = 1e-7;
-//     std::vector<double> jointAngles5AfterTime = {
-//         jointAngles5[0] + jointVelocities5[0] * dt, 
-//         jointAngles5[1] + jointVelocities5[1] * dt
-//     };
-//     Eigen::Vector2d p2 = Kinematics::forwardKinematics(jointAngles5AfterTime, linkLengths5);
+    double dt = 1e-7;
+    std::vector<double> jointAngles5AfterTime = {
+        jointAngles5[0] + jointVelocities5[0] * dt, 
+        jointAngles5[1] + jointVelocities5[1] * dt
+    };
+    Eigen::Vector3d p2 = Kinematics::forwardKinematics(jointAngles5AfterTime, linkLengths5, jointAxes5);
 
-//     Eigen::Vector3d omegaAxis = axisOfRotation5.normalized();
+    Eigen::Vector3d expectedVelocity5 = (p2 - p1) / dt;
 
-//     Eigen::Vector3d axisU;
-//     if (omegaAxis.x() != 0.0) {
-//         axisU << 0.0, 1.0, 0.0;
-//     } else {
-//         axisU << 1.0, 0.0, 0.0;
-//     }
-
-//     Eigen::Vector3d axisV = omegaAxis.cross(axisU);
-
-//     Eigen::Vector3d expectedVelocity5 = axisU * ((p2.x() - p1.x())/dt) + axisV * ((p2.y() - p1.y())/dt);
-
-//     EXPECT_TRUE(velocity5.isApprox(expectedVelocity5, tolerance));
-// }
+    EXPECT_TRUE(velocity5.isApprox(expectedVelocity5, tolerance));
+}
 
 // TEST(PlanarRoboticArmKinematicsTestSuite, AnalyticInverseKinematicsTest) {
 //     const double tolerance = 1e-6;
