@@ -150,22 +150,22 @@ namespace Kinematics {
         return linearVelocityJ;
     }
 
-    // Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
-    // {
-    //     if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
-    //         throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
-    //     }
+    Eigen::VectorXd endEffectorTwist(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const std::vector<Eigen::VectorXd>& jointAxes)
+    {
+        if (jointAngles.size() != linkLengths.size() || jointAngles.size() != static_cast<size_t>(jointVelocities.size())) {
+            throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
+        }
 
-    //     for (double length : linkLengths) {
-    //         if (length <= 0.0) {
-    //             throw std::invalid_argument("Link lengths must be greater than zero");
-    //         }
-    //     }
+        for (double length : linkLengths) {
+            if (length <= 0.0) {
+                throw std::invalid_argument("Link lengths must be greater than zero");
+            }
+        }
 
-    //     auto J = spatialJacobian(jointAngles, linkLengths, axisOfRotation);
+        auto J = spatialJacobian(jointAngles, linkLengths, jointAxes);
 
-    //     return J * jointVelocities;
-    // }
+        return J * jointVelocities;
+    }
 
     // Eigen::Vector3d endEffectorVelocity(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const Eigen::VectorXd& jointVelocities, const Eigen::Vector3d& axisOfRotation)
     // {
