@@ -7,12 +7,12 @@
 
 namespace Kinematics{
     /**
-     * @brief Computes the position of the end effector of a planar robotic arm using forward kinematics.
+     * @brief Computes the position of the end effector of a robotic arm using forward kinematics.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @return The position of the end effector in the base frame.
      */
-    Eigen::Vector2d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths);
+    Eigen::Vector3d forwardKinematics(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::Vector3d>& jointAxes);
 
     /**
      * @brief Determines if a provided point is within the planar robotic arm's task space.
