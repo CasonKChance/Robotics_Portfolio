@@ -156,6 +156,12 @@ namespace Kinematics {
             throw std::invalid_argument("The number of joints, links, and joint velocities must be equal.");
         }
 
+        for (double length : linkLengths) {
+            if (!std::isfinite(length) || length <= 0.0) {
+                throw std::invalid_argument("Links must be finite and have positive length.");
+            }
+        }
+
         auto J = spatialJacobian(jointAngles, linkLengths, jointAxes);
 
         return J * jointVelocities;
@@ -168,8 +174,8 @@ namespace Kinematics {
         }
 
         for (double length : linkLengths) {
-            if (length <= 0.0) {
-                throw std::invalid_argument("Link lengths must be greater than zero");
+            if (!std::isfinite(length) || length <= 0.0) {
+                throw std::invalid_argument("Links must be finite and have positive length.");
             }
         }
 
@@ -187,8 +193,8 @@ namespace Kinematics {
         }
 
         for (double length : linkLengths) {
-            if (length <= 0.0) {
-                throw std::invalid_argument("Link lengths must be greater than zero");
+            if (!std::isfinite(length) || length <= 0.0) {
+                throw std::invalid_argument("Links must be finite and have positive length.");
             }
         }
 
@@ -241,75 +247,57 @@ namespace Kinematics {
         return std::vector<std::vector<double>>{{leftyTheta1, leftyTheta2}, {rightyTheta1, rightyTheta2}};
     }
 
-    // std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation, const std::vector<double>& initialGuess, const Eigen::Vector2d& errorTolerance, const int maximumIterations)
-    // {
-    //     if (linkLengths.empty()) {
-    //         throw std::invalid_argument("Robot must have at least 1 link");
-    //     }
+    std::vector<double> numericalInverseKinematics(const Eigen::Vector3d& targetPosition, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes, const std::vector<double>& initialGuess, const Eigen::Vector3d& errorTolerance, const int maximumIterations)
+    {
+        if (linkLengths.empty()) {
+            throw std::invalid_argument("Robot must have at least 1 link");
+        }
 
-    //     for (double length : linkLengths) {
-    //         if (length <= 0.0) {
-    //             throw std::invalid_argument("Link lengths must be greater than zero");
-    //         }
-    //     }
+        for (double length : linkLengths) {
+            if (!std::isfinite(length) || length <= 0.0) {
+                throw std::invalid_argument("Links must be finite and have positive length.");
+            }
+        }
 
-    //     if (!isReachable(targetPosition, linkLengths)) {
-    //         // No solution
-    //         return {};
-    //     } else if (linkLengths.size() == 1) {
-    //         // Solution for single link robotic arm
-    //         return std::vector<double>{std::atan2(targetPosition.y(), targetPosition.x())};
-    //     }
+        if (!isWithinReachBounds(targetPosition, linkLengths)) {
+            // No solution
+            return {};
+        } else if (linkLengths.size() == 1) {
+            // Solution for single link robotic arm
+            return std::vector<double>{std::atan2(targetPosition.y(), targetPosition.x())};
+        }
 
-    //     double previousErrorNorm = std::numeric_limits<double>::max();
-    //     double finalErrorNorm = 0.0;
+        double previousErrorNorm = std::numeric_limits<double>::max();
+        double finalErrorNorm = 0.0;
 
-    //     std::vector<double> currentGuess = initialGuess;
-    //     for (int i = 0; i < maximumIterations; ++i) {
-    //         Eigen::Vector2d currentPosition = forwardKinematics(currentGuess, linkLengths);
+        std::vector<double> currentGuess = initialGuess;
+        for (int i = 0; i < maximumIterations; ++i) {
+            Eigen::Vector3d currentPosition = forwardKinematics(currentGuess, linkLengths, jointAxes);
 
-    //         Eigen::Vector2d currentError = targetPosition - currentPosition;
-    //         if ((currentError.array().abs() <= errorTolerance.array()).all()) {
-    //             return currentGuess;
-    //         }
+            Eigen::Vector3d currentError = targetPosition - currentPosition;
+            if ((currentError.array().abs() <= errorTolerance.array()).all()) {
+                return currentGuess;
+            }
 
-    //         finalErrorNorm = currentError.norm();
-    //         if (i == maximumIterations - 2) {
-    //             previousErrorNorm = finalErrorNorm;
-    //         }
+            finalErrorNorm = currentError.norm();
+            if (i == maximumIterations - 2) {
+                previousErrorNorm = finalErrorNorm;
+            }
 
-    //         auto jacobian = linearVelocityJacobian(currentGuess, linkLengths, axisOfRotation);
-            
-    //         Eigen::MatrixXd planarJacobian(2, linkLengths.size());
+            auto jacobian = linearVelocityJacobian(currentGuess, linkLengths, jointAxes);
+            auto jacobianPseudoInverse = jacobian.completeOrthogonalDecomposition().pseudoInverse();
 
-    //         // Select the two dimensions perpendicular to the rotation axis
-    //         if (std::abs(axisOfRotation.x()) > 0.5) {
-    //             // Rotation about X: YZ plane
-    //             planarJacobian.row(0) = jacobian.row(1);
-    //             planarJacobian.row(1) = jacobian.row(2);
-    //         } else if (std::abs(axisOfRotation.y()) > 0.5) {
-    //             // Rotation about Y: XZ plane
-    //             planarJacobian.row(0) = jacobian.row(0);
-    //             planarJacobian.row(1) = jacobian.row(2);
-    //         } else {
-    //             // Rotation about Z: XY plane
-    //             planarJacobian.row(0) = jacobian.row(0);
-    //             planarJacobian.row(1) = jacobian.row(1);
-    //         }
+            Eigen::VectorXd q = Eigen::Map<Eigen::VectorXd>(currentGuess.data(), currentGuess.size());
+            q += jacobianPseudoInverse * currentError;
 
-    //         auto jacobianPseudoInverse = planarJacobian.completeOrthogonalDecomposition().pseudoInverse();
+            currentGuess.assign(q.data(), q.data() + q.size());
+        }
 
-    //         Eigen::VectorXd q = Eigen::Map<Eigen::VectorXd>(currentGuess.data(), currentGuess.size());
-    //         q += jacobianPseudoInverse * currentError;
+        double errorReduction = previousErrorNorm - finalErrorNorm;
+        if (errorReduction > 1e-5) {
+            return currentGuess;
+        }
 
-    //         currentGuess.assign(q.data(), q.data() + q.size());
-    //     }
-
-    //     double errorReduction = previousErrorNorm - finalErrorNorm;
-    //     if (errorReduction > 1e-5) {
-    //         return currentGuess;
-    //     }
-
-    //     return {};
-    // }
+        return {};
+    }
 }

@@ -34,7 +34,7 @@ namespace Kinematics{
     Eigen::Matrix<double, 6, Eigen::Dynamic> spatialJacobian(const std::vector<double>& jointAngles, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes);
 
     /**
-     * @brief Calculates the linear velocity jacobian of a planar robot arm.
+     * @brief Calculates the linear velocity jacobian of a robot arm.
      * @param jointAngles The angles of the joints in the robotic arm.
      * @param linkLengths The lengths of the links in the robotic arm.
      * @param jointAxes The axes about which each joint rotates.
@@ -74,9 +74,14 @@ namespace Kinematics{
     /**
      * @brief Uses numerical inverse kinematics to converge on a joint angles solution to place the end-effector at a target position.
      * @param targetPosition The target position for the end-effector.
+     * @param linkLengths The lengths of the links in the robotic arm.
+     * @param jointAxes The axes about which each joint rotates.
+     * @param initialGuess An initial guess at a solution, must be sufficiently close to an actual solution.
+     * @param errorTolerance The allowed difference between an end-effector position and the target position to consider a solution acceptable.
+     * @param maximumIterations The number of times the function is allowed to iterate before returning.
      * @return The closest solution to the initial guess.
      */
-    std::vector<double> numericalInverseKinematics(const Eigen::Vector2d& targetPosition, const std::vector<double>& linkLengths, const Eigen::Vector3d& axisOfRotation, const std::vector<double>& initialGuess, const Eigen::Vector2d& errorTolerance, const int maximumIterations);
+    std::vector<double> numericalInverseKinematics(const Eigen::Vector3d& targetPosition, const std::vector<double>& linkLengths, const std::vector<Eigen::VectorXd>& jointAxes, const std::vector<double>& initialGuess, const Eigen::Vector3d& errorTolerance, const int maximumIterations);
 }
 
 #endif
