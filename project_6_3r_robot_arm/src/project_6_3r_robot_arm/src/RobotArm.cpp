@@ -13,26 +13,24 @@ using namespace std::chrono_literals;
 RobotArm::RobotArm(const rclcpp::NodeOptions& options)
 : Node("robot_arm", options)
 {
-    robot_description_subscription_ =
-        this->create_subscription<std_msgs::msg::String>(
-            "/robot_description",
-            rclcpp::QoS(1).transient_local().reliable(),
-            std::bind(
-                &RobotArm::robotDescriptionTopicCallback,
-                this,
-                _1
-            )
-        );
+    robot_description_subscription_ = this->create_subscription<std_msgs::msg::String>(
+        "/robot_description",
+        rclcpp::QoS(1).transient_local().reliable(),
+        std::bind(
+            &RobotArm::robotDescriptionTopicCallback,
+            this,
+            _1
+        )
+    );
 
-    joint_state_subscription_ = 
-        this->create_subscription<sensor_msgs::msg::JointState>(
-            "/joint_states",
-            10,
-            std::bind(
-                &RobotArm::jointStateTopicCallback,
-                this,
-                _1
-            )
+    joint_state_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
+        "/joint_states",
+        10,
+        std::bind(
+            &RobotArm::jointStateTopicCallback,
+            this,
+            _1
+        )
     );
 
     update_timer_ = this->create_wall_timer(
@@ -79,7 +77,9 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
   {
     RCLCPP_ERROR(
       this->get_logger(),
-      "Required robot arm links/joints not found in URDF.");
+      "Required robot arm links/joints not found in URDF."
+    );
+
     return;
   }
 
@@ -99,7 +99,9 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
   {
     RCLCPP_ERROR(
       this->get_logger(),
-      "Arm limits, inertials, or collision geometry missing.");
+      "Arm limits, inertials, or collision geometry missing."
+    );
+
     return;
   }
 
@@ -114,6 +116,7 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
       this->get_logger(),
       "Arm collision geometry must be cylindrical."
     );
+
     return;
   }
 
@@ -145,7 +148,10 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
         arm2_length_ <= 0.0 ||
         arm3_length_ <= 0.0)
     {
-        RCLCPP_ERROR(this->get_logger(), "Failed to extract arm lengths.");
+        RCLCPP_ERROR(
+            this->get_logger(),
+            "Failed to extract arm lengths."
+        );
 
         return;
     }
