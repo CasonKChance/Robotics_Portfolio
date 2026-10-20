@@ -54,6 +54,7 @@ endif()
 install(
   TARGETS
     ${PROJECT_NAME}_lib
+    RobotArm
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

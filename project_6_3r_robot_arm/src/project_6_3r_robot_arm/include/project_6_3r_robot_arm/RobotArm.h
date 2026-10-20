@@ -1,7 +1,7 @@
 #ifndef ROBOT_ARM_H
 #define ROBOT_ARM_H
 
-#include <Kinematics/Kinematics.h>
+#include <RoboticArmKinematics/Kinematics.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "urdf/model.hpp"
@@ -20,10 +20,12 @@ public:
 private:
     double joint_pedestal_arm1_angle_ {0.0};
     double joint_arm1_arm2_angle_ {0.0};
-    double joint_arm2_arm1_angle_ {0.0};
+    double joint_arm2_arm3_angle_ {0.0};
     double arm1_length_ {0.0};
     double arm2_length_ {0.0};
     double arm3_length_ {0.0};
+    double y_offset_ {0.0};
+    double z_offset_ {0.0};
     Eigen::Vector3d joint_pedestal_arm1_axis_ {Eigen::Vector3d::Zero(3)};
     Eigen::Vector3d joint_arm1_arm2_axis_ {Eigen::Vector3d::Zero(3)};
     Eigen::Vector3d joint_arm2_arm3_axis_ {Eigen::Vector3d::Zero(3)};

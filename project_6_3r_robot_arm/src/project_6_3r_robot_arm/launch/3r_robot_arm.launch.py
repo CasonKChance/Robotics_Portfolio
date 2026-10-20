@@ -27,7 +27,8 @@ def generate_launch_description():
 
     robot_arm = Node(
         package='project_6_3r_robot_arm',
-        executabe='RobotArm',
+        executable='RobotArm',
+        name='RobotArm',
         output='screen',
         emulate_tty=True
     )
