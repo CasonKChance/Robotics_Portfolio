@@ -10,6 +10,7 @@ find_package(rclcpp REQUIRED)
 find_package(urdf REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(project_6_3r_robot_arm_interfaces REQUIRED)
 
 add_subdirectory(
     ../../../RoboticArmKinematics
@@ -35,6 +36,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     ${sensor_msgs_TARGETS}
     ${std_msgs_TARGETS}
     Kinematics
+    ${project_6_3r_robot_arm_interfaces_TARGETS}
 )
 
 add_executable(RobotArm src/RobotArmMain.cpp)

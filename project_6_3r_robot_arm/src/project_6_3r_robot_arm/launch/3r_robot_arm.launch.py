@@ -1,10 +1,20 @@
 from launch import LaunchDescription
-from launch.substitutions import Command, PathJoinSubstitution
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import Command, PathJoinSubstitution, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch.conditions import IfCondition
+from launch.substitutions import PythonExpression
 
 
 def generate_launch_description():
+    mode = LaunchConfiguration('mode')
+    mode_arg = DeclareLaunchArgument(
+        'mode',
+        default_value='default',
+        description='Operating mode for RobotArm'
+    )
+
     package_share = FindPackageShare('project_6_3r_robot_arm')
     xacro_file = PathJoinSubstitution([package_share,
                                        'urdf', '3r_robot_arm.urdf.xacro'])
@@ -23,6 +33,9 @@ def generate_launch_description():
         executable='joint_state_publisher_gui',
         name='joint_state_publisher_gui',
         output='screen',
+        condition=IfCondition(
+            PythonExpression(["'", mode, "' != 'IK'"])
+        )
     )
 
     robot_arm = Node(
@@ -30,7 +43,8 @@ def generate_launch_description():
         executable='RobotArm',
         name='RobotArm',
         output='screen',
-        emulate_tty=True
+        emulate_tty=True,
+        parameters=[{'mode': mode}]
     )
 
     rviz_config = PathJoinSubstitution([
@@ -51,6 +65,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        mode_arg,
         robot_state_publisher,
         joint_state_publisher_gui,
         robot_arm,

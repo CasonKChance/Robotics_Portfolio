@@ -13,6 +13,9 @@ using namespace std::chrono_literals;
 RobotArm::RobotArm(const rclcpp::NodeOptions& options)
 : Node("robot_arm", options)
 {
+    this->declare_parameter<std::string>("mode", "default");
+    ik_mode_ = this->get_parameter("mode").as_string() == "IK";
+    
     robot_description_subscription_ = this->create_subscription<std_msgs::msg::String>(
         "/robot_description",
         rclcpp::QoS(1).transient_local().reliable(),
@@ -23,24 +26,107 @@ RobotArm::RobotArm(const rclcpp::NodeOptions& options)
         )
     );
 
-    joint_state_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
-        "/joint_states",
-        10,
-        std::bind(
-            &RobotArm::jointStateTopicCallback,
-            this,
-            _1
-        )
-    );
+    if (ik_mode_) {
+        joint_velocities_subscription_ = this->create_subscription<project_6_3r_robot_arm_interfaces::msg::JointVelocities>(
+            "/joint_velocities",
+            10,
+            std::bind(
+                &RobotArm::jointVelocitiesTopicCallback,
+                this,
+                _1
+            )
+        );
+
+        joint_state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
+    } else {
+        joint_state_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
+            "/joint_states",
+            10,
+            std::bind(
+                &RobotArm::jointStateTopicCallback,
+                this,
+                _1
+            )
+        );
+    }
+
+    last_update_time_ = this->get_clock()->now();
 
     update_timer_ = this->create_wall_timer(
         10ms, [this]() {
+            if (ik_mode_) {
+                const auto now = this->get_clock()->now();
+
+                const double dt = (now - last_update_time_).seconds();
+
+                last_update_time_ = now;
+
+                this->update(dt);
+            }
+
             this->logEndEffectorPosition();
         }
     );
 }
 
 /* Private Member Functions */
+
+void RobotArm::update(double dt)
+{
+    if (dt <= 0.0 || !robot_description_ready_) {
+        return;
+    }
+
+    updateJointVelocities(dt);
+
+    joint_pedestal_arm1_angle_ = normalizeAngle(joint_pedestal_arm1_angle_ + joint_velocities_.joint_pedestal_arm1_velocity * dt);
+    joint_arm1_arm2_angle_ = normalizeAngle(joint_arm1_arm2_angle_ + joint_velocities_.joint_arm1_arm2_velocity * dt);
+    joint_arm2_arm3_angle_ = normalizeAngle(joint_arm2_arm3_angle_ + joint_velocities_.joint_arm2_arm3_velocity * dt);
+
+    end_effector_position_ = Kinematics::forwardKinematics(
+        {joint_pedestal_arm1_angle_, joint_arm1_arm2_angle_, joint_arm2_arm3_angle_},
+        {arm1_length_, arm2_length_, arm3_length_},
+        {joint_pedestal_arm1_axis_, joint_arm1_arm2_axis_, joint_arm2_arm3_axis_}
+    );
+
+    Eigen::Vector3d offset(
+        -y_offset_ * std::sin(joint_pedestal_arm1_angle_),
+        y_offset_ * std::cos(joint_pedestal_arm1_angle_),
+        z_offset_
+    );
+
+    end_effector_position_ += offset;
+
+    publishJointStates();
+}
+
+void updateJointVelocities(double dt)
+{
+    
+}
+
+void RobotArm::jointVelocitiesTopicCallback(project_6_3r_robot_arm_interfaces::msg::JointVelocities::UniquePtr message)
+{
+  if (message->joint_pedestal_arm1_velocity == joint_velocities_.joint_pedestal_arm1_velocity &&
+      message->joint_arm1_arm2_velocity == joint_velocities_.joint_arm1_arm2_velocity &&
+      message->joint_arm2_arm3_velocity == joint_velocities_.joint_arm2_arm3_velocity)
+  {
+    return;
+  }
+
+  RCLCPP_DEBUG(this->get_logger(), "Updating commanded with: \n"
+                                    "\tjoint_pedestal_arm1_velocity: %.2f rads/s\n"
+                                    "\tjoint_arm1_arm2_velocity: %.2f rads/s\n"
+                                    "\tjoint_arm2_arm3_velocity: %.2f rads/s\n", 
+                                    message->joint_pedestal_arm1_velocity,
+                                    message->joint_arm1_arm2_velocity,
+                                    message->joint_arm2_arm3_velocity
+  );
+
+  joint_velocities_.joint_pedestal_arm1_velocity = message->joint_pedestal_arm1_velocity;
+  joint_velocities_.joint_arm1_arm2_velocity = message->joint_arm1_arm2_velocity;
+  joint_velocities_.joint_arm2_arm3_velocity = message->joint_arm2_arm3_velocity;
+}
 
 void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr message)
 {
@@ -227,6 +313,33 @@ void RobotArm::jointStateTopicCallback(sensor_msgs::msg::JointState::UniquePtr m
     end_effector_position_ += offset;
 }
 
+void RobotArm::publishJointStates() const
+{
+  sensor_msgs::msg::JointState message;
+
+  message.header.stamp = this->get_clock()->now();
+
+  message.name = {
+    "joint_pedestal_arm1",
+    "joint_arm1_arm2",
+    "joint_arm2_arm3"
+  };
+
+  message.position = {
+    joint_pedestal_arm1_angle_,
+    joint_arm1_arm2_angle_,
+    joint_arm2_arm3_angle_
+  };
+
+  message.velocity = {
+    joint_velocities_.joint_pedestal_arm1_velocity,
+    joint_velocities_.joint_arm1_arm2_velocity,
+    joint_velocities_.joint_arm2_arm3_velocity,
+  };
+
+  joint_state_publisher_->publish(message);
+}
+
 void RobotArm::logEndEffectorPosition() const
 {
     if (!robot_description_ready_ || end_effector_position_.isZero()) {
@@ -245,4 +358,10 @@ void RobotArm::logEndEffectorPosition() const
         end_effector_position_.y(),
         end_effector_position_.z()
     );
+}
+
+double RobotArm::normalizeAngle(double angle) const
+{
+  // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
+  return std::atan2(std::sin(angle), std::cos(angle));
 }

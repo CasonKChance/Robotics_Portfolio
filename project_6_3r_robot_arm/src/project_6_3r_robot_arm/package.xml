@@ -11,6 +11,7 @@
   <depend>urdf</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>project_6_3r_robot_arm_interfaces</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
