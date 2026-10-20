@@ -1,0 +1,3 @@
+float64 joint_pedestal_arm1_velocity
+float64 joint_arm1_arm2_velocity
+float64 joint_arm2_arm3_velocity
