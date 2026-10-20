@@ -1,0 +1,190 @@
+#include <project_6_3r_robot_arm/RobotArm.h>
+
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std::placeholders;
+
+/* Public Member Functions */
+
+RobotArm::RobotArm(const rclcpp::NodeOptions& options)
+: Node("robot_arm", options)
+{
+    robot_description_subscription_ =
+        this->create_subscription<std_msgs::msg::String>(
+            "/robot_description",
+            rclcpp::QoS(1).transient_local().reliable(),
+            std::bind(
+                &RobotArm::robotDescriptionTopicCallback,
+                this,
+                _1
+            )
+        );
+
+    joint_state_subscription_ = 
+        this->create_subscription<sensor_msgs::msg::JointState>(
+            "/joint_state",
+            std::bind(
+                &RobotArm::jointStateTopicCallback,
+                this,
+                _1
+            )
+    );
+
+    update_timer_ = this->create_wall_timer(
+        10ms, [this]() {
+            this->logEndEffectorPosition();
+        }
+    );
+}
+
+/* Private Member Functions */
+
+void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr message)
+{
+  // Pull model
+  urdf::Model model;
+
+  if (!model.initString(message->data)) {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "Failed to parse robot description.");
+    return;
+  }
+
+  const auto joint_pedestal_arm1 = model.getJoint("joint_pedestal_arm1");
+  const auto joint_arm1_arm2 = model.getJoint("joint_arm1_arm2");
+  const auto joint_arm2_arm3 = model.getJoint("joint_arm2_arm3");
+
+  const auto arm_link_1 = model.getLink("arm_link_1");
+  const auto arm_link_2 = model.getLink("arm_link_2");
+  const auto arm_link_3 = model.getLink("arm_link_3");
+
+  const auto end_effector_link = model.getLink("end_effector_link");
+
+  if (!joint_pedestal_arm1 ||
+    !joint_arm1_arm2 ||
+    !joint_arm2_arm3 ||
+    !arm_link_1 ||
+    !arm_link_2 ||
+    !arm_link_3 ||
+    !end_effector_link)
+  {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "Required robot arm links/joints not found in URDF.");
+    return;
+  }
+
+  // Validate model
+
+  if (!joint_pedestal_arm1->limits ||
+    !joint_arm1_arm2->limits ||
+    !joint_arm2_arm3->limits ||
+    !arm_link_1->inertial ||
+    !arm_link_2->inertial ||
+    !arm_link_3->inertial ||
+    !end_effector_link->inertial ||
+    !arm_link_1->collision ||
+    !arm_link_2->collision ||
+    !arm_link_3->collision ||
+    !end_effector_link->collision)
+  {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "Arm limits, inertials, or collision geometry missing.");
+    return;
+  }
+
+  // Extract Arm geometry
+
+  const auto * arm_link_1_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_1->collision->geometry.get());
+  const auto * arm_link_2_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_2->collision->geometry.get());
+  const auto * arm_link_3_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_3->collision->geometry.get());
+
+  if (!arm_link_1_cylinder || !arm_link_2_cylinder || !arm_link_3_cylinder) {
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "Arm collision geometry must be cylindrical.");
+    return;
+  }
+
+  // Extract arm lengths
+
+  arm1_length_ = arm_link_1_cylinder->length;
+  arm2_length_ = arm_link_2_cylinder->length;
+  arm3_length_ = arm_link_3_cylinder->length;
+
+  // Extract joint axes
+
+  joint_pedestal_arm1_axis_ << joint_pedestal_arm1->axis.x, joint_pedestal_arm1->axis.y, joint_pedestal_arm1->axis.z;
+  joint_arm1_arm2_axis_ = << joint_arm1_arm2->axis.x, joint_arm1_arm2->axis.y, joint_arm1_arm2->axis.z;
+  joint_arm2_arm3_axis_ = << joint_arm2_arm3->axis.x, joint_arm2_arm3->axis.y, joint_arm2_arm3->axis.z;
+
+  robot_description_ready_ = true;
+
+  RCLCPP_INFO(
+    this->get_logger(),
+    "Loaded robotic arm parameters:\n"
+    "\tArm1 length: %.3f m\n"
+    "\tArm2 length: %.3f m\n"
+    "\tArm3 length: %.3f m\n"
+    "\tJoint_pedestal_arm1 axis: [%.3f, %.3f, %.3f]\n"
+    "\tJoint_arm1_arm2 axis: [%.3f, %.3f, %.3f]\n"
+    "\tJoint_arm2_arm3 axis: [%.3f, %.3f, %.3f]",
+    arm1_length_,
+    arm2_length_,
+    arm3_length_,
+    joint_pedestal_arm1_axis_(0),
+    joint_pedestal_arm1_axis_(1),
+    joint_pedestal_arm1_axis_(2),
+    joint_arm1_arm2_axis_(0),
+    joint_arm1_arm2_axis_(1),
+    joint_arm1_arm2_axis_(2),
+    joint_arm2_arm3_axis_(0),
+    joint_arm2_arm3_axis_(1),
+    joint_arm2_arm3_axis_(2)
+  );
+}
+
+void RobotArm::jointStateTopicCallback(sensor_msgs::msg::JointState::UniquePtr message)
+{
+    if (!robot_description_ready_) {
+        return;
+    }
+
+    if (message->name.size() != message->position.size()) {
+        RCLCPP_WARN("Incomplete joint state date. Joints: %d. Joint angles: %d", message->name.size(), message->position.size())
+    }
+
+    joint_pedestal_arm1_angle_ = message->position[0]
+    joint_arm1_arm2_angle_ = message->position[1]
+    joint_arm2_arm1_angle_ = message->position[2]
+
+    end_effector_position_ = Kinematics::forwardKinematics(
+        std::vector<double>(joint_pedestal_arm1_angle_, joint_arm1_arm2_angle_, joint_arm2_arm1_angle_),
+        std::vector<double>(arm1_length_, arm2_length_, arm3_length_),
+        std::vector<Eigen::VectorXd>(joint_pedestal_arm1_axis_, joint_arm1_arm2_axis_, joint_arm2_arm3_axis_)
+    );
+}
+
+void RobotArm::logEndEffectorPosition() const
+{
+    if (!robot_description_ready_ || end_effector_position_ == Eigen::Vector3d::Zero(3)) {
+        return;
+    }
+
+    RCLCPP_INFO_THROTTLE(
+        this->get_logger(),
+        *this->get_clock(),
+        2500,
+        "End Effector located at:\n"
+        "\tx: %.3f\n"
+        "\ty: %.3f\n"
+        "\tz: %.3f\n",
+        end_effector_position_.x(),
+        end_effector_position_.y(),
+        end_effector_position_.z()
+    )
+}

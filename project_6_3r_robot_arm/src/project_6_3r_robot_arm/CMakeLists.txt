@@ -8,8 +8,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(urdf REQUIRED)
-find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_subdirectory(
     ../../../RoboticArmKinematics
@@ -17,24 +17,31 @@ add_subdirectory(
 )
 
 # Declare C++ library for core classes
-# add_library(${PROJECT_NAME}_lib
-# )
+add_library(${PROJECT_NAME}_lib
+  src/RobotArm.cpp
+)
 
 # Export include directories
-# target_include_directories(${PROJECT_NAME}_lib
-#   PUBLIC
-#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-# )
+target_include_directories(${PROJECT_NAME}_lib
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+)
 
-# target_link_libraries(${PROJECT_NAME}_lib
-#   PUBLIC
-#     rclcpp::rclcpp
-#     urdf::urdf
-#     ${geometry_msgs_TARGETS}
-#     ${std_msgs_TARGETS}
-#     Kinematics
-# )
+target_link_libraries(${PROJECT_NAME}_lib
+  PUBLIC
+    rclcpp::rclcpp
+    urdf::urdf
+    ${sensor_msgs_TARGETS}
+    ${std_msgs_TARGETS}
+    Kinematics
+)
+
+add_executable(RobotArm src/RobotArmMain.cpp)
+target_link_libraries(RobotArm
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -46,12 +53,17 @@ endif()
 # Installation rules
 install(
   TARGETS
-    Kinematics
-#    ${PROJECT_NAME}_lib
+    ${PROJECT_NAME}_lib
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS Kinematics
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
 
 install(

@@ -25,6 +25,13 @@ def generate_launch_description():
         output='screen',
     )
 
+    robot_arm = Node(
+        package='project_6_3r_robot_arm',
+        executabe='RobotArm',
+        output='screen',
+        emulate_tty=True
+    )
+
     rviz_config = PathJoinSubstitution([
         package_share,
         'rviz',
@@ -45,5 +52,6 @@ def generate_launch_description():
     return LaunchDescription([
         robot_state_publisher,
         joint_state_publisher_gui,
+        robot_arm,
         rviz
     ])
