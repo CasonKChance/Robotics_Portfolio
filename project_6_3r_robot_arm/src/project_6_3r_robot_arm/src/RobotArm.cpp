@@ -53,21 +53,19 @@ RobotArm::RobotArm(const rclcpp::NodeOptions & options)
 
   last_update_time_ = this->get_clock()->now();
 
-  update_timer_ = this->create_wall_timer(
-        10ms, [this]() {
-          if (ik_mode_) {
-            const auto now = this->get_clock()->now();
+  update_timer_ = this->create_wall_timer(10ms, [this]() {
+        if (ik_mode_) {
+          const auto now = this->get_clock()->now();
 
-            const double dt = (now - last_update_time_).seconds();
+          const double dt = (now - last_update_time_).seconds();
 
-            last_update_time_ = now;
+          last_update_time_ = now;
 
-            this->update(dt);
-          }
-
-          this->logEndEffectorPosition();
+          this->update(dt);
         }
-  );
+
+        this->logEndEffectorPosition();
+  });
 }
 
 /* Private Member Functions */
