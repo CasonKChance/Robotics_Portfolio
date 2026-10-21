@@ -100,9 +100,76 @@ void RobotArm::update(double dt)
     publishJointStates();
 }
 
-void RobotArm::updateJointVelocities([[maybe_unused]] double dt)
+void RobotArm::updateJointVelocities(double dt)
 {
-    
+    const Eigen::Vector3d effective_inertia = computeApproximateJointInertias();
+
+    for (int i = 0; i < 3; ++i) {
+        const auto& joint = joint_dynamics_[i];
+
+        const double max_effort = joint.max_effort;
+        const double max_velocity = joint.max_velocity;
+
+        const double current_velocity = joint_velocities_[i];
+
+        const double target_velocity = std::clamp(
+            commanded_joint_velocities_[i],
+            -max_velocity,
+            max_velocity
+        );
+
+        // Calculate velocity tracking error.
+        const double velocity_error = target_velocity - current_velocity;
+
+        // Proportional velocity controller.
+        const double requested_torque = velocity_kp_[i] * velocity_error;
+
+        // Enforce motor effort limit.
+        const double motor_torque = std::clamp(
+            requested_torque,
+            -max_effort,
+            max_effort
+        );
+
+        // Viscous damping.
+        const double damping_torque = joint.damping * current_velocity;
+
+        // Coulomb friction magnitude.
+        // For now, apply it only during motion.
+        double friction_torque = 0.0;
+
+        constexpr double velocity_epsilon = 1e-6;
+
+        if (std::abs(current_velocity) > velocity_epsilon) {
+            friction_torque = std::copysign(
+                joint.friction,
+                current_velocity
+            );
+        }
+
+        // Calculate net torque.
+        const double net_torque = motor_torque - damping_torque - friction_torque;
+
+        // Rotational form of Newton's second law.
+        const double acceleration = net_torque / effective_inertia[i];
+
+        // Integrate acceleration.
+        double new_velocity = current_velocity + acceleration * dt;
+
+        // Prevent numerical overshoot when approaching the commanded velocity.
+        if ((target_velocity - current_velocity) * (target_velocity - new_velocity) < 0.0) {
+            new_velocity = target_velocity;
+        }
+
+        // Enforce URDF velocity limit.
+        new_velocity = std::clamp(
+            new_velocity,
+            -max_velocity,
+            max_velocity
+        );
+
+        joint_velocities_[i] = new_velocity;
+    }
 }
 
 void RobotArm::jointVelocitiesTopicCallback(project_6_3r_robot_arm_interfaces::msg::JointVelocities::UniquePtr message)
@@ -502,3 +569,39 @@ double RobotArm::normalizeAngle(double angle) const
     // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
     return std::atan2(std::sin(angle), std::cos(angle));
 }
+
+
+Eigen::Vector3d RobotArm::computeApproximateJointInertias() const
+{
+    Eigen::Vector3d effective_inertia =
+        Eigen::Vector3d::Zero();
+
+    for (int i = 0; i < 3; ++i) {
+
+        // Joint i accelerates link i and all downstream links.
+        // Link 3 is the fixed end effector.
+        for (int j = i; j < 4; ++j) {
+
+            const auto& link = link_dynamics_[j];
+
+            // Approximate distance from joint i to the downstream link origin.
+            double distance = 0.0;
+
+            for (int k = i; k < j && k < 3; ++k) {
+                distance += link_dynamics_[k].length;
+            }
+
+            // Approximate distance to the link COM.
+            distance += link.center_of_mass.norm();
+
+            // Approximate rotational inertia about the joint axis using the mean principal moment.
+            const double rotational_inertia = link.inertia.trace() / 3.0;
+
+            // Parallel-axis approximation.
+            effective_inertia[i] += rotational_inertia + link.mass * distance * distance;
+        }
+    }
+
+    return effective_inertia;
+}
+

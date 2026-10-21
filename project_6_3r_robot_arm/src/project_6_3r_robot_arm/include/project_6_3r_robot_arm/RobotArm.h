@@ -44,9 +44,7 @@ private:
     Eigen::Vector3d joint_angles_ {Eigen::Vector3d::Zero()};
     Eigen::Vector3d joint_velocities_ {Eigen::Vector3d::Zero()};
     Eigen::Vector3d commanded_joint_velocities_ {Eigen::Vector3d::Zero()};
-    Eigen::Vector3d applied_joint_torques_ {Eigen::Vector3d::Zero()};
     Eigen::Vector3d velocity_kp_ {Eigen::Vector3d::Constant(5.0)}; // Velocity-controller proportional gain. Units: N*m / (rad/s)
-    Eigen::Vector3d gravity_ {0.0, 0.0, -9.81};
     double y_offset_ {0.0};
     double z_offset_ {0.0};
     bool robot_description_ready_ {false};
@@ -79,6 +77,8 @@ private:
      * @return Equivalent angle wrapped within [-π, π].
      */
     double normalizeAngle(double angle) const;
+
+    Eigen::Vector3d computeApproximateJointInertias() const;
 };
 
 #endif
