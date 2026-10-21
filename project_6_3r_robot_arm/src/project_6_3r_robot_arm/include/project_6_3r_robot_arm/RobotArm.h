@@ -20,8 +20,6 @@ struct JointDynamics {
     double damping {0.0};         // N*m*s/rad
     double friction {0.0};        // N*m
     Eigen::Vector3d axis {Eigen::Vector3d::Zero(3)};
-    Eigen::Vector3d origin_position {Eigen::Vector3d::Zero()}; // Joint origin relative to parent link frame
-    Eigen::Matrix3d origin_rotation {Eigen::Matrix3d::Identity()};
 };
 
 struct LinkDynamics {

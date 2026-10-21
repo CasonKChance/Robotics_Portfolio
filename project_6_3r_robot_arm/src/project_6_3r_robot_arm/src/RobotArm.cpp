@@ -381,16 +381,6 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
 
         result.axis << joint->axis.x, joint->axis.y, joint->axis.z;
 
-        const auto& origin = joint->parent_to_joint_origin_transform;
-
-        result.origin_position << origin.position.x, origin.position.y, origin.position.z;
-
-        const auto& r = origin.rotation;
-
-        Eigen::Quaterniond rotation(r.w, r.x, r.y, r.z);
-
-        result.origin_rotation = rotation.normalized().toRotationMatrix();
-
         return result;
     };
 
