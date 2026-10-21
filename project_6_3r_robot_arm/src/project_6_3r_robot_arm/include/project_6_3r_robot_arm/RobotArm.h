@@ -22,10 +22,10 @@
  */
 struct JointDynamics
 {
-  double max_effort {0.0};        // Maximum joint torque (N*m).
-  double max_velocity {0.0};      // Maximum joint angular velocity (rad/s).
-  double damping {0.0};           // Viscous damping coefficient (N*m*s/rad).
-  double friction {0.0};          // Joint friction torque (N*m).
+  double max_effort {0.0};                           // Maximum joint torque (N*m).
+  double max_velocity {0.0};                         // Maximum joint angular velocity (rad/s).
+  double damping {0.0};                              // Viscous damping coefficient (N*m*s/rad).
+  double friction {0.0};                             // Joint friction torque (N*m).
   Eigen::Vector3d axis {Eigen::Vector3d::Zero(3)};   // Joint rotation axis.
 };
 
@@ -37,10 +37,10 @@ struct JointDynamics
  */
 struct LinkDynamics
 {
-  double mass {0.0};   // Link mass (kg).
-  double length {0.0};   // Link mass (kg).
+  double mass {0.0};                                          // Link mass (kg).
+  double length {0.0};                                        // Link mass (kg).
   Eigen::Vector3d center_of_mass {Eigen::Vector3d::Zero()};   // Center of mass in the link frame
-  Eigen::Matrix3d inertia {Eigen::Matrix3d::Zero()};   // Inertia tensor about center of mass, expressed in the link frame
+  Eigen::Matrix3d inertia {Eigen::Matrix3d::Zero()};          // Inertia tensor about center of mass, expressed in the link frame
 };
 
 /**
@@ -70,17 +70,17 @@ public:
   explicit RobotArm(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
-  Eigen::Vector3d end_effector_position_ {Eigen::Vector3d::Zero(3)};   // Current end-effector position (m).
-  std::array < JointDynamics, 3 > joint_dynamics_; // Dynamic properties and constraints of the three revolute joints.
-  std::array < LinkDynamics, 4 > link_dynamics_; // Physical and inertial properties of the four robot links.
-  Eigen::Vector3d joint_angles_ {Eigen::Vector3d::Zero()};   // Current joint angular positions (rad).
-  Eigen::Vector3d joint_velocities_ {Eigen::Vector3d::Zero()};   // Current joint angular velocities (rad/s).
+  Eigen::Vector3d end_effector_position_ {Eigen::Vector3d::Zero(3)};       // Current end-effector position (m).
+  std::array < JointDynamics, 3 > joint_dynamics_;                         // Dynamic properties and constraints of the three revolute joints.
+  std::array < LinkDynamics, 4 > link_dynamics_;                           // Physical and inertial properties of the four robot links.
+  Eigen::Vector3d joint_angles_ {Eigen::Vector3d::Zero()};                 // Current joint angular positions (rad).
+  Eigen::Vector3d joint_velocities_ {Eigen::Vector3d::Zero()};             // Current joint angular velocities (rad/s).
   Eigen::Vector3d commanded_joint_velocities_ {Eigen::Vector3d::Zero()};   // Commanded joint angular velocities (rad/s).
-  Eigen::Vector3d velocity_kp_ {Eigen::Vector3d::Constant(5.0)};   // Velocity-controller proportional gain. Units: N*m / (rad/s)
-  double y_offset_ {0.0};   // End-effector geometry offset along the y-axis (m).
-  double z_offset_ {0.0};   // End-effector geometry offset along the z-axis (m).
-  bool robot_description_ready_ {false};   // Indicates whether the robot description has been received and processed.
-  bool ik_mode_ {false};   // Indicates whether inverse-kinematics mode is enabled.
+  Eigen::Vector3d velocity_kp_ {Eigen::Vector3d::Constant(5.0)};           // Velocity-controller proportional gain. Units: N*m / (rad/s)
+  double y_offset_ {0.0};                                                  // End-effector geometry offset along the y-axis (m).
+  double z_offset_ {0.0};                                                  // End-effector geometry offset along the z-axis (m).
+  bool robot_description_ready_ {false};                                   // Indicates whether the robot description has been received and processed.
+  bool ik_mode_ {false};                                                   // Indicates whether inverse-kinematics mode is enabled.
 
   rclcpp::Publisher < sensor_msgs::msg::JointState > ::SharedPtr joint_state_publisher_;
   rclcpp::Subscription < project_6_3r_robot_arm_interfaces::msg::JointVelocities >
