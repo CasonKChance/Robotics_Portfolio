@@ -79,19 +79,19 @@ void RobotArm::update(double dt)
 
     updateJointVelocities(dt);
 
-    joint_pedestal_arm1_angle_ = normalizeAngle(joint_pedestal_arm1_angle_ + joint_velocities_.joint_pedestal_arm1_velocity * dt);
-    joint_arm1_arm2_angle_ = normalizeAngle(joint_arm1_arm2_angle_ + joint_velocities_.joint_arm1_arm2_velocity * dt);
-    joint_arm2_arm3_angle_ = normalizeAngle(joint_arm2_arm3_angle_ + joint_velocities_.joint_arm2_arm3_velocity * dt);
+    joint_angles_[0] = normalizeAngle(joint_angles_[0] + joint_velocities_[0] * dt);
+    joint_angles_[1] = normalizeAngle(joint_angles_[1] + joint_velocities_[1] * dt);
+    joint_angles_[2] = normalizeAngle(joint_angles_[2] + joint_velocities_[2] * dt);
 
     end_effector_position_ = Kinematics::forwardKinematics(
-        {joint_pedestal_arm1_angle_, joint_arm1_arm2_angle_, joint_arm2_arm3_angle_},
-        {arm1_length_, arm2_length_, arm3_length_},
-        {joint_pedestal_arm1_axis_, joint_arm1_arm2_axis_, joint_arm2_arm3_axis_}
+        {joint_angles_[0], joint_angles_[1], joint_angles_[2]},
+        {link_dynamics_[0].length, link_dynamics_[1].length, link_dynamics_[2].length},
+        {joint_dynamics_[0].axis, joint_dynamics_[1].axis, joint_dynamics_[2].axis}
     );
 
     Eigen::Vector3d offset(
-        -y_offset_ * std::sin(joint_pedestal_arm1_angle_),
-        y_offset_ * std::cos(joint_pedestal_arm1_angle_),
+        -y_offset_ * std::sin(joint_angles_[0]),
+        y_offset_ * std::cos(joint_angles_[0]),
         z_offset_
     );
 
@@ -100,115 +100,163 @@ void RobotArm::update(double dt)
     publishJointStates();
 }
 
-void updateJointVelocities(double dt)
+void RobotArm::updateJointVelocities([[maybe_unused]] double dt)
 {
     
 }
 
 void RobotArm::jointVelocitiesTopicCallback(project_6_3r_robot_arm_interfaces::msg::JointVelocities::UniquePtr message)
 {
-  if (message->joint_pedestal_arm1_velocity == joint_velocities_.joint_pedestal_arm1_velocity &&
-      message->joint_arm1_arm2_velocity == joint_velocities_.joint_arm1_arm2_velocity &&
-      message->joint_arm2_arm3_velocity == joint_velocities_.joint_arm2_arm3_velocity)
-  {
-    return;
-  }
+    if (!robot_description_ready_) {
+        return;
+    }
 
-  RCLCPP_DEBUG(this->get_logger(), "Updating commanded with: \n"
+    Eigen::Vector3d command(
+        message->joint_pedestal_arm1_velocity,
+        message->joint_arm1_arm2_velocity,
+        message->joint_arm2_arm3_velocity
+    );
+
+    if (!command.allFinite()) {
+        RCLCPP_WARN(
+            this->get_logger(),
+            "Rejecting non-finite joint velocity command."
+        );
+
+        return;
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        const double limit = joint_dynamics_[i].max_velocity;
+
+        command[i] = std::clamp(command[i], -limit, limit);
+    }
+
+    if (command.isApprox(commanded_joint_velocities_)) {
+        return;
+    }
+
+    RCLCPP_DEBUG(this->get_logger(), "Updating commanded with: \n"
                                     "\tjoint_pedestal_arm1_velocity: %.2f rads/s\n"
                                     "\tjoint_arm1_arm2_velocity: %.2f rads/s\n"
                                     "\tjoint_arm2_arm3_velocity: %.2f rads/s\n", 
-                                    message->joint_pedestal_arm1_velocity,
-                                    message->joint_arm1_arm2_velocity,
-                                    message->joint_arm2_arm3_velocity
-  );
+                                    command[0],
+                                    command[1],
+                                    command[2]
+    );
 
-  joint_velocities_.joint_pedestal_arm1_velocity = message->joint_pedestal_arm1_velocity;
-  joint_velocities_.joint_arm1_arm2_velocity = message->joint_arm1_arm2_velocity;
-  joint_velocities_.joint_arm2_arm3_velocity = message->joint_arm2_arm3_velocity;
+    commanded_joint_velocities_[0] = command[0];
+    commanded_joint_velocities_[1] = command[1];
+    commanded_joint_velocities_[2] = command[2];
 }
 
 void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr message)
 {
-  // Pull model
-  urdf::Model model;
+    // Pull model
+    urdf::Model model;
 
-  if (!model.initString(message->data)) {
-    RCLCPP_ERROR(
-      this->get_logger(),
-      "Failed to parse robot description.");
-    return;
-  }
+    if (!model.initString(message->data)) {
+        RCLCPP_ERROR(
+        this->get_logger(),
+        "Failed to parse robot description.");
+        return;
+    }
 
-  const auto joint_pedestal_arm1 = model.getJoint("joint_pedestal_arm1");
-  const auto joint_arm1_arm2 = model.getJoint("joint_arm1_arm2");
-  const auto joint_arm2_arm3 = model.getJoint("joint_arm2_arm3");
+    const auto joint_pedestal_arm1 = model.getJoint("joint_pedestal_arm1");
+    const auto joint_arm1_arm2 = model.getJoint("joint_arm1_arm2");
+    const auto joint_arm2_arm3 = model.getJoint("joint_arm2_arm3");
 
-  const auto arm_link_1 = model.getLink("arm_link_1");
-  const auto arm_link_2 = model.getLink("arm_link_2");
-  const auto arm_link_3 = model.getLink("arm_link_3");
+    const auto arm_link_1 = model.getLink("arm_link_1");
+    const auto arm_link_2 = model.getLink("arm_link_2");
+    const auto arm_link_3 = model.getLink("arm_link_3");
 
-  const auto end_effector_link = model.getLink("end_effector_link");
+    const auto end_effector_link = model.getLink("end_effector_link");
 
-  const auto joint_base_pedestal = model.getJoint("joint_base_pedestal");
+    const auto joint_base_pedestal = model.getJoint("joint_base_pedestal");
 
-  if (!joint_pedestal_arm1 ||
-    !joint_arm1_arm2 ||
-    !joint_arm2_arm3 ||
-    !arm_link_1 ||
-    !arm_link_2 ||
-    !arm_link_3 ||
-    !end_effector_link ||
-    !joint_base_pedestal)
-  {
-    RCLCPP_ERROR(
-      this->get_logger(),
-      "Required robot arm links/joints not found in URDF."
-    );
+    if (!joint_pedestal_arm1 ||
+        !joint_arm1_arm2 ||
+        !joint_arm2_arm3 ||
+        !arm_link_1 ||
+        !arm_link_2 ||
+        !arm_link_3 ||
+        !end_effector_link ||
+        !joint_base_pedestal)
+    {
+        RCLCPP_ERROR(
+        this->get_logger(),
+        "Required robot arm links/joints not found in URDF."
+        );
 
-    return;
-  }
+        return;
+    }
 
-  // Validate model
+    // Validate model
 
-  if (!joint_pedestal_arm1->limits ||
-    !joint_arm1_arm2->limits ||
-    !joint_arm2_arm3->limits ||
-    !arm_link_1->inertial ||
-    !arm_link_2->inertial ||
-    !arm_link_3->inertial ||
-    !end_effector_link->inertial ||
-    !arm_link_1->collision ||
-    !arm_link_2->collision ||
-    !arm_link_3->collision ||
-    !end_effector_link->collision)
-  {
-    RCLCPP_ERROR(
-      this->get_logger(),
-      "Arm limits, inertials, or collision geometry missing."
-    );
+    if (!joint_pedestal_arm1->limits ||
+        !joint_arm1_arm2->limits ||
+        !joint_arm2_arm3->limits ||
+        !arm_link_1->inertial ||
+        !arm_link_2->inertial ||
+        !arm_link_3->inertial ||
+        !end_effector_link->inertial ||
+        !arm_link_1->collision ||
+        !arm_link_2->collision ||
+        !arm_link_3->collision ||
+        !end_effector_link->collision)
+    {
+        RCLCPP_ERROR(
+        this->get_logger(),
+        "Arm limits, inertials, or collision geometry missing."
+        );
 
-    return;
-  }
+        return;
+    }
 
-  // Extract Arm geometry
+    // Extract arm geometry
 
-  const auto * arm_link_1_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_1->collision->geometry.get());
-  const auto * arm_link_2_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_2->collision->geometry.get());
-  const auto * arm_link_3_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_3->collision->geometry.get());
+    const auto * arm_link_1_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_1->collision->geometry.get());
+    const auto * arm_link_2_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_2->collision->geometry.get());
+    const auto * arm_link_3_cylinder = dynamic_cast<const urdf::Cylinder *>(arm_link_3->collision->geometry.get());
 
-  if (!arm_link_1_cylinder || !arm_link_2_cylinder || !arm_link_3_cylinder) {
-    RCLCPP_ERROR(
-      this->get_logger(),
-      "Arm collision geometry must be cylindrical."
-    );
+    if (!arm_link_1_cylinder || !arm_link_2_cylinder || !arm_link_3_cylinder) {
+        RCLCPP_ERROR(
+        this->get_logger(),
+        "Arm collision geometry must be cylindrical."
+        );
 
-    return;
-  }
+        return;
+    }
 
-  // Extract arm lengths
+    // Extract arm dynamics
 
-    auto extractArmLength = [](const urdf::LinkConstSharedPtr& link) {
+    auto extractArmDynamics = [](const urdf::LinkConstSharedPtr& link) {
+        const auto& inertial = *link->inertial;
+
+        LinkDynamics result;
+
+        result.mass = inertial.mass;
+
+        result.center_of_mass <<
+            inertial.origin.position.x,
+            inertial.origin.position.y,
+            inertial.origin.position.z;
+
+        Eigen::Matrix3d inertia_inertial_frame;
+
+        inertia_inertial_frame <<
+            inertial.ixx, inertial.ixy, inertial.ixz,
+            inertial.ixy, inertial.iyy, inertial.iyz,
+            inertial.ixz, inertial.iyz, inertial.izz;
+
+        const auto& r = inertial.origin.rotation;
+
+        const Eigen::Quaterniond rotation(r.w, r.x, r.y, r.z);
+
+        const Eigen::Matrix3d R = rotation.normalized().toRotationMatrix();
+
+        result.inertia = R * inertia_inertial_frame * R.transpose();
+
         double maxLength = 0.0;
 
         for (const auto& collision : link->collision_array) {
@@ -223,30 +271,82 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
             }
         }
 
-        return maxLength;
+        result.length = maxLength;
+
+        return result;
     };
 
-    arm1_length_ = extractArmLength(arm_link_1);
-    arm2_length_ = extractArmLength(arm_link_2);
-    arm3_length_ = extractArmLength(arm_link_3);
+    link_dynamics_[0] = extractArmDynamics(arm_link_1);
+    link_dynamics_[1] = extractArmDynamics(arm_link_2);
+    link_dynamics_[2] = extractArmDynamics(arm_link_3);
+    link_dynamics_[3] = extractArmDynamics(end_effector_link);
 
-    if (arm1_length_ <= 0.0 ||
-        arm2_length_ <= 0.0 ||
-        arm3_length_ <= 0.0)
-    {
-        RCLCPP_ERROR(
-            this->get_logger(),
-            "Failed to extract arm lengths."
-        );
+    for (const auto& link : link_dynamics_) {
+        if (!std::isfinite(link.mass) ||
+            link.mass <= 0 ||
+            !std::isfinite(link.length) ||
+            link.length <= 0 ||
+            !link.center_of_mass.allFinite() ||
+            !link.inertia.allFinite() ||
+            !link.inertia.isApprox(link.inertia.transpose().eval(), 1e-9))
+        {
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "Invalid link dynamics parameters."
+            );
 
-        return;
+            return;
+        }
     }
 
-    // Extract joint axes
+    // Extract joint dynamics
 
-    joint_pedestal_arm1_axis_ << joint_pedestal_arm1->axis.x, joint_pedestal_arm1->axis.y, joint_pedestal_arm1->axis.z;
-    joint_arm1_arm2_axis_ << joint_arm1_arm2->axis.x, joint_arm1_arm2->axis.y, joint_arm1_arm2->axis.z;
-    joint_arm2_arm3_axis_ << joint_arm2_arm3->axis.x, joint_arm2_arm3->axis.y, joint_arm2_arm3->axis.z;
+    auto extractJointDynamics = [](const urdf::JointConstSharedPtr& joint) {
+        JointDynamics result;
+
+        result.max_effort = joint->limits->effort;
+        result.max_velocity = joint->limits->velocity;
+
+        if (joint->dynamics) {
+            result.damping = joint->dynamics->damping;
+            result.friction = joint->dynamics->friction;
+        }
+
+        result.axis << joint->axis.x, joint->axis.y, joint->axis.z;
+
+        const auto& origin = joint->parent_to_joint_origin_transform;
+
+        result.origin_position << origin.position.x, origin.position.y, origin.position.z;
+
+        const auto& r = origin.rotation;
+
+        Eigen::Quaterniond rotation(r.w, r.x, r.y, r.z);
+
+        result.origin_rotation = rotation.normalized().toRotationMatrix();
+
+        return result;
+    };
+
+    joint_dynamics_[0] = extractJointDynamics(joint_pedestal_arm1);
+    joint_dynamics_[1] = extractJointDynamics(joint_arm1_arm2);
+    joint_dynamics_[2] = extractJointDynamics(joint_arm2_arm3);
+
+    for (const auto& joint : joint_dynamics_) {
+        if (!std::isfinite(joint.max_effort) ||
+            joint.max_effort <= 0.0 ||
+            !std::isfinite(joint.max_velocity) ||
+            joint.max_velocity <= 0.0 ||
+            !joint.axis.allFinite() ||
+            joint.axis.norm() < 1e-9)
+        {
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "Invalid joint dynamics parameters."
+            );
+
+            return;
+        }
+    }
 
     // Extract y-offsets created by joint seats
 
@@ -267,18 +367,18 @@ void RobotArm::robotDescriptionTopicCallback(std_msgs::msg::String::UniquePtr me
         "\tJoint_pedestal_arm1 axis: [%.3f, %.3f, %.3f]\n"
         "\tJoint_arm1_arm2 axis: [%.3f, %.3f, %.3f]\n"
         "\tJoint_arm2_arm3 axis: [%.3f, %.3f, %.3f]",
-        arm1_length_,
-        arm2_length_,
-        arm3_length_,
-        joint_pedestal_arm1_axis_(0),
-        joint_pedestal_arm1_axis_(1),
-        joint_pedestal_arm1_axis_(2),
-        joint_arm1_arm2_axis_(0),
-        joint_arm1_arm2_axis_(1),
-        joint_arm1_arm2_axis_(2),
-        joint_arm2_arm3_axis_(0),
-        joint_arm2_arm3_axis_(1),
-        joint_arm2_arm3_axis_(2)
+        link_dynamics_[0].length,
+        link_dynamics_[1].length,
+        link_dynamics_[2].length,
+        joint_dynamics_[0].axis(0),
+        joint_dynamics_[0].axis(1),
+        joint_dynamics_[0].axis(2),
+        joint_dynamics_[1].axis(0),
+        joint_dynamics_[1].axis(1),
+        joint_dynamics_[1].axis(2),
+        joint_dynamics_[2].axis(0),
+        joint_dynamics_[2].axis(1),
+        joint_dynamics_[2].axis(2)
     );
 }
 
@@ -290,23 +390,60 @@ void RobotArm::jointStateTopicCallback(sensor_msgs::msg::JointState::UniquePtr m
 
     if (message->name.size() != message->position.size() || message->position.size() < 3) {
         RCLCPP_WARN(this->get_logger(), 
-            "Incomplete joint state date. Joints: %d. Joint angles: %d", static_cast<int>(message->name.size()), static_cast<int>(message->position.size())
+            "Incomplete joint state data... Joints: %d. Joint angles: %d", static_cast<int>(message->name.size()), static_cast<int>(message->position.size())
         );
+
+        return;
     }
 
-    joint_pedestal_arm1_angle_ = message->position[0];
-    joint_arm1_arm2_angle_ = message->position[1];
-    joint_arm2_arm3_angle_ = message->position[2];
+    const std::array<std::string, 3> joint_names = {
+        "joint_pedestal_arm1",
+        "joint_arm1_arm2",
+        "joint_arm2_arm3"
+    };
+
+    Eigen::Vector3d new_joint_angles;
+
+    for (int i = 0; i < 3; ++i) {
+        const auto joint_name_index = std::find(message->name.begin(), message->name.end(), joint_names[i]);
+
+        if (joint_name_index == message->name.end()) {
+            RCLCPP_WARN(
+                this->get_logger(),
+                "Missing joint state for %s.",
+                joint_names[i].c_str()
+            );
+
+            return;
+        }
+
+        const auto index = std::distance(message->name.begin(), joint_name_index);
+
+        const double angle = message->position[index];
+
+        if (!std::isfinite(angle)) {
+            RCLCPP_WARN(
+                this->get_logger(),
+                "Non-finite joint angle for %s.",
+                joint_names[i].c_str()
+            );
+            return;
+        }
+
+        new_joint_angles[i] = angle;
+    }
+
+    joint_angles_ = new_joint_angles;
 
     end_effector_position_ = Kinematics::forwardKinematics(
-        {joint_pedestal_arm1_angle_, joint_arm1_arm2_angle_, joint_arm2_arm3_angle_},
-        {arm1_length_, arm2_length_, arm3_length_},
-        {joint_pedestal_arm1_axis_, joint_arm1_arm2_axis_, joint_arm2_arm3_axis_}
+        {joint_angles_[0], joint_angles_[1], joint_angles_[2]},
+        {link_dynamics_[0].length, link_dynamics_[1].length, link_dynamics_[2].length},
+        {joint_dynamics_[0].axis, joint_dynamics_[1].axis, joint_dynamics_[2].axis}
     );
 
     Eigen::Vector3d offset(
-        -y_offset_ * std::sin(joint_pedestal_arm1_angle_),
-        y_offset_ * std::cos(joint_pedestal_arm1_angle_),
+        -y_offset_ * std::sin(joint_angles_[0]),
+        y_offset_ * std::cos(joint_angles_[0]),
         z_offset_
     );
 
@@ -315,29 +452,29 @@ void RobotArm::jointStateTopicCallback(sensor_msgs::msg::JointState::UniquePtr m
 
 void RobotArm::publishJointStates() const
 {
-  sensor_msgs::msg::JointState message;
+    sensor_msgs::msg::JointState message;
 
-  message.header.stamp = this->get_clock()->now();
+    message.header.stamp = this->get_clock()->now();
 
-  message.name = {
-    "joint_pedestal_arm1",
-    "joint_arm1_arm2",
-    "joint_arm2_arm3"
-  };
+    message.name = {
+        "joint_pedestal_arm1",
+        "joint_arm1_arm2",
+        "joint_arm2_arm3"
+    };
 
-  message.position = {
-    joint_pedestal_arm1_angle_,
-    joint_arm1_arm2_angle_,
-    joint_arm2_arm3_angle_
-  };
+    message.position = {
+        joint_angles_[0],
+        joint_angles_[1],
+        joint_angles_[2]
+    };
 
-  message.velocity = {
-    joint_velocities_.joint_pedestal_arm1_velocity,
-    joint_velocities_.joint_arm1_arm2_velocity,
-    joint_velocities_.joint_arm2_arm3_velocity,
-  };
+    message.velocity = {
+        joint_velocities_[0],
+        joint_velocities_[1],
+        joint_velocities_[2],
+    };
 
-  joint_state_publisher_->publish(message);
+    joint_state_publisher_->publish(message);
 }
 
 void RobotArm::logEndEffectorPosition() const
@@ -354,14 +491,14 @@ void RobotArm::logEndEffectorPosition() const
         "\tx: %.3f\n"
         "\ty: %.3f\n"
         "\tz: %.3f\n",
-        end_effector_position_.x(),
-        end_effector_position_.y(),
-        end_effector_position_.z()
+        end_effector_position_[0],
+        end_effector_position_[1],
+        end_effector_position_[2]
     );
 }
 
 double RobotArm::normalizeAngle(double angle) const
 {
-  // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
-  return std::atan2(std::sin(angle), std::cos(angle));
+    // std::atan2(sin(θ), cos(θ)) maps any angle onto [-π, π] continuously
+    return std::atan2(std::sin(angle), std::cos(angle));
 }
