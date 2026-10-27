@@ -568,7 +568,7 @@ void RobotArm::publishRobotState() const
   message.joint_pedestal_arm1_acceleration = joint_accelerations_[0];
   message.joint_arm1_arm2_acceleration = joint_accelerations_[1];
   message.joint_arm2_arm3_acceleration = joint_accelerations_[2];
-  message.maximumJointVelocity = joint_dynamics_.max_velocity;
+  message.maximum_joint_velocity = joint_dynamics_.max_velocity;
 
   robot_state_publisher_->publish(message);
 }
