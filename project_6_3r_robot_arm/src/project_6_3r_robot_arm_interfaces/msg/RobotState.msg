@@ -1,0 +1,14 @@
+float64 end_effector_x
+float64 end_effector_y
+float64 end_effector_z
+float64 arm1_length
+float64 arm2_length
+float64 arm3_length
+float64 joint_pedestal_arm1_angle
+float64 joint_arm1_arm2_angle
+float64 joint_arm2_arm3_angle
+float64 joint_pedestal_arm1_velocity
+float64 joint_arm1_arm2_velocity
+float64 joint_arm2_arm3_velocity
+float64 maximumJointVelocity
+float64 jointAcceleration
