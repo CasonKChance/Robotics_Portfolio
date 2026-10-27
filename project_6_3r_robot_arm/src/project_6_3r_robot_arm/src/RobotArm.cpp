@@ -8,6 +8,8 @@
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 
+using JointVelocities = project_6_3r_robot_arm_interfaces::msg::JointVelocities;
+
 /* Public Member Functions */
 
 RobotArm::RobotArm(const rclcpp::NodeOptions & options)
@@ -27,7 +29,7 @@ RobotArm::RobotArm(const rclcpp::NodeOptions & options)
   );
 
   if (ik_mode_) {
-    joint_velocities_subscription_ = this->create_subscription<project_6_3r_robot_arm_interfaces::msg::JointVelocities>(
+    joint_velocities_subscription_ = this->create_subscription<JointVelocities>(
         "/joint_velocities",
         10,
         std::bind(
@@ -39,6 +41,8 @@ RobotArm::RobotArm(const rclcpp::NodeOptions & options)
 
     joint_state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/joint_states",
       10);
+
+    robot_state_publisher_ = this->create_publisher<project_6_3r_robot_arm_interfaces::msg::RobotState>("/robot_state", 10);
   } else {
     joint_state_subscription_ = this->create_subscription<sensor_msgs::msg::JointState>(
         "/joint_states",
@@ -97,6 +101,7 @@ void RobotArm::update(double dt)
   end_effector_position_ += offset;
 
   publishJointStates();
+  publishRobotState();
 }
 
 void RobotArm::updateJointVelocities(double dt)
@@ -152,6 +157,8 @@ void RobotArm::updateJointVelocities(double dt)
     // Rotational form of Newton's second law.
     const double acceleration = net_torque / effective_inertia[i];
 
+    joint_accelerations_[i] = acceleration;
+
     // Integrate acceleration.
     double new_velocity = current_velocity + acceleration * dt;
 
@@ -171,8 +178,7 @@ void RobotArm::updateJointVelocities(double dt)
   }
 }
 
-void RobotArm::jointVelocitiesTopicCallback(
-  project_6_3r_robot_arm_interfaces::msg::JointVelocities::UniquePtr message)
+void RobotArm::jointVelocitiesTopicCallback(JointVelocities::UniquePtr message)
 {
   if (!robot_description_ready_) {
     return;
@@ -539,6 +545,32 @@ void RobotArm::publishJointStates() const
   };
 
   joint_state_publisher_->publish(message);
+}
+
+void RobotArm::publishRobotState() const
+{
+  project_6_3r_robot_arm_interfaces::msg::RobotState message;
+
+  message.header.stamp = this->get_clock()->now();
+
+  message.end_effector_x = end_effector_position_.x();
+  message.end_effector_y = end_effector_position_.y();
+  message.end_effector_z = end_effector_position_.z();
+  message.arm1_length = link_dynamics_[0].length;
+  message.arm2_length = link_dynamics_[1].length;
+  message.arm3_length = link_dynamics_[2].length;
+  message.joint_pedestal_arm1_angle = joint_angles_[0];
+  message.joint_arm1_arm2_angle = joint_angles_[1];
+  message.joint_arm2_arm3_angle = joint_angles_[2];
+  message.joint_pedestal_arm1_velocity = joint_velocities_[0];
+  message.joint_arm1_arm2_velocity = joint_velocities_[1];
+  message.joint_arm2_arm3_velocity = joint_velocities_[2];
+  message.joint_pedestal_arm1_acceleration = joint_accelerations_[0];
+  message.joint_arm1_arm2_acceleration = joint_accelerations_[1];
+  message.joint_arm2_arm3_acceleration = joint_accelerations_[2];
+  message.maximumJointVelocity = joint_dynamics_.max_velocity;
+
+  robot_state_publisher_->publish(message);
 }
 
 void RobotArm::logEndEffectorPosition() const

@@ -4,6 +4,7 @@
 #include <RoboticArmKinematics/Kinematics.h>
 
 #include "project_6_3r_robot_arm_interfaces/msg/joint_velocities.hpp"
+#include "project_6_3r_robot_arm_interfaces/msg/robot_state.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "urdf/model.hpp"
@@ -59,6 +60,8 @@ class RobotArm: public rclcpp::Node
 {
 public:
 
+  using JointVelocities = project_6_3r_robot_arm_interfaces::msg::JointVelocities;
+
   /**
    * @brief Constructs the RobotArm ROS 2 node.
    *
@@ -76,6 +79,7 @@ private:
   Eigen::Vector3d joint_angles_ {Eigen::Vector3d::Zero()};                 // Current joint angular positions (rad).
   Eigen::Vector3d joint_velocities_ {Eigen::Vector3d::Zero()};             // Current joint angular velocities (rad/s).
   Eigen::Vector3d commanded_joint_velocities_ {Eigen::Vector3d::Zero()};   // Commanded joint angular velocities (rad/s).
+  Eigen::Vector3d joint_accelerations_ {Eigen::Vector3d::Zero()};          // Current joint angular accelerations (rad/s^2).
   Eigen::Vector3d velocity_kp_ {Eigen::Vector3d::Constant(5.0)};           // Velocity-controller proportional gain. Units: N*m / (rad/s)
   double y_offset_ {0.0};                                                  // End-effector geometry offset along the y-axis (m).
   double z_offset_ {0.0};                                                  // End-effector geometry offset along the z-axis (m).
@@ -83,8 +87,8 @@ private:
   bool ik_mode_ {false};                                                   // Indicates whether inverse-kinematics mode is enabled.
 
   rclcpp::Publisher < sensor_msgs::msg::JointState > ::SharedPtr joint_state_publisher_;
-  rclcpp::Subscription < project_6_3r_robot_arm_interfaces::msg::JointVelocities >
-  ::SharedPtr joint_velocities_subscription_;
+  rclcpp::Publisher < project_6_3r_robot_arm_interfaces::msg::RobotState > ::SharedPtr robot_state_publisher_;
+  rclcpp::Subscription < JointVelocities > ::SharedPtr joint_velocities_subscription_;
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robot_description_subscription_;
   rclcpp::Subscription < sensor_msgs::msg::JointState > ::SharedPtr joint_state_subscription_;
   rclcpp::TimerBase::SharedPtr update_timer_;
@@ -117,8 +121,7 @@ private:
    *
    * @param message Unique pointer to the received joint velocity message.
    */
-  void jointVelocitiesTopicCallback(
-    project_6_3r_robot_arm_interfaces::msg::JointVelocities::UniquePtr message);
+  void jointVelocitiesTopicCallback(JointVelocities::UniquePtr message);
 
   /**
    * @brief Processes a received robot description.
@@ -147,6 +150,11 @@ private:
    * sensor_msgs::msg::JointState message.
    */
   void publishJointStates() const;
+
+  /**
+   * @brief Publishes the robot arm's current state.
+   */
+  void publishRobotState() const;
 
   /**
    * @brief Logs the current end-effector position.

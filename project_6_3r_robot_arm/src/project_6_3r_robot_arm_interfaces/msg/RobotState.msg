@@ -10,5 +10,7 @@ float64 joint_arm2_arm3_angle
 float64 joint_pedestal_arm1_velocity
 float64 joint_arm1_arm2_velocity
 float64 joint_arm2_arm3_velocity
+float64 joint_pedestal_arm1_acceleration
+float64 joint_arm1_arm2_acceleration
+float64 joint_arm2_arm3_acceleration
 float64 maximumJointVelocity
-float64 jointAcceleration
