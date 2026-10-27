@@ -1,0 +1,14 @@
+# Goal
+float64 x
+float64 y
+float64 z
+---
+# Result
+float64 x
+float64 y
+float64 z
+---
+# Feedback
+float64 joint_pedestal_arm1_rotation_remaining
+float64 joint_arm1_arm2_rotation_remaining
+float64 joint_arm2_arm3_rotation_remaining
