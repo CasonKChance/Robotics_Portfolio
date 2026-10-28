@@ -12,7 +12,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/JointVelocities.msg"
   "msg/RobotState.msg"
-  "acton/GoToPosition.action"
+  "action/GoToPosition.action"
 )
 
 ament_package()
