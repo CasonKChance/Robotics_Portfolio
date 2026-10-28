@@ -551,8 +551,6 @@ void RobotArm::publishRobotState() const
 {
   project_6_3r_robot_arm_interfaces::msg::RobotState message;
 
-  message.header.stamp = this->get_clock()->now();
-
   message.end_effector_x = end_effector_position_.x();
   message.end_effector_y = end_effector_position_.y();
   message.end_effector_z = end_effector_position_.z();
@@ -568,7 +566,12 @@ void RobotArm::publishRobotState() const
   message.joint_pedestal_arm1_acceleration = joint_accelerations_[0];
   message.joint_arm1_arm2_acceleration = joint_accelerations_[1];
   message.joint_arm2_arm3_acceleration = joint_accelerations_[2];
-  message.maximum_joint_velocity = joint_dynamics_.max_velocity;
+  message.joint_pedestal_arm1_maximum_velocity = joint_dynamics_[0].max_velocity;
+  message.joint_arm1_arm2_maximum_velocity = joint_dynamics_[1].max_velocity;
+  message.joint_arm2_arm3_maximum_velocity = joint_dynamics_[2].max_velocity;
+  message.x_offset = 0;
+  message.y_offset = y_offset_;
+  message.z_offset = z_offset_;
 
   robot_state_publisher_->publish(message);
 }
