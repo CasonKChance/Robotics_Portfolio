@@ -571,8 +571,8 @@ void RobotArm::publishRobotState() const
   message.joint_pedestal_arm1_maximum_velocity = joint_dynamics_[0].max_velocity;
   message.joint_arm1_arm2_maximum_velocity = joint_dynamics_[1].max_velocity;
   message.joint_arm2_arm3_maximum_velocity = joint_dynamics_[2].max_velocity;
-  message.x_offset = 0;
-  message.y_offset = y_offset_;
+  message.x_offset = -y_offset_ * std::sin(joint_angles_[0]);
+  message.y_offset = y_offset_ * std::cos(joint_angles_[0]);
   message.z_offset = z_offset_;
 
   robot_state_publisher_->publish(message);
@@ -587,7 +587,7 @@ void RobotArm::logEndEffectorPosition() const
   RCLCPP_INFO_THROTTLE(
         this->get_logger(),
         *this->get_clock(),
-        2500,
+        5000,
         "End Effector located at:\n"
         "\tx: %.3f\n"
         "\ty: %.3f\n"
