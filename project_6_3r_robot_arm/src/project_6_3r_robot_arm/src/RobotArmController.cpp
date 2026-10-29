@@ -62,8 +62,7 @@ rclcpp_action::GoalResponse RobotArmController::handleGoal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse RobotArmController::handleCancel(
-  const std::shared_ptr<GoalHandleGoToPosition> goalHandle)
+rclcpp_action::CancelResponse RobotArmController::handleCancel(const std::shared_ptr<GoalHandleGoToPosition> goalHandle)
 {
   if (!active_goal_handle_ || goalHandle != active_goal_handle_) {
     RCLCPP_WARN(get_logger(), "Rejecting goal cancelation: No active goal.");
@@ -74,8 +73,7 @@ rclcpp_action::CancelResponse RobotArmController::handleCancel(
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void RobotArmController::handleAccepted(
-  const std::shared_ptr<GoalHandleGoToPosition> goalHandle)
+void RobotArmController::handleAccepted(const std::shared_ptr<GoalHandleGoToPosition> goalHandle)
 {
   active_goal_handle_ = goalHandle;
   controller_state_ = ControllerState::RotatingToGoalPosition;
@@ -261,8 +259,7 @@ std::vector<double> RobotArmController::getRotationRemaining(const std::vector<d
   return {normalizeAngle(goalAngles[0] - current[0]), normalizeAngle(goalAngles[1] - current[1]), normalizeAngle(goalAngles[2] - current[2])};
 }
 
-double RobotArmController::getStoppingDistance(
-  const double velocity, const double acceleration) const
+double RobotArmController::getStoppingDistance(const double velocity, const double acceleration) const
 {
   if (!std::isfinite(velocity) || !std::isfinite(acceleration) || acceleration <= 0.0) {
     return std::numeric_limits<double>::infinity();
