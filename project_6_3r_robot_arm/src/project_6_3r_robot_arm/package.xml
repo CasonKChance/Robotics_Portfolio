@@ -8,6 +8,7 @@
   <license>Apache-2.0</license>
 
   <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
   <depend>urdf</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>

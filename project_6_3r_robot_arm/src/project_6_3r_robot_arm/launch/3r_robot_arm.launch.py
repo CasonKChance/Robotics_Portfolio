@@ -1,5 +1,6 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch_ros.parameter_descriptions import ParameterValue
 from launch.conditions import IfCondition
 from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch.substitutions import PythonExpression
@@ -13,6 +14,13 @@ def generate_launch_description():
         'mode',
         default_value='default',
         description='Operating mode for RobotArm'
+    )
+
+    goal_position_tolerance = LaunchConfiguration('goal_position_tolerance');
+    goal_position_tolerance_arg = DeclareLaunchArgument(
+        'goal_position_tolerance',
+        default_value='0.01',
+        description='End-effector goal positional tolerance in meters'
     )
 
     package_share = FindPackageShare('project_6_3r_robot_arm')
@@ -47,6 +55,23 @@ def generate_launch_description():
         parameters=[{'mode': mode}]
     )
 
+    robot_arm_controller = Node(
+        package='project_6_3r_robot_arm',
+        executable='RobotArmController',
+        name='RobotArmController',
+        output='screen',
+        emulate_tty=True,
+        condition=IfCondition(
+            PythonExpression(["'", mode, "' == 'IK'"])
+        ),
+        parameters=[{
+            'goal_position_tolerance': ParameterValue(
+                goal_position_tolerance,
+                value_type=float
+            )
+        }]
+    )
+
     rviz_config = PathJoinSubstitution([
         package_share,
         'rviz',
@@ -66,8 +91,10 @@ def generate_launch_description():
 
     return LaunchDescription([
         mode_arg,
+        goal_position_tolerance_arg,
         robot_state_publisher,
         joint_state_publisher_gui,
         robot_arm,
+        robot_arm_controller,
         rviz
     ])

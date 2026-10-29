@@ -7,6 +7,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(urdf REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -20,6 +21,7 @@ add_subdirectory(
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
   src/RobotArm.cpp
+  src/RobotArmController.cpp
 )
 
 # Export include directories
@@ -32,6 +34,7 @@ target_include_directories(${PROJECT_NAME}_lib
 target_link_libraries(${PROJECT_NAME}_lib
   PUBLIC
     rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
     urdf::urdf
     ${sensor_msgs_TARGETS}
     ${std_msgs_TARGETS}
@@ -41,6 +44,12 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 add_executable(RobotArm src/RobotArmMain.cpp)
 target_link_libraries(RobotArm
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
+add_executable(RobotArmController src/RobotArmControllerMain.cpp)
+target_link_libraries(RobotArmController
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -57,6 +66,7 @@ install(
   TARGETS
     ${PROJECT_NAME}_lib
     RobotArm
+    RobotArmController
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
