@@ -1,7 +1,6 @@
 #include "project_6_3r_robot_arm/RobotArmController.h"
 
 #include <algorithm>
-#include <array>
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -10,8 +9,8 @@
 using namespace std::chrono_literals;
 using namespace std::placeholders;
 
-static constexpr double kDefaultGoalPositionTolerance = 1e-2;  // meters
-static constexpr double kJointAngleTolerance = 1e-2;           // rad
+static constexpr double kDefaultGoalPositionTolerance = 5e-2;  // meters
+static constexpr double kJointAngleTolerance = 5e-2;           // rad
 static constexpr double kStoppedVelocityTolerance = 1e-3;      // rad/s
 static constexpr int kIKIterations = 150;
 

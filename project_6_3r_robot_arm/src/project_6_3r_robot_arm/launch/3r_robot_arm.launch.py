@@ -19,7 +19,7 @@ def generate_launch_description():
     goal_position_tolerance = LaunchConfiguration('goal_position_tolerance');
     goal_position_tolerance_arg = DeclareLaunchArgument(
         'goal_position_tolerance',
-        default_value='0.01',
+        default_value='0.05',
         description='End-effector goal positional tolerance in meters'
     )
 
