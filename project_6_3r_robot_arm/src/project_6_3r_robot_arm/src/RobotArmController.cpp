@@ -19,7 +19,8 @@ static constexpr int kIKIterations = 150;
 RobotArmController::RobotArmController(const rclcpp::NodeOptions & options)
 : Node("robot_arm_controller", options), controller_state_(ControllerState::Idle)
 {
-  goal_position_tolerance_ = declare_parameter<double>("goal_position_tolerance", kDefaultGoalPositionTolerance);
+  goal_position_tolerance_ = declare_parameter<double>("goal_position_tolerance",
+    kDefaultGoalPositionTolerance);
   if (!std::isfinite(goal_position_tolerance_) || goal_position_tolerance_ <= 0.0) {
     throw std::invalid_argument("goal_position_tolerance must be positive and finite");
   }
@@ -58,11 +59,17 @@ rclcpp_action::GoalResponse RobotArmController::handleGoal(
     return rclcpp_action::GoalResponse::REJECT;
   }
 
-  RCLCPP_INFO(get_logger(), "Accepted goal position: (%.3f, %.3f, %.3f)", goal->x, goal->y, goal->z);
+  RCLCPP_INFO(get_logger(),
+    "Accepted goal position: (%.3f, %.3f, %.3f)",
+    goal->x,
+    goal->y,
+    goal->z
+  );
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse RobotArmController::handleCancel(const std::shared_ptr<GoalHandleGoToPosition> goalHandle)
+rclcpp_action::CancelResponse RobotArmController::handleCancel(
+  const std::shared_ptr<GoalHandleGoToPosition> goalHandle)
 {
   if (!active_goal_handle_ || goalHandle != active_goal_handle_) {
     RCLCPP_WARN(get_logger(), "Rejecting goal cancelation: No active goal.");
@@ -97,7 +104,7 @@ void RobotArmController::controlLoop()
   const auto stopped = [&]() {
       const auto velocities = jointVelocities();
       return std::all_of(velocities.begin(), velocities.end(),
-        [](double v) {return std::abs(v) <= kStoppedVelocityTolerance;});
+               [](double v) {return std::abs(v) <= kStoppedVelocityTolerance;});
     };
   const auto failGoal = [&](const char * reason) {
       RCLCPP_ERROR(get_logger(), "%s", reason);
@@ -168,7 +175,9 @@ void RobotArmController::controlLoop()
         for (std::size_t i = 0; i < 3; ++i) {
           const double stopping_distance = getStoppingDistance(velocities[i], max_accelerations[i]);
 
-          if (std::abs(remaining[i]) > kJointAngleTolerance && std::abs(remaining[i]) > stopping_distance) {
+          if (std::abs(remaining[i]) > kJointAngleTolerance &&
+            std::abs(remaining[i]) > stopping_distance)
+          {
             commands[i] = std::copysign(max_velocities[i], remaining[i]);
             all_braking = false;
           }
@@ -178,15 +187,17 @@ void RobotArmController::controlLoop()
         if (all_braking) {
           controller_state_ = ControllerState::WaitingForRotationToGoalPositionStop;
         }
+
         return;
-    }
+      }
 
     case ControllerState::WaitingForRotationToGoalPositionStop:
       publishCommandJointVelocities({0.0, 0.0, 0.0});
+
       if (stopped()) {
         controller_state_ = ControllerState::GoalPositionReached;
       }
-      
+
       return;
 
     case ControllerState::GoalPositionReached:
@@ -224,7 +235,8 @@ void RobotArmController::publishCommandJointVelocities(const std::vector<double>
   joint_velocities_publisher_->publish(message);
 }
 
-void RobotArmController::robotStateTopicCallback(project_6_3r_robot_arm_interfaces::msg::RobotState::UniquePtr message)
+void RobotArmController::robotStateTopicCallback(
+  project_6_3r_robot_arm_interfaces::msg::RobotState::UniquePtr message)
 {
   current_robot_state_.end_effector_x = message->end_effector_x;
   current_robot_state_.end_effector_y = message->end_effector_y;
@@ -238,10 +250,14 @@ void RobotArmController::robotStateTopicCallback(project_6_3r_robot_arm_interfac
   current_robot_state_.joint_pedestal_arm1_velocity = message->joint_pedestal_arm1_velocity;
   current_robot_state_.joint_arm1_arm2_velocity = message->joint_arm1_arm2_velocity;
   current_robot_state_.joint_arm2_arm3_velocity = message->joint_arm2_arm3_velocity;
-  current_robot_state_.joint_pedestal_arm1_maximum_acceleration = message->joint_pedestal_arm1_maximum_acceleration;
-  current_robot_state_.joint_arm1_arm2_maximum_acceleration = message->joint_arm1_arm2_maximum_acceleration;
-  current_robot_state_.joint_arm2_arm3_maximum_acceleration = message->joint_arm2_arm3_maximum_acceleration;
-  current_robot_state_.joint_pedestal_arm1_maximum_velocity = message->joint_pedestal_arm1_maximum_velocity;
+  current_robot_state_.joint_pedestal_arm1_maximum_acceleration =
+    message->joint_pedestal_arm1_maximum_acceleration;
+  current_robot_state_.joint_arm1_arm2_maximum_acceleration =
+    message->joint_arm1_arm2_maximum_acceleration;
+  current_robot_state_.joint_arm2_arm3_maximum_acceleration =
+    message->joint_arm2_arm3_maximum_acceleration;
+  current_robot_state_.joint_pedestal_arm1_maximum_velocity =
+    message->joint_pedestal_arm1_maximum_velocity;
   current_robot_state_.joint_arm1_arm2_maximum_velocity = message->joint_arm1_arm2_maximum_velocity;
   current_robot_state_.joint_arm2_arm3_maximum_velocity = message->joint_arm2_arm3_maximum_velocity;
   current_robot_state_.x_offset = message->x_offset;
@@ -256,10 +272,14 @@ std::vector<double> RobotArmController::getRotationRemaining(const std::vector<d
   }
 
   const auto current = jointAngles();
-  return {normalizeAngle(goalAngles[0] - current[0]), normalizeAngle(goalAngles[1] - current[1]), normalizeAngle(goalAngles[2] - current[2])};
+  return {normalizeAngle(goalAngles[0] - current[0]),
+    normalizeAngle(goalAngles[1] - current[1]),
+    normalizeAngle(goalAngles[2] - current[2])};
 }
 
-double RobotArmController::getStoppingDistance(const double velocity, const double acceleration) const
+double RobotArmController::getStoppingDistance(
+  const double velocity,
+  const double acceleration) const
 {
   if (!std::isfinite(velocity) || !std::isfinite(acceleration) || acceleration <= 0.0) {
     return std::numeric_limits<double>::infinity();
@@ -273,10 +293,21 @@ std::vector<double> RobotArmController::solveGoalAngles(const Eigen::Vector3d & 
   const auto lengths = linkLengths();
   const auto axes = jointAxes();
   const Eigen::Vector3d offset = measuredOffset();
-  const Eigen::Vector3d ik_error_tolerance = Eigen::Vector3d::Constant(goal_position_tolerance_ / std::sqrt(3.0));
+  const Eigen::Vector3d ik_error_tolerance = Eigen::Vector3d::Constant(
+    goal_position_tolerance_ / std::sqrt(3.0)
+  );
 
-  std::vector<double> solution = Kinematics::numericalInverseKinematics(goal - offset, lengths, axes, jointAngles(), ik_error_tolerance, kIKIterations);
-  if (solution.size() != 3 || !std::all_of(solution.begin(), solution.end(), [](double angle) { return std::isfinite(angle); })) {
+  std::vector<double> solution = Kinematics::numericalInverseKinematics(
+    goal - offset,
+    lengths,
+    axes,
+    jointAngles(),
+    ik_error_tolerance,
+    kIKIterations
+  );
+  if (solution.size() != 3 ||
+    !std::all_of(solution.begin(), solution.end(), [](double angle) {return std::isfinite(angle);}))
+  {
     return {};
   }
 
@@ -284,7 +315,11 @@ std::vector<double> RobotArmController::solveGoalAngles(const Eigen::Vector3d & 
     angle = normalizeAngle(angle);
   }
 
-  const Eigen::Vector3d predicted_position = Kinematics::forwardKinematics(solution, lengths, axes) + offset;
+  const Eigen::Vector3d predicted_position = Kinematics::forwardKinematics(
+    solution,
+    lengths,
+    axes
+    ) + offset;
 
   return ((goal - predicted_position).norm() <= goal_position_tolerance_) ? solution : std::vector<double>{};
 }
@@ -302,37 +337,51 @@ std::vector<Eigen::VectorXd> RobotArmController::jointAxes()
 
 std::vector<double> RobotArmController::linkLengths()
 {
-  return {current_robot_state_.arm1_length, current_robot_state_.arm2_length, current_robot_state_.arm3_length};
+  return {current_robot_state_.arm1_length,
+    current_robot_state_.arm2_length,
+    current_robot_state_.arm3_length};
 }
 
 std::vector<double> RobotArmController::jointAngles()
 {
-  return {current_robot_state_.joint_pedestal_arm1_angle, current_robot_state_.joint_arm1_arm2_angle, current_robot_state_.joint_arm2_arm3_angle};
+  return {current_robot_state_.joint_pedestal_arm1_angle,
+    current_robot_state_.joint_arm1_arm2_angle,
+    current_robot_state_.joint_arm2_arm3_angle};
 }
 
 std::vector<double> RobotArmController::jointVelocities()
 {
-  return {current_robot_state_.joint_pedestal_arm1_velocity, current_robot_state_.joint_arm1_arm2_velocity, current_robot_state_.joint_arm2_arm3_velocity};
+  return {current_robot_state_.joint_pedestal_arm1_velocity,
+    current_robot_state_.joint_arm1_arm2_velocity,
+    current_robot_state_.joint_arm2_arm3_velocity};
 }
 
 std::vector<double> RobotArmController::maximumJointAccelerations()
 {
-  return {current_robot_state_.joint_pedestal_arm1_maximum_acceleration, current_robot_state_.joint_arm1_arm2_maximum_acceleration, current_robot_state_.joint_arm2_arm3_maximum_acceleration};
+  return {current_robot_state_.joint_pedestal_arm1_maximum_acceleration,
+    current_robot_state_.joint_arm1_arm2_maximum_acceleration,
+    current_robot_state_.joint_arm2_arm3_maximum_acceleration};
 }
 
 std::vector<double> RobotArmController::maximumJointVelocities()
 {
-  return {current_robot_state_.joint_pedestal_arm1_maximum_velocity, current_robot_state_.joint_arm1_arm2_maximum_velocity, current_robot_state_.joint_arm2_arm3_maximum_velocity};
+  return {current_robot_state_.joint_pedestal_arm1_maximum_velocity,
+    current_robot_state_.joint_arm1_arm2_maximum_velocity,
+    current_robot_state_.joint_arm2_arm3_maximum_velocity};
 }
 
 Eigen::Vector3d RobotArmController::measuredPosition()
 {
-  return {current_robot_state_.end_effector_x, current_robot_state_.end_effector_y, current_robot_state_.end_effector_z};
+  return {current_robot_state_.end_effector_x,
+    current_robot_state_.end_effector_y,
+    current_robot_state_.end_effector_z};
 }
 
 Eigen::Vector3d RobotArmController::measuredOffset()
 {
-  return {current_robot_state_.x_offset, current_robot_state_.y_offset, current_robot_state_.z_offset};
+  return {current_robot_state_.x_offset,
+    current_robot_state_.y_offset,
+    current_robot_state_.z_offset};
 }
 
 bool RobotArmController::validRobotState()
@@ -343,11 +392,19 @@ bool RobotArmController::validRobotState()
   const auto maximum_accelerations = maximumJointAccelerations();
   const auto maximum_velocities = maximumJointVelocities();
 
-  return std::all_of(lengths.begin(), lengths.end(), [](double length) {return std::isfinite(length) && length > 0.0;}) &&
-         std::all_of(angles.begin(), angles.end(), [](double angle) {return std::isfinite(angle);}) &&
-         std::all_of(velocities.begin(), velocities.end(), [](double velocity) {return std::isfinite(velocity);}) &&
-         std::all_of(maximum_accelerations.begin(), maximum_accelerations.end(), [](double maximum_acceleration) {return std::isfinite(maximum_acceleration);}) &&
-         std::all_of(maximum_velocities.begin(), maximum_velocities.end(), [](double maximum_velocity) {return std::isfinite(maximum_velocity);}) &&
+  return std::all_of(lengths.begin(), lengths.end(), [](double length) {
+             return std::isfinite(length) && length > 0.0;
+         }) &&
+         std::all_of(angles.begin(), angles.end(), [](double angle) {
+             return std::isfinite(angle);
+         }) &&
+         std::all_of(velocities.begin(), velocities.end(), [](double velocity) {
+             return std::isfinite(velocity);
+         }) &&
+         std::all_of(maximum_accelerations.begin(), maximum_accelerations.end(),
+           [](double maximum_acceleration) {return std::isfinite(maximum_acceleration);}) &&
+         std::all_of(maximum_velocities.begin(), maximum_velocities.end(),
+           [](double maximum_velocity) {return std::isfinite(maximum_velocity);}) &&
          measuredPosition().allFinite() &&
          measuredOffset().allFinite();
 }

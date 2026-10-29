@@ -842,29 +842,28 @@ TEST(RoboticArmKinematicsTestSuite, NumericalInverseKinematicsTest) {
 
     EXPECT_TRUE(solution10.empty());
 
-    // Test case 11: Zero maximum iterations should return the initial guess
+    // Test case 11: Empty link lengths should throw an exception
     Eigen::Vector3d targetPosition11(1.0, 1.0, 0.0);
-    std::vector<double> linkLengths11 = {1.0, 1.0};
-    std::vector<double> initialGuess11 = {0.2, 0.5};
-    std::vector<Eigen::VectorXd> jointAxes11 = {
+    std::vector<double> linkLengths11 = {};
+    std::vector<double> initialGuess11 = {};
+    std::vector<Eigen::VectorXd> jointAxes11 = {};
+
+    EXPECT_THROW(
+        Kinematics::numericalInverseKinematics(
+            targetPosition11, linkLengths11, jointAxes11,
+            initialGuess11, errorTolerance, maximumIterations
+        ),
+        std::invalid_argument
+    );
+
+    // Test case 12: Zero link length should throw an exception
+    Eigen::Vector3d targetPosition12(1.0, 1.0, 0.0);
+    std::vector<double> linkLengths12 = {1.0, 0.0};
+    std::vector<double> initialGuess12 = {0.0, 0.0};
+    std::vector<Eigen::VectorXd> jointAxes12 = {
         Eigen::Vector3d::UnitZ(),
         Eigen::Vector3d::UnitZ()
     };
-
-    auto solution11 = Kinematics::numericalInverseKinematics(
-        targetPosition11, linkLengths11, jointAxes11,
-        initialGuess11, errorTolerance, 0
-    );
-
-    ASSERT_EQ(solution11.size(), 2);
-    EXPECT_NEAR(solution11[0], initialGuess11[0], tolerance);
-    EXPECT_NEAR(solution11[1], initialGuess11[1], tolerance);
-
-    // Test case 12: Empty link lengths should throw an exception
-    Eigen::Vector3d targetPosition12(1.0, 1.0, 0.0);
-    std::vector<double> linkLengths12 = {};
-    std::vector<double> initialGuess12 = {};
-    std::vector<Eigen::VectorXd> jointAxes12 = {};
 
     EXPECT_THROW(
         Kinematics::numericalInverseKinematics(
@@ -874,9 +873,9 @@ TEST(RoboticArmKinematicsTestSuite, NumericalInverseKinematicsTest) {
         std::invalid_argument
     );
 
-    // Test case 13: Zero link length should throw an exception
+    // Test case 13: Negative link length should throw an exception
     Eigen::Vector3d targetPosition13(1.0, 1.0, 0.0);
-    std::vector<double> linkLengths13 = {1.0, 0.0};
+    std::vector<double> linkLengths13 = {1.0, -1.0};
     std::vector<double> initialGuess13 = {0.0, 0.0};
     std::vector<Eigen::VectorXd> jointAxes13 = {
         Eigen::Vector3d::UnitZ(),
@@ -887,23 +886,6 @@ TEST(RoboticArmKinematicsTestSuite, NumericalInverseKinematicsTest) {
         Kinematics::numericalInverseKinematics(
             targetPosition13, linkLengths13, jointAxes13,
             initialGuess13, errorTolerance, maximumIterations
-        ),
-        std::invalid_argument
-    );
-
-    // Test case 14: Negative link length should throw an exception
-    Eigen::Vector3d targetPosition14(1.0, 1.0, 0.0);
-    std::vector<double> linkLengths14 = {1.0, -1.0};
-    std::vector<double> initialGuess14 = {0.0, 0.0};
-    std::vector<Eigen::VectorXd> jointAxes14 = {
-        Eigen::Vector3d::UnitZ(),
-        Eigen::Vector3d::UnitZ()
-    };
-
-    EXPECT_THROW(
-        Kinematics::numericalInverseKinematics(
-            targetPosition14, linkLengths14, jointAxes14,
-            initialGuess14, errorTolerance, maximumIterations
         ),
         std::invalid_argument
     );

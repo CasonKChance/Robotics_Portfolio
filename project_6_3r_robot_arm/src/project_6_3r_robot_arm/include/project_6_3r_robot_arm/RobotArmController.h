@@ -78,11 +78,12 @@ private:
   RobotState current_robot_state_;
   ControllerState controller_state_;
   double goal_position_tolerance_;
-  std::vector<double> goal_angles_;
+  std::vector < double > goal_angles_;
 
   rclcpp_action::Server < GoToPosition > ::SharedPtr go_to_position_action_server_;
   rclcpp::Publisher < JointVelocities > ::SharedPtr joint_velocities_publisher_;
-  rclcpp::Subscription < project_6_3r_robot_arm_interfaces::msg::RobotState > ::SharedPtr robot_state_subscription_;
+  rclcpp::Subscription < project_6_3r_robot_arm_interfaces::msg::RobotState >
+  ::SharedPtr robot_state_subscription_;
   rclcpp::TimerBase::SharedPtr control_timer_;
   std::shared_ptr < GoalHandleGoToPosition > active_goal_handle_;
 
@@ -96,7 +97,9 @@ private:
    * @param goal Shared pointer to the requested GoToPosition goal.
    * @return GoalResponse decision (accept/reject).
    */
-  rclcpp_action::GoalResponse handleGoal(const rclcpp_action::GoalUUID & uuid, std::shared_ptr < const GoToPosition::Goal > goal);
+  rclcpp_action::GoalResponse handleGoal(
+    const rclcpp_action::GoalUUID & uuid,
+    std::shared_ptr < const GoToPosition::Goal > goal);
 
   /**
    * @brief Handles incoming cancellation requests for active action goals.
@@ -108,7 +111,9 @@ private:
    * @param goalHandle Handle to the goal being canceled.
    * @return CancelResponse decision (accept/reject).
    */
-  rclcpp_action::CancelResponse handleCancel(const std::shared_ptr < GoalHandleGoToPosition > goalHandle);
+  rclcpp_action::CancelResponse handleCancel(
+    const std::shared_ptr < GoalHandleGoToPosition >
+    goalHandle);
 
   /**
    * @brief Initializes execution of an accepted action goal.
@@ -137,7 +142,7 @@ private:
    * @param jointVelocities Target velocities for the three joints (rad/s).
    * @throws std::invalid_argument If the provided vector does not contain exactly three velocities.
    */
-  void publishCommandJointVelocities(const std::vector<double> & jointVelocities);
+  void publishCommandJointVelocities(const std::vector < double > &jointVelocities);
 
   /**
    * @brief Subscriber callback for robot state updates from topic "robot_state".
@@ -147,7 +152,8 @@ private:
    *
    * @param message Unique pointer to the incoming RobotState message.
    */
-  void robotStateTopicCallback(project_6_3r_robot_arm_interfaces::msg::RobotState::UniquePtr message);
+  void robotStateTopicCallback(
+    project_6_3r_robot_arm_interfaces::msg::RobotState::UniquePtr message);
 
   /**
    * @brief Calculates the shortest angular difference between current and target joint angles.
@@ -155,7 +161,7 @@ private:
    * @return Vector of remaining joint rotations in radians, bounded within [-π, π].
    * @throws std::invalid_argument If the provided vector does not contain exactly three angles.
    */
-  std::vector<double> getRotationRemaining(const std::vector<double> & goalAngles);
+  std::vector < double > getRotationRemaining(const std::vector < double > &goalAngles);
 
   /**
    * @brief Calculates the required stopping distance given current velocity and maximum deceleration.
@@ -177,7 +183,7 @@ private:
    * @return Vector of three target joint angles (rad), or an empty vector
    *         if no valid solution is found.
    */
-  std::vector<double> solveGoalAngles(const Eigen::Vector3d & goal);
+  std::vector < double > solveGoalAngles(const Eigen::Vector3d & goal);
 
   /**
    * @brief Wraps an angle in radians to the range [-π, π].
@@ -194,44 +200,44 @@ private:
    *
    * @return Vector of three joint rotation axes in joint order.
    */
-  std::vector<Eigen::VectorXd> jointAxes();
+  std::vector < Eigen::VectorXd > jointAxes();
 
   /**
    * @brief Retrieves the current lengths of the robotic arm links.
    * @return Vector containing the three link lengths (m) in joint order.
    */
-  std::vector<double> linkLengths();
+  std::vector < double > linkLengths();
 
   /**
    * @brief Retrieves the current angular positions of the robotic arm joints.
    * @return Vector containing the three joint angles (rad) in joint order.
    */
-  std::vector<double> jointAngles();
+  std::vector < double > jointAngles();
 
   /**
    * @brief Retrieves the current angular velocities of the robotic arm joints.
    * @return Vector containing the three joint velocities (rad/s) in joint order.
    */
-  std::vector<double> jointVelocities();
+  std::vector < double > jointVelocities();
 
   /**
    * @brief Retrieves the maximum angular accelerations of the robotic arm joints.
    * @return Vector containing the three maximum joint accelerations (rad/s^2) in joint order.
    */
-  std::vector<double> maximumJointAccelerations();
+  std::vector < double > maximumJointAccelerations();
 
   /**
    * @brief Retrieves the maximum angular velocities of the robotic arm joints.
    * @return Vector containing the three maximum joint velocities (rad/s) in joint order.
    */
-  std::vector<double> maximumJointVelocities();
+  std::vector < double > maximumJointVelocities();
 
   /**
    * @brief Retrieves the current measured Cartesian position of the end effector.
    * @return Three-dimensional end-effector position vector (m).
    */
   Eigen::Vector3d measuredPosition();
-  
+
   /**
    * @brief Retrieves the end-effector positional offset in the robot's zero configuration.
    * @return Three-dimensional positional offset vector (m).

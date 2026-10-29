@@ -87,7 +87,8 @@ private:
   bool ik_mode_ {false};                                                   // Indicates whether inverse-kinematics mode is enabled.
 
   rclcpp::Publisher < sensor_msgs::msg::JointState > ::SharedPtr joint_state_publisher_;
-  rclcpp::Publisher < project_6_3r_robot_arm_interfaces::msg::RobotState > ::SharedPtr robot_state_publisher_;
+  rclcpp::Publisher < project_6_3r_robot_arm_interfaces::msg::RobotState >
+  ::SharedPtr robot_state_publisher_;
   rclcpp::Subscription < JointVelocities > ::SharedPtr joint_velocities_subscription_;
   rclcpp::Subscription < std_msgs::msg::String > ::SharedPtr robot_description_subscription_;
   rclcpp::Subscription < sensor_msgs::msg::JointState > ::SharedPtr joint_state_subscription_;
