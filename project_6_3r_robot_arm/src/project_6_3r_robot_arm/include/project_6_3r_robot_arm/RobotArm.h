@@ -180,6 +180,12 @@ private:
    *         inertias (kg*m^2).
    */
   Eigen::Vector3d computeApproximateJointInertias() const;
+
+  /**
+   * @brief Computes the maximum accelerations each joint can achieve.
+   * @return Three-dimensional vector containing the maximum accelerations for each joint
+   */
+  Eigen::Vector3d computeMaximumJointAccelerations() const;
 };
 
 #endif

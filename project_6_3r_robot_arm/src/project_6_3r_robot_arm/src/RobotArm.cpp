@@ -551,6 +551,8 @@ void RobotArm::publishRobotState() const
 {
   project_6_3r_robot_arm_interfaces::msg::RobotState message;
 
+  const auto maximum_accelerations = computeMaximumJointAccelerations();
+
   message.end_effector_x = end_effector_position_.x();
   message.end_effector_y = end_effector_position_.y();
   message.end_effector_z = end_effector_position_.z();
@@ -563,9 +565,9 @@ void RobotArm::publishRobotState() const
   message.joint_pedestal_arm1_velocity = joint_velocities_[0];
   message.joint_arm1_arm2_velocity = joint_velocities_[1];
   message.joint_arm2_arm3_velocity = joint_velocities_[2];
-  message.joint_pedestal_arm1_acceleration = joint_accelerations_[0];
-  message.joint_arm1_arm2_acceleration = joint_accelerations_[1];
-  message.joint_arm2_arm3_acceleration = joint_accelerations_[2];
+  message.joint_pedestal_arm1_maximum_acceleration = maximum_accelerations[0];
+  message.joint_arm1_arm2_maximum_acceleration = maximum_accelerations[1];
+  message.joint_arm2_arm3_maximum_acceleration = maximum_accelerations[2];
   message.joint_pedestal_arm1_maximum_velocity = joint_dynamics_[0].max_velocity;
   message.joint_arm1_arm2_maximum_velocity = joint_dynamics_[1].max_velocity;
   message.joint_arm2_arm3_maximum_velocity = joint_dynamics_[2].max_velocity;
@@ -635,4 +637,17 @@ Eigen::Vector3d RobotArm::computeApproximateJointInertias() const
   }
 
   return effective_inertia;
+}
+
+Eigen::Vector3d RobotArm::computeMaximumJointAccelerations() const
+{
+  const Eigen::Vector3d inertias = computeApproximateJointInertias();
+
+  Eigen::Vector3d max_accelerations;
+
+  for (int i = 0; i < 3; ++i) {
+    max_accelerations[i] = joint_dynamics_[i].max_effort / inertias[i];
+  }
+
+  return max_accelerations;
 }
