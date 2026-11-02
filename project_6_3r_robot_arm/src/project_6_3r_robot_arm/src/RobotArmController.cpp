@@ -9,8 +9,8 @@
 using namespace std::chrono_literals;
 using namespace std::placeholders;
 
-static constexpr double kDefaultGoalPositionTolerance = 5e-2;  // meters
-static constexpr double kJointAngleTolerance = 5e-2;           // rad
+static constexpr double kDefaultGoalPositionTolerance = 1e-3;  // meters
+static constexpr double kJointAngleTolerance = 1e-3;           // rad
 static constexpr double kStoppedVelocityTolerance = 1e-3;      // rad/s
 static constexpr int kIKIterations = 150;
 
@@ -166,30 +166,41 @@ void RobotArmController::controlLoop()
       return;
 
     case ControllerState::RotatingToGoalPosition: {
-        const auto velocities = jointVelocities();
-        const auto max_velocities = maximumJointVelocities();
-        const auto max_accelerations = maximumJointAccelerations();
-        std::vector<double> commands{0.0, 0.0, 0.0};
+      const auto velocities = jointVelocities();
+      const auto max_velocities = maximumJointVelocities();
+      std::vector<double> commands(3, 0.0);
 
-        bool all_braking = true;
-        for (std::size_t i = 0; i < 3; ++i) {
-          const double stopping_distance = getStoppingDistance(velocities[i], max_accelerations[i]);
+      constexpr double kp = 2.0;
 
-          if (std::abs(remaining[i]) > kJointAngleTolerance &&
-            std::abs(remaining[i]) > stopping_distance)
-          {
-            commands[i] = std::copysign(max_velocities[i], remaining[i]);
-            all_braking = false;
-          }
+      bool all_at_goal = true;
+      bool all_stopped = true;
+
+      for (std::size_t i = 0; i < 3; ++i) {
+        const double error = remaining[i];
+
+        if (std::abs(error) > kJointAngleTolerance) {
+          all_at_goal = false;
+
+          commands[i] = std::clamp(
+          kp * error,
+          -max_velocities[i],
+          max_velocities[i]
+          );
         }
 
-        publishCommandJointVelocities(commands);
-        if (all_braking) {
-          controller_state_ = ControllerState::WaitingForRotationToGoalPositionStop;
+        if (std::abs(velocities[i]) > kStoppedVelocityTolerance) {
+          all_stopped = false;
         }
-
-        return;
       }
+
+      publishCommandJointVelocities(commands);
+
+      if (all_at_goal && all_stopped) {
+        controller_state_ = ControllerState::GoalPositionReached;
+      }
+
+      return;
+    }
 
     case ControllerState::WaitingForRotationToGoalPositionStop:
       publishCommandJointVelocities({0.0, 0.0, 0.0});
