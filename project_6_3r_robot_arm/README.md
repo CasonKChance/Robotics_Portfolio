@@ -375,9 +375,7 @@ Iteration continues until the Cartesian error falls within the requested toleran
 
 Unlike analytic IK, numerical IK is not tied to one specific manipulator geometry. The 3R ROS robot therefore uses numerical inverse kinematics to solve Cartesian goals in three-dimensional space.
 
----
-
-## Kinematics Testing
+### Kinematics Testing
 
 The `RoboticArmKinematics` library includes a GoogleTest test suite covering the primary mathematical operations and edge cases.
 
