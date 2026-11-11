@@ -117,10 +117,10 @@
         <wheel_radius>${wheel_radius}</wheel_radius>
 
         <!-- Limits -->
-        <max_linear_acceleration>2.0</max_linear_acceleration>
-        <min_linear_acceleration>-2.0</min_linear_acceleration>
-        <max_angular_acceleration>4.0</max_angular_acceleration>
-        <min_angular_acceleration>-4.0</min_angular_acceleration>
+        <max_linear_acceleration>1.0</max_linear_acceleration>
+        <min_linear_acceleration>-1.0</min_linear_acceleration>
+        <max_angular_acceleration>2.0</max_angular_acceleration>
+        <min_angular_acceleration>-2.0</min_angular_acceleration>
 
         <!-- Topics -->
         <topic>cmd_vel</topic>
