@@ -21,7 +21,7 @@ def generate_launch_description():
 
     # Gazebo world
     treasure_hunting_world_file = PathJoinSubstitution([
-        gz_package_share_dir,
+        package_share_dir,
         'models',
         'treasure_hunting_world.sdf'
     ])
