@@ -18,11 +18,6 @@
     <xacro:property name="wheel_mass" value="0.5"/>
     <xacro:property name="wheel_roll" value="${pi/2}"/>
 
-    <!-- Sensors -->
-    <xacro:property name="sensor_radius" value="0.075"/>
-    <xacro:property name="sensor_height" value="0.05"/>
-    <xacro:property name="sensor_mass" value="0.15"/>
-
     <!-- Caster Wheel Radius -->
     <xacro:property name="caster_wheel_radius" value="${(wheel_radius - (wheel_base_height/2))/2}"/>
     <xacro:property name="caster_wheel_mass" value="0.1"/>
