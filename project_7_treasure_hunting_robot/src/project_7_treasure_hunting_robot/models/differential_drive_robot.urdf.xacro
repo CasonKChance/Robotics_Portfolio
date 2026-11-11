@@ -109,8 +109,8 @@
         <!-- Differential Drive System Plugin -->
         <plugin filename="gz-sim-diff-drive-system"
                 name="gz::sim::systems::DiffDrive">
-        <left_joint>left_wheel_joint</left_joint>
-        <right_joint>right_wheel_joint</right_joint>
+        <left_joint>left_wheel_link_joint</left_joint>
+        <right_joint>right_wheel_link_joint</right_joint>
 
         <!-- Kinematics -->
         <wheel_separation>${base_width + wheel_length}</wheel_separation>
