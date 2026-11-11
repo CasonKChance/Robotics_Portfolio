@@ -5,3 +5,6 @@
 
 # ./build files while creating library
 build/
+
+#.DS_Store
+.DS_Store
