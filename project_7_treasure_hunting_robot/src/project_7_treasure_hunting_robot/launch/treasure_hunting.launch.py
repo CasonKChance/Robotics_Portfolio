@@ -99,7 +99,7 @@ def generate_launch_description():
 
     # Robot Controller
     robot_controller = Node(
-                        package='project_5_rigid_body_transformations',
+                        package='project_7_treasure_hunting_robot',
                         executable='RobotController',
                         name='RobotController',
                         output='screen',
