@@ -97,10 +97,20 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
 
+    # Robot Controller
+    robot_controller = Node(
+                        package='project_5_rigid_body_transformations',
+                        executable='RobotController',
+                        name='RobotController',
+                        output='screen',
+                        emulate_tty=True
+                       )
+
     return LaunchDescription([
         gz_bridge,
         gazebo,
         robot_state_publisher,
         spawn_robot,
         rviz,
+        robot_controller,
     ])
