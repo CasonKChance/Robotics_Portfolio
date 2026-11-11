@@ -7,12 +7,26 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    package_share_dir = FindPackageShare('project_7_treasure_hunting_robot')
-    gz_package_share_dir = FindPackageShare('ros_gz_sim')
+    package_share = FindPackageShare('project_7_treasure_hunting_robot')
+    gz_package_share = FindPackageShare('ros_gz_sim')
+
+    # Bridge
+    bridge_config = PathJoinSubstitution([
+        package_share,
+        'config',
+        'bridge.yaml'
+    ])
+
+    gz_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        parameters=[{'config_file': bridge_config}],
+        output='screen'
+    )
 
     # Robot Description
     differential_drive_model_xacro_file = PathJoinSubstitution([
-        package_share_dir,
+        package_share,
         'models', 
         'differential_drive_robot.urdf.xacro'
     ])
@@ -21,7 +35,7 @@ def generate_launch_description():
 
     # Gazebo world
     treasure_hunting_world_file = PathJoinSubstitution([
-        package_share_dir,
+        package_share,
         'models',
         'treasure_hunting_world.sdf'
     ])
@@ -29,7 +43,7 @@ def generate_launch_description():
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([
-                gz_package_share_dir,
+                gz_package_share,
                 'launch',
                 'gz_sim.launch.py'
             ])
@@ -69,7 +83,7 @@ def generate_launch_description():
 
     # RViz
     rviz_config = PathJoinSubstitution([
-        package_share_dir,
+        package_share,
         'rviz',
         'differential_drive_robot.rviz'
     ])
@@ -84,6 +98,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        gz_bridge,
         gazebo,
         robot_state_publisher,
         spawn_robot,
