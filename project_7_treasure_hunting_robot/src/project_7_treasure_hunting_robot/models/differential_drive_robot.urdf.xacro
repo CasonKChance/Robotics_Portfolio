@@ -143,6 +143,39 @@
         </sensor>
     </gazebo>
 
+    <!-- RGB Camera -->
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_height}"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${camera_length} ${camera_width} ${camera_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="${camera_mass}"/>
+            <inertia
+                ixx="${camera_mass * ((camera_width*camera_width) + (camera_height*imu_sensor_housing_height)) / 12.0}"
+                ixy="0"
+                ixz="0"
+                iyy="${camera_mass * ((camera_length*camera_length) + (camera_height*imu_sensor_housing_height)) / 12.0}"
+                iyz="0"
+                izz="${camera_mass * ((camera_length*camera_length) + (camera_width*imu_sensor_housing_width)) / 12.0}"/>
+        </inertial>
+    </link> 
+    <joint name="camera_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera_link"/>
+        <origin xyz="${(base_length/2) + (camera_length/2)} 0 -${(base_height/2)}" rpy="0 0 0"/>
+    </joint>
+    <!-- <gazebo reference="camera_link">
+        ...
+    </gazebo> -->
+    
     <gazebo>
         <!-- Differential Drive System Plugin -->
         <plugin filename="gz-sim-diff-drive-system"
