@@ -200,7 +200,7 @@
             </camera>
         </sensor>
     </gazebo>
-    <gazebo reference="camera_optical_link">
+    <gazebo reference="camera_link_optical">
         <light name="camera_light" type="spot">
             <diffuse>1 1 1 1</diffuse>
             <specular>0.2 0.2 0.2 1</specular>
