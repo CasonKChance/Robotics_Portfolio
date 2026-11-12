@@ -24,6 +24,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Camera bridge
+    gz_image_bridge = Node(
+        package='ros_gz_image',
+        executable='image_bridge',
+        arguments=['/camera/image_raw'],
+        output='screen',
+    )
+
     # Robot Description
     differential_drive_model_xacro_file = PathJoinSubstitution([
         package_share,
@@ -108,6 +116,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         gz_bridge,
+        gz_image_bridge,
         gazebo,
         robot_state_publisher,
         spawn_robot,
