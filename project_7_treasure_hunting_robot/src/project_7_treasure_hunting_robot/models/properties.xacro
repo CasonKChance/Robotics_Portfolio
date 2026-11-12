@@ -28,4 +28,10 @@
     <!-- Wheel actuator limits -->
     <xacro:property name="wheel_max_velocity" value="10.0"/>      <!-- rad/s -->
     <xacro:property name="wheel_max_effort" value="1.0"/>        <!-- N*m -->
+
+    <!-- IMU Sensor -->
+    <xacro:property name="imu_sensor_housing_length" value="0.04"/>
+    <xacro:property name="imu_sensor_housing_width" value="0.03"/>
+    <xacro:property name="imu_sensor_housing_height" value="0.015"/>
+    <xacro:property name="imu_sensor_mass" value="0.02"/>
 </robot>

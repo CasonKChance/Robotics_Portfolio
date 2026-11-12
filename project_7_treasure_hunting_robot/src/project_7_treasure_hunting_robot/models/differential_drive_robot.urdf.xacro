@@ -105,6 +105,48 @@
         <mu2>0.01</mu2>
     </gazebo>
 
+    <!-- IMU Sensor -->
+    <link name="imu_sensor_housing_link">
+        <visual>
+            <geometry>
+                <box size="${imu_sensor_housing_length} ${imu_sensor_housing_width} ${imu_sensor_housing_height}"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${imu_sensor_housing_length} ${imu_sensor_housing_width} ${imu_sensor_housing_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="${imu_sensor_mass}"/>
+            <inertia
+                ixx="${imu_sensor_mass * ((imu_sensor_housing_width*imu_sensor_housing_width) + (imu_sensor_housing_height*imu_sensor_housing_height)) / 12.0}"
+                ixy="0"
+                ixz="0"
+                iyy="${imu_sensor_mass * ((imu_sensor_housing_length*imu_sensor_housing_length) + (imu_sensor_housing_height*imu_sensor_housing_height)) / 12.0}"
+                iyz="0"
+                izz="${imu_sensor_mass * ((imu_sensor_housing_length*imu_sensor_housing_length) + (imu_sensor_housing_width*imu_sensor_housing_width)) / 12.0}"/>
+        </inertial>
+    </link> 
+    <joint name="imu_sensor_housing_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu_sensor_housing_link"/>
+        <origin xyz="0 0 ${(base_height/2) + (imu_sensor_housing_height/2)}" rpy="0 0 0"/>
+    </joint>
+    <gazebo reference="imu_sensor_housing_link">
+        <plugin filename="gz-sim-imu-system"
+                name="gz::sim::systems::Imu">
+        </plugin>
+
+        <sensor name="imu_sensor" type="imu">
+            <always_on>1</always_on>
+            <update_rate>1</update_rate>
+            <visualize>true</visualize>
+            <topic>imu</topic>
+        </sensor>
+    </gazebo>
+
     <gazebo>
         <!-- Differential Drive System Plugin -->
         <plugin filename="gz-sim-diff-drive-system"
