@@ -53,7 +53,7 @@
     <xacro:wheel_base_joint prefix="right" parent="base_link" child="right_wheel_base_link" reflect="-1"/>
 
     <xacro:wheel_base_link prefix="left" mass="${wheel_base_mass}"/> 
-    <xacro:wheel_base_joint parent="base_link" child="left_wheel_base_link" reflect="1"/> 
+    <xacro:wheel_base_joint prefix="left" parent="base_link" child="left_wheel_base_link" reflect="1"/> 
 
     <!-- Wheels -->
     <xacro:wheel_link prefix="right" mass="${wheel_mass}"/>
