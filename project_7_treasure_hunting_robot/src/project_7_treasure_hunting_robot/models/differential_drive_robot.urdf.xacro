@@ -212,7 +212,7 @@
                 <quadratic>0.01</quadratic>
             </attenuation>
 
-            <direction>0 0 1</direction>
+            <direction>0 0 -1</direction>
 
             <spot>
                 <inner_angle>0.6</inner_angle>
