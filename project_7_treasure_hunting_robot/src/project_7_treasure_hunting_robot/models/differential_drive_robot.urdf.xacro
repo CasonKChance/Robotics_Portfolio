@@ -50,17 +50,17 @@
 
     <!-- Wheel Base Links -->
     <xacro:wheel_base_link prefix="right" mass="${wheel_base_mass}"/>
-    <xacro:wheel_base_joint parent="base_link" child="right_wheel_base_link" reflect="-1"/>
+    <xacro:wheel_base_joint prefix="right" parent="base_link" child="right_wheel_base_link" reflect="-1"/>
 
     <xacro:wheel_base_link prefix="left" mass="${wheel_base_mass}"/> 
     <xacro:wheel_base_joint parent="base_link" child="left_wheel_base_link" reflect="1"/> 
 
     <!-- Wheels -->
     <xacro:wheel_link prefix="right" mass="${wheel_mass}"/>
-    <xacro:wheel_joint parent="right_wheel_base_link" child="right_wheel_link" reflect="-1"/>
+    <xacro:wheel_joint prefix="right" parent="right_wheel_base_link" child="right_wheel_link" reflect="-1"/>
 
     <xacro:wheel_link prefix="left" mass="${wheel_mass}"/>
-    <xacro:wheel_joint parent="left_wheel_base_link" child="left_wheel_link" reflect="1"/>
+    <xacro:wheel_joint prefix="left" parent="left_wheel_base_link" child="left_wheel_link" reflect="1"/>
 
     <!-- Caster Wheel -->
     <xacro:wheel_base_link prefix="caster" mass="${wheel_base_mass}"/>
@@ -109,8 +109,8 @@
         <!-- Differential Drive System Plugin -->
         <plugin filename="gz-sim-diff-drive-system"
                 name="gz::sim::systems::DiffDrive">
-        <left_joint>left_wheel_link_joint</left_joint>
-        <right_joint>right_wheel_link_joint</right_joint>
+        <left_joint>left_wheel_joint</left_joint>
+        <right_joint>right_wheel_joint</right_joint>
 
         <!-- Kinematics -->
         <wheel_separation>${base_width + wheel_length}</wheel_separation>

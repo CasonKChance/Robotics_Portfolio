@@ -29,8 +29,8 @@
     </xacro:macro>
 
     <!-- Wheel base joint -->
-    <xacro:macro name="wheel_base_joint" params="parent child reflect">
-        <joint name="${child}_joint" type="fixed">
+    <xacro:macro name="wheel_base_joint" params="prefix parent child reflect">
+        <joint name="${prefix}_wheel_base_joint" type="fixed">
             <parent link="${parent}"/>
             <child link="${child}"/>
             <origin xyz="-${(base_length/2) - (wheel_base_length/2)} ${reflect*((base_width/2) - (wheel_base_width/2))} -${(base_height/2) + (wheel_base_height/2)}" rpy="0 0 0"/>
@@ -67,8 +67,8 @@
     </xacro:macro>
 
     <!-- Wheel joint -->
-    <xacro:macro name="wheel_joint" params="parent child reflect">
-        <joint name="${child}_joint" type="continuous">
+    <xacro:macro name="wheel_joint" params="prefix parent child reflect">
+        <joint name="${prefix}_wheel_joint" type="continuous">
             <parent link="${parent}"/>
             <child link="${child}"/>
             <axis xyz="0 1 0"/>
