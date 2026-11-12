@@ -201,8 +201,6 @@
         </sensor>
 
         <light name="camera_light" type="spot">
-            <pose>0 0 0 0 0 0</pose>
-
             <diffuse>1 1 1 1</diffuse>
             <specular>0.2 0.2 0.2 1</specular>
 
