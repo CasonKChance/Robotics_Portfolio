@@ -34,4 +34,10 @@
     <xacro:property name="imu_sensor_housing_width" value="0.03"/>
     <xacro:property name="imu_sensor_housing_height" value="0.015"/>
     <xacro:property name="imu_sensor_mass" value="0.02"/>
+
+    <!-- Camera -->
+    <xacro:property name="camera_length" value="0.04"/>
+    <xacro:property name="camera_width" value="0.03"/>
+    <xacro:property name="camera_height" value="0.025"/>
+    <xacro:property name="camera_mass" value="0.03"/>
 </robot>
