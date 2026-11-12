@@ -199,9 +199,10 @@
                 </clip>
             </camera>
         </sensor>
-    </gazebo>
-    <gazebo reference="camera_link_optical">
+
         <light name="camera_light" type="spot">
+            <pose>0 0 0 0 0 0</pose>
+
             <diffuse>1 1 1 1</diffuse>
             <specular>0.2 0.2 0.2 1</specular>
 
@@ -212,7 +213,7 @@
                 <quadratic>0.01</quadratic>
             </attenuation>
 
-            <direction>0 0 -1</direction>
+            <direction>1 0 0</direction>
 
             <spot>
                 <inner_angle>0.6</inner_angle>
