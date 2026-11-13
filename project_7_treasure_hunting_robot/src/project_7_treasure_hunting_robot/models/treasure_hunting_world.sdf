@@ -77,5 +77,95 @@
                 </visual>
             </link>
         </model>
+        <model name="hint_1">
+            <static>true</static>
+            <pose>-1 -2 0.001 0 0 0</pose>
+            <link name="link">
+                <visual name="visual">
+                    <geometry>
+                        <cylinder>
+                            <radius>0.5</radius>
+                            <length>0.002</length>
+                        </cylinder>
+                    </geometry>
+                    <material>
+                        <ambient>0 1 1 1</ambient>
+                        <diffuse>0 1 1 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+        <model name="hint_2">
+            <static>true</static>
+            <pose>6 -5 0.001 0 0 0</pose>
+            <link name="link">
+                <visual name="visual">
+                    <geometry>
+                        <cylinder>
+                            <radius>0.5</radius>
+                            <length>0.002</length>
+                        </cylinder>
+                    </geometry>
+                    <material>
+                        <ambient>0 0 1 1</ambient>
+                        <diffuse>0 0 1 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+        <model name="hint_3">
+            <static>true</static>
+            <pose>-6 -8 0.001 0 0 0</pose>
+            <link name="link">
+                <visual name="visual">
+                    <geometry>
+                        <cylinder>
+                            <radius>0.5</radius>
+                            <length>0.002</length>
+                        </cylinder>
+                    </geometry>
+                    <material>
+                        <ambient>1 0 1 1</ambient>
+                        <diffuse>1 0 1 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+        <model name="hint_4">
+            <static>true</static>
+            <pose>-7 6 0.001 0 0 0</pose>
+            <link name="link">
+                <visual name="visual">
+                    <geometry>
+                        <cylinder>
+                            <radius>0.5</radius>
+                            <length>0.002</length>
+                        </cylinder>
+                    </geometry>
+                    <material>
+                        <ambient>1 1 0 1</ambient>
+                        <diffuse>1 1 0 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+        <model name="treasure">
+            <static>true</static>
+            <pose>8 7 0.001 0 0 0</pose>
+            <link name="link">
+                <visual name="visual">
+                    <geometry>
+                        <cylinder>
+                            <radius>0.5</radius>
+                            <length>0.002</length>
+                        </cylinder>
+                    </geometry>
+                    <material>
+                        <ambient>1 0 0 1</ambient>
+                        <diffuse>1 0 0 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
     </world>
 </sdf>
