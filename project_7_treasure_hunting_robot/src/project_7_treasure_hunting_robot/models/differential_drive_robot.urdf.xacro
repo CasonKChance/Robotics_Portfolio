@@ -201,7 +201,7 @@
         </sensor>
 
         <light name="camera_light" type="spot">
-            <pose>0 0 0 0 -${pi/2} 0</pose>
+            <pose>0 0 0 0 ${pi/2} 0</pose>
             <diffuse>1 1 1 1</diffuse>
             <specular>0.1 0.1 0.1 1</specular>
             <attenuation>
@@ -211,7 +211,7 @@
                 <quadratic>0.0</quadratic>
             </attenuation>
 
-            <direction>0 0 -1</direction>
+            <direction>0 0 1</direction>
 
             <spot>
                 <inner_angle>1.089</inner_angle>
