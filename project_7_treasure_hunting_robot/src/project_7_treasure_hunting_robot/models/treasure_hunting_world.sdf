@@ -47,7 +47,7 @@
                 <geometry>
                     <plane>
                     <normal>0 0 1</normal>
-                    <size>100 100</size>
+                    <size>50 50</size>
                     </plane>
                 </geometry>
                 <material>
@@ -163,6 +163,108 @@
                     <material>
                         <ambient>1 0 0 1</ambient>
                         <diffuse>1 0 0 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <!-- Boundary Walls -->
+
+        <model name="north_wall">
+            <static>true</static>
+            <pose>0 5.05 0.5 0 0 0</pose>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <box>
+                            <size>10.2 0.1 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <box>
+                            <size>10.2 0.1 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>0 0 0 1</ambient>
+                        <diffuse>0 0 0 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <model name="south_wall">
+            <static>true</static>
+            <pose>0 -5.05 0.5 0 0 0</pose>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <box>
+                            <size>10.2 0.1 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <box>
+                            <size>10.2 0.1 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>0 0 0 1</ambient>
+                        <diffuse>0 0 0 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <model name="east_wall">
+            <static>true</static>
+            <pose>5.05 0 0.5 0 0 0</pose>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <box>
+                            <size>0.1 10.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <box>
+                            <size>0.1 10.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>0 0 0 1</ambient>
+                        <diffuse>0 0 0 1</diffuse>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <model name="west_wall">
+            <static>true</static>
+            <pose>-5.05 0 0.5 0 0 0</pose>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <box>
+                            <size>0.1 10.2 1</size>
+                        </box>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <box>
+                            <size>0.1 10.2 1</size>
+                        </box>
+                    </geometry>
+                    <material>
+                        <ambient>0 0 0 1</ambient>
+                        <diffuse>0 0 0 1</diffuse>
                     </material>
                 </visual>
             </link>
