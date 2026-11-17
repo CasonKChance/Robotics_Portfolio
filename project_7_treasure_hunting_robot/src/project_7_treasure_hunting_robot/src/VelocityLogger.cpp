@@ -6,7 +6,7 @@ using namespace std::placeholders;
 
 /* Public Member Functions */
 
-VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
+VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
 : Node("velocity_logger", options)
 {
     imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
