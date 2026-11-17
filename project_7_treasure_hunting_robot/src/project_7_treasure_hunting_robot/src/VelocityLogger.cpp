@@ -7,7 +7,7 @@ using namespace std::placeholders;
 
 static constexpr double kGravityConstant = 9.8;
 static constexpr double kLinearVelocityTolerance = 5e-3;
-static constexpr douLinearVelocityVelocityTolerance = 5e-3;
+static constexpr double kAngularVelocityTolerance = 5e-3;
 static constexpr double kZeroVelocityThreshold = 1e-2;
 
 /* Public Member Functions */
