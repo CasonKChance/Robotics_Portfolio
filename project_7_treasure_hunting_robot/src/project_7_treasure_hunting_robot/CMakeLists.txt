@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
 find_package(SDL2_ttf REQUIRED)
 find_package(ament_index_cpp REQUIRED)
@@ -29,6 +30,7 @@ target_link_libraries(${PROJECT_NAME}_lib
   PUBLIC
     rclcpp::rclcpp
     ${geometry_msgs_TARGETS}
+    ${sensor_msgs_TARGETS}
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
     ament_index_cpp::ament_index_cpp
@@ -36,6 +38,12 @@ target_link_libraries(${PROJECT_NAME}_lib
 
 add_executable(RobotController src/RobotControllerMain.cpp)
 target_link_libraries(RobotController
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
+add_executable(VelocityLogger src/VelocityLogger.cpp)
+target_link_libraries(VelocityLogger
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -52,6 +60,7 @@ install(
   TARGETS
     ${PROJECT_NAME}_lib
     RobotController
+    VelocityLogger
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
