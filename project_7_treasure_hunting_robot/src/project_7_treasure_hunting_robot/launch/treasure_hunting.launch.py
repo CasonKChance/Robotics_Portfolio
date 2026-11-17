@@ -123,7 +123,8 @@ def generate_launch_description():
         executable='VelocityLogger',
         name='VelocityLogger',
         output='screen',
-        emulate_tty=True
+        emulate_tty=True,
+        prefix='xterm -e'
     )
 
     return LaunchDescription([

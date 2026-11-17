@@ -20,14 +20,8 @@ VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
 
 VelocityLogger::~VelocityLogger()
 {
-    std::cerr << "VelocityLogger destructor called!" << std::endl;
-    // Clear the speedometer (rows 1-10)
-    for (int row = 1; row <= 10; ++row) {
-        std::cout << "\033[" << row << ";1H\033[2K";
-    }
-
-    // Restore normal scrolling and position cursor below the speedometer
-    std::cout << "\033[r\033[11;1H" << std::flush;
+    // Restore normal scrolling and clear the terminal
+    std::cout << "\033[r\033[2J\033[H" << std::flush;
 }
 
 /* Private Member Functions */
