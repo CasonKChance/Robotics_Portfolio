@@ -17,6 +17,7 @@ find_package(ament_index_cpp REQUIRED)
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
   src/RobotController.cpp
+  src/VelocityLogger.cpp
 )
 
 # Export include directories
