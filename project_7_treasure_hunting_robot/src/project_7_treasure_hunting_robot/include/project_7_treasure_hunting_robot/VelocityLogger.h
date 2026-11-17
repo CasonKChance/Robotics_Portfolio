@@ -13,7 +13,7 @@ struct Twist {
     double angular_velocity_x{0.0};
     double angular_velocity_y{0.0};
     double angular_velocity_z{0.0};
-}
+};
 
 class VelocityLogger: public rclcpp::Node
 {
@@ -33,6 +33,6 @@ private:
     void IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg);
 
     void logCurrentTwist();
-}
+};
 
 #endif
