@@ -20,6 +20,7 @@ VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
 
 VelocityLogger::~VelocityLogger()
 {
+    std::cerr << "VelocityLogger destructor called!" << std::endl;
     // Clear the speedometer (rows 1-10)
     for (int row = 1; row <= 10; ++row) {
         std::cout << "\033[" << row << ";1H\033[2K";
