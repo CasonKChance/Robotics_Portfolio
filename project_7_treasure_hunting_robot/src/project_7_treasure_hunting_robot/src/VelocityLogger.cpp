@@ -117,12 +117,12 @@ void VelocityLogger::logCurrentTwist()
         "\t\tx: %7.2f\033[K\n"
         "\t\ty: %7.2f\033[K\n"
         "\t\tz: %7.2f\033[K",
-        std::abs(current_twist_.linear_velocity_x) <= kZeroVelocityThreshold ? current_twist_.linear_velocity_x : 0.00,
-        std::abs(current_twist_.linear_velocity_y) <= kZeroVelocityThreshold ? current_twist_.linear_velocity_y : 0.00,
-        std::abs(current_twist_.linear_velocity_z) <= kZeroVelocityThreshold ? current_twist_.linear_velocity_z : 0.00,
-        std::abs(current_twist_.angular_velocity_x) <= kZeroVelocityThreshold ? current_twist_.angular_velocity_x : 0.00,
-        std::abs(current_twist_.angular_velocity_y) <= kZeroVelocityThreshold ? current_twist_.angular_velocity_y : 0.00,
-        std::abs(current_twist_.angular_velocity_z) <= kZeroVelocityThreshold ? current_twist_.angular_velocity_z : 0.00
+        std::abs(current_twist_.linear_velocity_x) > kZeroVelocityThreshold ? current_twist_.linear_velocity_x : 0.00,
+        std::abs(current_twist_.linear_velocity_y) > kZeroVelocityThreshold ? current_twist_.linear_velocity_y : 0.00,
+        std::abs(current_twist_.linear_velocity_z) > kZeroVelocityThreshold ? current_twist_.linear_velocity_z : 0.00,
+        std::abs(current_twist_.angular_velocity_x) > kZeroVelocityThreshold ? current_twist_.angular_velocity_x : 0.00,
+        std::abs(current_twist_.angular_velocity_y) > kZeroVelocityThreshold ? current_twist_.angular_velocity_y : 0.00,
+        std::abs(current_twist_.angular_velocity_z) > kZeroVelocityThreshold ? current_twist_.angular_velocity_z : 0.00
     );
 
     // Save current cursor position (\033[s), jump to top-left (\033[1;1H),
