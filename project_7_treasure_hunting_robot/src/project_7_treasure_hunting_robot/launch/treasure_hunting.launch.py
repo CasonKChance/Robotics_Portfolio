@@ -124,7 +124,7 @@ def generate_launch_description():
         name='VelocityLogger',
         output='screen',
         emulate_tty=True,
-        prefix='xterm -title "Velocity Logger" -geometry 40x5 -e'
+        prefix='xterm -title "Velocity Logger" -class VelocityLogger -geometry 48x5 -e'
     )
 
     return LaunchDescription([
