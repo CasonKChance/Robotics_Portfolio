@@ -4,7 +4,7 @@
 
 using namespace std::placeholders;
 
-static constexpr kGravityConstant = 9.8;
+static constexpr double kGravityConstant = 9.8;
 
 /* Public Member Functions */
 
