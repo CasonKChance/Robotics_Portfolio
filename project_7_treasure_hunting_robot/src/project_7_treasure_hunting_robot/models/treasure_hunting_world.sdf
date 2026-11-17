@@ -29,8 +29,7 @@
                 <scene>scene</scene>
                 <ambient_light>0.4 0.4 0.4</ambient_light>
                 <background_color>0.8 0.8 0.8</background_color>
-                <!-- X=0, Y=-11 (behind south wall), Z=7 (above 1m walls), Roll=0, Pitch=0.55, Yaw=1.5708 (+Y) -->
-                <camera_pose>0 -11 7 0 0.55 1.5708</camera_pose>
+                <camera_pose>0 -7 7 0 1.0 1.5708</camera_pose>
             </plugin>
         </gui>
 
