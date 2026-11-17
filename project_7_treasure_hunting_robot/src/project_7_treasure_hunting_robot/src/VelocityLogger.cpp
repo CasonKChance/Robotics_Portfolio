@@ -4,6 +4,8 @@
 
 using namespace std::placeholders;
 
+static constexpr kGravityConstant = 9.8;
+
 /* Public Member Functions */
 
 VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
@@ -48,7 +50,7 @@ void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 
     current_twist_.linear_velocity_x += msg->linear_acceleration.x * dt;
     current_twist_.linear_velocity_y += msg->linear_acceleration.y * dt;
-    current_twist_.linear_velocity_z += msg->linear_acceleration.z * dt;
+    current_twist_.linear_velocity_z += (msg->linear_acceleration.z * dt) - kGravityConstant;
     current_twist_.angular_velocity_x = msg->angular_velocity.x;
     current_twist_.angular_velocity_y = msg->angular_velocity.y;
     current_twist_.angular_velocity_z = msg->angular_velocity.z;
@@ -89,14 +91,14 @@ void VelocityLogger::logCurrentTwist()
     char buffer[256];
     std::snprintf(
         buffer, sizeof(buffer),
-        "Linear Velocity (m/s):\033[K\n"
-        "  x: %7.2f\033[K\n"
-        "  y: %7.2f\033[K\n"
-        "  z: %7.2f\033[K\n"
-        "Angular Velocity (rad/s):\033[K\n"
-        "  x: %7.2f\033[K\n"
-        "  y: %7.2f\033[K\n"
-        "  z: %7.2f\033[K",
+        "\n\tLinear Velocity (m/s):\033[K\n"
+        "\t\tx: %7.2f\033[K\n"
+        "\t\ty: %7.2f\033[K\n"
+        "\t\tz: %7.2f\033[K\n"
+        "\nAngular Velocity (rad/s):\033[K\n"
+        "\t\tx: %7.2f\033[K\n"
+        "\t\ty: %7.2f\033[K\n"
+        "\t\tz: %7.2f\033[K",
         current_twist_.linear_velocity_x,
         current_twist_.linear_velocity_y,
         current_twist_.linear_velocity_z,
