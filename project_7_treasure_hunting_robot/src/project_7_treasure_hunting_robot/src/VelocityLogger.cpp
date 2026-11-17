@@ -6,7 +6,8 @@
 using namespace std::placeholders;
 
 static constexpr double kGravityConstant = 9.8;
-static constexpr double kAccelerationTolerance = 5e-3;
+static constexpr double kLinearVelocityTolerance = 5e-3;
+static constexpr douLinearVelocityVelocityTolerance = 5e-3;
 static constexpr double kZeroVelocityThreshold = 1e-2;
 
 /* Public Member Functions */
@@ -63,9 +64,9 @@ void VelocityLogger::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 
 void VelocityLogger::odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
 {
-    if (std::abs(msg->twist.twist.linear.x) <= kAccelerationTolerance &&
-        std::abs(msg->twist.twist.linear.y) <= kAccelerationTolerance &&
-        std::abs(msg->twist.twist.angular.z) <= kAccelerationTolerance)
+    if (std::abs(msg->twist.twist.linear.x) <= kLinearVelocityTolerance &&
+        std::abs(msg->twist.twist.linear.y) <= kLinearVelocityTolerance &&
+        std::abs(msg->twist.twist.angular.z) <= kAngularVelocityTolerance)
     {
         current_twist_.linear_velocity_x = 0.0;
         current_twist_.linear_velocity_y = 0.0;
