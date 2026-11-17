@@ -132,7 +132,7 @@
     <joint name="imu_sensor_housing_joint" type="fixed">
         <parent link="base_link"/>
         <child link="imu_sensor_housing_link"/>
-        <origin xyz="0 0 ${(base_height/2) + (imu_sensor_housing_height/2)}" rpy="0 0 0"/>
+        <origin xyz="-${(base_length/2) - (wheel_base_length/2)} 0 ${(base_height/2) + (imu_sensor_housing_height/2)}" rpy="0 0 0"/>
     </joint>
     <gazebo reference="imu_sensor_housing_link">
         <sensor name="imu_sensor" type="imu">

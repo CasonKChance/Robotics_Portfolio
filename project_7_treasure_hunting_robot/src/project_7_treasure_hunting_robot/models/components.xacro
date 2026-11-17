@@ -33,7 +33,7 @@
         <joint name="${prefix}_wheel_base_joint" type="fixed">
             <parent link="${parent}"/>
             <child link="${child}"/>
-            <origin xyz="-${(base_length/2) - (wheel_base_length/2)} ${reflect*((base_width/2) - (wheel_base_width/2))} -${(base_height/2) + (wheel_base_height/2)}" rpy="0 0 0"/>
+            <origin xyz="-${(base_length/2) - wheel_base_length} ${reflect*((base_width/2) - (wheel_base_width/2))} -${(base_height/2) + (wheel_base_height/2)}" rpy="0 0 0"/>
         </joint>
     </xacro:macro>
 
