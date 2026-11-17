@@ -70,9 +70,6 @@ void VelocityLogger::odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
         current_twist_.linear_velocity_x = 0.0;
         current_twist_.linear_velocity_y = 0.0;
         current_twist_.linear_velocity_z = 0.0;
-        current_twist_.angular_velocity_x = 0.0;
-        current_twist_.angular_velocity_y = 0.0;
-        current_twist_.angular_velocity_z = 0.0;
     }
 }
 
