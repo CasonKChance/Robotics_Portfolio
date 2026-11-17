@@ -59,9 +59,8 @@ void VelocityLogger::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
     logCurrentTwist();
 }
 
-void VelocityLogger::OdomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
+void VelocityLogger::odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
 {
-    // Use odom data to determine when the robot is stationary
     if (std::abs(msg->twist.twist.linear.x) <= kAccelerationTolerance &&
         std::abs(msg->twist.twist.linear.y) <= kAccelerationTolerance &&
         std::abs(msg->twist.twist.angular.z) <= kAccelerationTolerance)
