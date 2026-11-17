@@ -24,7 +24,7 @@ VelocityLogger::~VelocityLogger()
 
 /* Private Member Functions */
 
-VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
+void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 {
     rclcpp::Time current_time(msg->header.stamp);
 
@@ -56,7 +56,7 @@ VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
     logCurrentTwist();
 }
 
-VelocityLogger::logCurrentTwist()
+void VelocityLogger::logCurrentTwist()
 {
     RCLCPP_DEBUG(
         this->get_logger(),
