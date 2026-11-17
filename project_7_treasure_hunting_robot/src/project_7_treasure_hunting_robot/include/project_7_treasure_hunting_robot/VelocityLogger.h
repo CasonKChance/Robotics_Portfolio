@@ -21,8 +21,6 @@ public:
 
     explicit VelocityLogger(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
-    ~VelocityLogger();
-
 private:
     Twist current_twist_;
     bool has_received_imu_data_ = false;

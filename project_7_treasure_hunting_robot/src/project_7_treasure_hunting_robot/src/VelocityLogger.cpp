@@ -18,12 +18,6 @@ VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
     );
 }
 
-VelocityLogger::~VelocityLogger()
-{
-    // Restore normal scrolling and clear the terminal
-    std::cout << "\033[r\033[2J\033[H" << std::flush;
-}
-
 /* Private Member Functions */
 
 void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
