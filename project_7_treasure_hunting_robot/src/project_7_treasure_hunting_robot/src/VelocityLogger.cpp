@@ -100,8 +100,8 @@ void VelocityLogger::logCurrentTwist()
 
     if (!initialized) {
         // Clear the screen and move cursor to top-left (1,1)
-        // Set scroll region from row 11 to the bottom of the terminal (\033[11;999r)
-        // Move cursor to row 11 so subsequent ROS logs start below the speedometer
+        // Set scroll region from row 5 to the bottom of the terminal (\033[5;999r)
+        // Move cursor to row 5 so subsequent ROS logs start below the speedometer
         std::cout << "\033[2J\033[1;1H\033[5;999r\033[5;1H";
         initialized = true;
     }
