@@ -42,7 +42,7 @@ target_link_libraries(RobotController
     ${PROJECT_NAME}_lib
 )
 
-add_executable(VelocityLogger src/VelocityLogger.cpp)
+add_executable(VelocityLogger src/VelocityLoggerMain.cpp)
 target_link_libraries(VelocityLogger
   PUBLIC
     ${PROJECT_NAME}_lib

@@ -63,15 +63,15 @@ def generate_launch_description():
 
     # Publish robot transforms
     robot_state_publisher = Node(
-                package='robot_state_publisher',
-                executable='robot_state_publisher',
-                name='robot_state_publisher',
-                output='screen',
-                parameters=[{
-                    'robot_description': differential_drive_robot_description,
-                    'use_sim_time': True
-                }],
-            )
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{
+            'robot_description': differential_drive_robot_description,
+            'use_sim_time': True
+        }],
+    )
 
     # Spawn robot into Gazebo
     spawn_robot = Node(
@@ -110,12 +110,21 @@ def generate_launch_description():
 
     # Robot Controller
     robot_controller = Node(
-                        package='project_7_treasure_hunting_robot',
-                        executable='RobotController',
-                        name='RobotController',
-                        output='screen',
-                        emulate_tty=True
-                       )
+        package='project_7_treasure_hunting_robot',
+        executable='RobotController',
+        name='RobotController',
+        output='screen',
+        emulate_tty=True
+    )
+
+    # Velocity Logger
+    velocity_logger = Node(
+        package='project_7_treasure_hunting_robot',
+        executable='VelocityLogger',
+        name='VelocityLogger',
+        output='screen',
+        emulate_tty=True
+    )
 
     return LaunchDescription([
         gz_bridge,
@@ -125,4 +134,5 @@ def generate_launch_description():
         spawn_robot,
         rviz,
         robot_controller,
+        velocity_logger,
     ])
