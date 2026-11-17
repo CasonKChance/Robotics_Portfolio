@@ -16,7 +16,7 @@ static const double kMaximumAngularSpeed = 2.0;
 RobotController::RobotController(const rclcpp::NodeOptions & options)
 : rclcpp::Node("robot_controller", options)
 {
-  commandVelocityPublisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+  command_velocity_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
   // Initialize SDL Window
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -70,23 +70,23 @@ RobotController::RobotController(const rclcpp::NodeOptions & options)
 
     std::cerr << "Failed to load font: " << error << std::endl;
   } else {
-    SDL_Color textColor = {255, 255, 255, 255};
-    SDL_Surface * textSurface = TTF_RenderText_Blended(font_,
-      "Focus this window and use the arrow keys to control the robot", textColor);
+    SDL_Color text_color = {255, 255, 255, 255};
+    SDL_Surface * text_surface = TTF_RenderText_Blended(font_,
+      "Focus this window and use the arrow keys to control the robot", text_color);
 
-    if (textSurface) {
-      textTexture_ = SDL_CreateTextureFromSurface(renderer_, textSurface);
+    if (text_surface) {
+      text_texture_ = SDL_CreateTextureFromSurface(renderer_, text_surface);
 
-      textRect_.w = textSurface->w;
-      textRect_.h = textSurface->h;
-      textRect_.x = (600 - textRect_.w) / 2;
-      textRect_.y = (150 - textRect_.h) / 2;
+      text_rect_.w = text_surface->w;
+      text_rect_.h = text_surface->h;
+      text_rect_.x = (600 - text_rect_.w) / 2;
+      text_rect_.y = (150 - text_rect_.h) / 2;
 
-      SDL_FreeSurface(textSurface);
+      SDL_FreeSurface(text_surface);
 
       SDL_SetRenderDrawColor(renderer_, 25, 25, 25, 255);
       SDL_RenderClear(renderer_);
-      SDL_RenderCopy(renderer_, textTexture_, NULL, &textRect_);
+      SDL_RenderCopy(renderer_, text_texture_, NULL, &text_rect_);
       SDL_RenderPresent(renderer_);
     }
   }
@@ -95,22 +95,22 @@ RobotController::RobotController(const rclcpp::NodeOptions & options)
     "Teleop controller started. Focus the SDL window and use the arrow keys to control robot.");
 
   // Poll keyboard at 100Hz rate
-  keyboardTimer_ = this->create_wall_timer(
+  keyboard_timer_ = this->create_wall_timer(
         10ms, std::bind(&RobotController::processKeyboardInput, this));
 }
 
 RobotController::~RobotController()
 {
   // Command robot to stop before shutting down controller
-  if (commandVelocityPublisher_) {
+  if (command_velocity_publisher_) {
     geometry_msgs::msg::Twist msg;
     msg.linear.x = 0.0;
     msg.angular.z = 0.0;
-    commandVelocityPublisher_->publish(msg);
+    command_velocity_publisher_->publish(msg);
   }
 
-  if (textTexture_) {
-    SDL_DestroyTexture(textTexture_);
+  if (text_texture_) {
+    SDL_DestroyTexture(text_texture_);
   }
   if (font_) {
     TTF_CloseFont(font_);
@@ -138,10 +138,10 @@ void RobotController::processKeyboardInput()
 
     // Handle window close event
     if (event.type == SDL_QUIT) {
-      upPressed_ = false;
-      downPressed_ = false;
-      leftPressed_ = false;
-      rightPressed_ = false;
+      up_pressed_ = false;
+      down_pressed_ = false;
+      left_pressed_ = false;
+      right_pressed_ = false;
 
       publishCommandVelocity();
 
@@ -157,10 +157,10 @@ void RobotController::processKeyboardInput()
       event.type == SDL_WINDOWEVENT &&
       event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
     {
-      upPressed_ = false;
-      downPressed_ = false;
-      leftPressed_ = false;
-      rightPressed_ = false;
+      up_pressed_ = false;
+      down_pressed_ = false;
+      left_pressed_ = false;
+      right_pressed_ = false;
 
       publishCommandVelocity();
 
@@ -187,16 +187,16 @@ void RobotController::processKeyboardInput()
 
     switch (event.key.keysym.scancode) {
       case SDL_SCANCODE_UP:
-        upPressed_ = pressed;
+        up_pressed_ = pressed;
         break;
       case SDL_SCANCODE_DOWN:
-        downPressed_ = pressed;
+        down_pressed_ = pressed;
         break;
       case SDL_SCANCODE_LEFT:
-        leftPressed_ = pressed;
+        left_pressed_ = pressed;
         break;
       case SDL_SCANCODE_RIGHT:
-        rightPressed_ = pressed;
+        right_pressed_ = pressed;
         break;
       default:
         continue;
@@ -210,7 +210,7 @@ void RobotController::processKeyboardInput()
     SDL_RenderClear(renderer_);
 
     if (textTexture_) {
-      SDL_RenderCopy(renderer_, textTexture_, NULL, &textRect_);
+      SDL_RenderCopy(renderer_, text_texture_, NULL, &text_rect_);
     }
 
     SDL_RenderPresent(renderer_);
@@ -221,10 +221,10 @@ void RobotController::publishCommandVelocity() const
 {
   geometry_msgs::msg::Twist msg;
 
-  msg.linear.x = (upPressed_ ? kMaximumLinearSpeed : 0.0) -
-    (downPressed_ ? kMaximumLinearSpeed : 0.0);
-  msg.angular.z = (leftPressed_ ? kMaximumAngularSpeed : 0.0) -
-    (rightPressed_ ? kMaximumAngularSpeed : 0.0);
+  msg.linear.x = (up_pressed_ ? kMaximumLinearSpeed : 0.0) -
+    (down_pressed_ ? kMaximumLinearSpeed : 0.0);
+  msg.angular.z = (left_pressed_ ? kMaximumAngularSpeed : 0.0) -
+    (right_pressed_ ? kMaximumAngularSpeed : 0.0);
 
   commandVelocityPublisher_->publish(msg);
 }

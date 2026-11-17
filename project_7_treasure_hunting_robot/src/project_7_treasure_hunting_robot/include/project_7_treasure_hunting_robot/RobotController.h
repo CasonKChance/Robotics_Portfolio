@@ -29,15 +29,15 @@ private:
   SDL_Window * window_ {nullptr}; // SDL window for keyboard input, must be focused.
   SDL_Renderer * renderer_ = nullptr;
   TTF_Font * font_ = nullptr;
-  SDL_Texture * textTexture_ = nullptr;
-  SDL_Rect textRect_;
-  bool upPressed_ {false};
-  bool downPressed_ {false};
-  bool leftPressed_ {false};
-  bool rightPressed_ {false};
+  SDL_Texture * text_texture_ = nullptr;
+  SDL_Rect text_rect_;
+  bool up_pressed_ {false};
+  bool down_pressed_ {false};
+  bool left_pressed_ {false};
+  bool right_pressed_ {false};
 
-  rclcpp::Publisher < geometry_msgs::msg::Twist > ::SharedPtr commandVelocityPublisher_;
-  rclcpp::TimerBase::SharedPtr keyboardTimer_;
+  rclcpp::Publisher < geometry_msgs::msg::Twist > ::SharedPtr command_velocity_publisher_;
+  rclcpp::TimerBase::SharedPtr keyboard_timer_;
 
   /**
    * @brief Processes keyboard input and updates the state of the control buttons.
