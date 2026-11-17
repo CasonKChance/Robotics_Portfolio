@@ -22,14 +22,12 @@
             <plugin filename="MinimalScene" name="3D View">
                 <gz-gui>
                     <title>3D View</title>
-                    <property type="bool" key="showTitleBar">false</property>
+                    <property type="bool" key="showTitleBar">true</property>
                     <property type="string" key="state">docked</property>
                 </gz-gui>
                 <engine>ogre2</engine>
                 <scene>scene</scene>
-                <ambient_light>0.4 0.4 0.4</ambient_light>
-                <background_color>0.8 0.8 0.8</background_color>
-                <camera_pose>0 -6 5 0 1.0 1.5708</camera_pose>
+                <camera_pose>0 -7 6 0 1.0 1.5708</camera_pose>
             </plugin>
         </gui>
 

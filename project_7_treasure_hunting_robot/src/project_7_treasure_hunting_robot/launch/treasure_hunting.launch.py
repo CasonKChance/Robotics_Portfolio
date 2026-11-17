@@ -85,7 +85,10 @@ def generate_launch_description():
             '-name', 'differential_drive_robot',
             '-x', '0',
             '-y', '0',
-            '-z', '0'
+            '-z', '0',
+            '-R', '0',
+            '-P', '0',
+            '-Y', '1.57'
         ]
     )
 
