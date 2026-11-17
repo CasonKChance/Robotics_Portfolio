@@ -46,12 +46,12 @@ void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 
     last_imu_time_ = current_time;
 
-    current_twist_.linear_velocity_x += msg.linear_acceleration.x * dt;
-    current_twist_.linear_velocity_y += msg.linear_acceleration.y * dt;
-    current_twist_.linear_velocity_z += msg.linear_acceleration.z * dt;
-    current_twist_.angular_velocity_x = msg.angular_velocity.x;
-    current_twist_.angular_velocity_y = msg.angular_velocity.y;
-    current_twist_.angular_velocity_z = msg.angular_velocity.z;
+    current_twist_.linear_velocity_x += msg->linear_acceleration.x * dt;
+    current_twist_.linear_velocity_y += msg->linear_acceleration.y * dt;
+    current_twist_.linear_velocity_z += msg->linear_acceleration.z * dt;
+    current_twist_.angular_velocity_x = msg->angular_velocity.x;
+    current_twist_.angular_velocity_y = msg->angular_velocity.y;
+    current_twist_.angular_velocity_z = msg->angular_velocity.z;
 
     logCurrentTwist();
 }
