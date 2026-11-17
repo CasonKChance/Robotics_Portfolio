@@ -109,8 +109,8 @@ void VelocityLogger::logCurrentTwist()
     char buffer[256];
     std::snprintf(
         buffer, sizeof(buffer),
-        "\n\tLinear Velocity (m/s): %7.2f\033[K\n"
-        "\tAngular Velocity (rad/s): %7.2f\033[K\n"
+        "\n\tLinear Velocity (m/s): %7.2f\033[K\n",
+        "\tAngular Velocity (rad/s): %7.2f\033[K\n",
         std::abs(current_twist_.linear_velocity_x) > kZeroVelocityThreshold ? current_twist_.linear_velocity_x : 0.00,
         std::abs(current_twist_.angular_velocity_z) > kZeroVelocityThreshold ? current_twist_.angular_velocity_z : 0.00
     );
