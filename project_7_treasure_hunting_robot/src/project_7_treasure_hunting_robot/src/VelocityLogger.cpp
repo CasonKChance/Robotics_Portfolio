@@ -5,6 +5,7 @@
 using namespace std::placeholders;
 
 static constexpr double kGravityConstant = 9.8;
+static constexpr double kAccelerationTolerance = 5e-3;
 
 /* Public Member Functions */
 
@@ -14,13 +15,19 @@ VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
     imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
         "imu",
         10,
-        std::bind(&VelocityLogger::IMUTopicCallback, this, _1)
+        std::bind(&VelocityLogger::imuTopicCallback, this, _1)
+    );
+
+    odom_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
+        "odom",
+        10,
+        std::bind(&VelocityLogger::odomTopicCallback, this, _1)
     );
 }
 
 /* Private Member Functions */
 
-void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
+void VelocityLogger::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 {
     rclcpp::Time current_time(msg->header.stamp);
 
@@ -50,6 +57,22 @@ void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
     current_twist_.angular_velocity_z = msg->angular_velocity.z;
 
     logCurrentTwist();
+}
+
+void OdomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
+{
+    // Use odom data to determine when the robot is stationary
+    if (std::abs(msg->linear.x) <= kAccelerationTolerance &&
+        std::abs(msg->linear.y) <= kAccelerationTolerance &&
+        std::abs(msg->angular.z) <= kAccelerationTolerance)
+    {
+        current_twist_.linear_velocity_x = 0.0;
+        current_twist_.linear_velocity_y = 0.0;
+        current_twist_.linear_velocity_z = 0.0;
+        current_twist_.angular_velocity_x = 0.0;
+        current_twist_.angular_velocity_y = 0.0;
+        current_twist_.angular_velocity_z = 0.0;
+    }
 }
 
 void VelocityLogger::logCurrentTwist()

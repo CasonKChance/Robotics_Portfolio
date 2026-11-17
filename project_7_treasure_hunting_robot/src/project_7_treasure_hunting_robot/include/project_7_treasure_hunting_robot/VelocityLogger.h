@@ -3,6 +3,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 #include <memory>
 
@@ -26,9 +27,12 @@ private:
     bool has_received_imu_data_ = false;
 
     rclcpp::Subscription < sensor_msgs::msg::Imu > ::SharedPtr imu_subscription_;
+    rclcpp::Subscription < nav_msgs::msg::Odometry > ::SharedPtr odom_subscription_;
     rclcpp::Time last_imu_time_;
 
-    void IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg);
+    void imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg);
+
+    void odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg);
 
     void logCurrentTwist();
 };
