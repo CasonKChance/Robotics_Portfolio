@@ -27,7 +27,7 @@
                 </gz-gui>
                 <engine>ogre2</engine>
                 <scene>scene</scene>
-                <camera_pose>0 -7 6 0 1.0 1.5708</camera_pose>
+                <camera_pose>0 -6 6 0 1.0 1.5708</camera_pose>
             </plugin>
         </gui>
 
