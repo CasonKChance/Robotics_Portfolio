@@ -209,7 +209,7 @@ void RobotController::processKeyboardInput()
     SDL_SetRenderDrawColor(renderer_, 25, 25, 25, 255);
     SDL_RenderClear(renderer_);
 
-    if (textTexture_) {
+    if (text_texture_) {
       SDL_RenderCopy(renderer_, text_texture_, NULL, &text_rect_);
     }
 
@@ -226,5 +226,5 @@ void RobotController::publishCommandVelocity() const
   msg.angular.z = (left_pressed_ ? kMaximumAngularSpeed : 0.0) -
     (right_pressed_ ? kMaximumAngularSpeed : 0.0);
 
-  commandVelocityPublisher_->publish(msg);
+  command_velocity_publisher_->publish(msg);
 }
