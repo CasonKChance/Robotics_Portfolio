@@ -21,7 +21,7 @@ VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
 VelocityLogger::~VelocityLogger()
 {
     // Reset scroll region to full screen and move cursor below the header
-    std::cout << "\033[r\033[10;1H" << std::endl;
+    std::cout << "\033[r\033[11;1H" << std::endl;
 }
 
 /* Private Member Functions */
@@ -82,8 +82,8 @@ void VelocityLogger::logCurrentTwist()
 
     if (!initialized) {
         // Clear the screen and move cursor to top-left (1,1)
-        // Set scroll region from row 11 to the bottom of the terminal (\033[9;999r)
-        // Move cursor to row 11 so subsequent ROS logs start below the speedometer
+        // Set scroll region from row 10 to the bottom of the terminal (\033[10;999r)
+        // Move cursor to row 10 so subsequent ROS logs start below the speedometer
         std::cout << "\033[2J\033[1;1H\033[10;999r\033[10;1H";
         initialized = true;
     }
