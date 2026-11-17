@@ -2,7 +2,7 @@
 #define IMU_VELOCITY_LOGGER_H
 
 #include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/imu.cpp"
+#include "sensor_msgs/msg/imu.hpp"
 
 #include <memory>
 
