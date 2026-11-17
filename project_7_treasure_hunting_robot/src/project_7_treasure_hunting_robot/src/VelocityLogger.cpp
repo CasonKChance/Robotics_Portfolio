@@ -21,7 +21,7 @@ VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
 VelocityLogger::~VelocityLogger()
 {
     // Reset scroll region to full screen and move cursor below the header
-    std::cout << "\033[r\033[9;1H" << std::endl;
+    std::cout << "\033[r\033[11;1H" << std::endl;
 }
 
 /* Private Member Functions */
@@ -50,7 +50,7 @@ void VelocityLogger::IMUTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 
     current_twist_.linear_velocity_x += msg->linear_acceleration.x * dt;
     current_twist_.linear_velocity_y += msg->linear_acceleration.y * dt;
-    current_twist_.linear_velocity_z += (msg->linear_acceleration.z * dt) - kGravityConstant;
+    current_twist_.linear_velocity_z += (msg->linear_acceleration.z * dt) - (kGravityConstant * dt);
     current_twist_.angular_velocity_x = msg->angular_velocity.x;
     current_twist_.angular_velocity_y = msg->angular_velocity.y;
     current_twist_.angular_velocity_z = msg->angular_velocity.z;
@@ -82,9 +82,9 @@ void VelocityLogger::logCurrentTwist()
 
     if (!initialized) {
         // Clear the screen and move cursor to top-left (1,1)
-        // Set scroll region from row 9 to the bottom of the terminal (\033[9;999r)
-        // Move cursor to row 9 so subsequent ROS logs start below the speedometer
-        std::cout << "\033[2J\033[1;1H\033[9;999r\033[9;1H";
+        // Set scroll region from row 11 to the bottom of the terminal (\033[9;999r)
+        // Move cursor to row 11 so subsequent ROS logs start below the speedometer
+        std::cout << "\033[2J\033[1;1H\033[11;999r\033[11;1H";
         initialized = true;
     }
 
@@ -95,7 +95,7 @@ void VelocityLogger::logCurrentTwist()
         "\t\tx: %7.2f\033[K\n"
         "\t\ty: %7.2f\033[K\n"
         "\t\tz: %7.2f\033[K\n"
-        "\nAngular Velocity (rad/s):\033[K\n"
+        "\tAngular Velocity (rad/s):\033[K\n"
         "\t\tx: %7.2f\033[K\n"
         "\t\ty: %7.2f\033[K\n"
         "\t\tz: %7.2f\033[K",
