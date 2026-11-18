@@ -83,7 +83,8 @@ class ImageDecoder(Node):
             elif is_red_channel_present:
                 # The red circle contains the treasure
                 self.get_logger().info(
-                    f"Treasure found!"
+                    f"Treasure found!",
+                    once=True
                 )
                 return
     
@@ -142,7 +143,7 @@ class ImageDecoder(Node):
         msg.y = float(y)
         msg.z = float(0)
 
-        self.get_logger().info(
+        self.get_logger().debug(
             f"Publishing coordinates (x, y): {x, y}"
         )
 
