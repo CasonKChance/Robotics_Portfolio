@@ -38,6 +38,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     ${geometry_msgs_TARGETS}
     ${sensor_msgs_TARGETS}
     ${nav_msgs_TARGETS}
+    ${visualization_msgs_TARGETS}
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
     ament_index_cpp::ament_index_cpp
