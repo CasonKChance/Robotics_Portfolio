@@ -37,10 +37,10 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(geometry_msgs::msg::Poin
 
     RCLCPP_INFO(
         this->get_logger(), 
-        "\n\tNew hint coordinates found at: \n"
+        "\n\tNew hint coordinates given: \n"
         "\t\tx: %.2f\n"
         "\t\ty: %.2f\n"
-        "\t\tz: %.2f\n",
+        "\t\tz: %.2f",
         new_coordinates.x,
         new_coordinates.y,
         new_coordinates.z
@@ -87,7 +87,7 @@ void CoordinatesProcessor::publishVisualizationMarker()
         "\n\tPublishing marker at: \n"
         "\t\tx: %.2f\n"
         "\t\ty: %.2f\n"
-        "\t\tz: %.2f\n",
+        "\t\tz: %.2f",
         current_hint_coordinates_.x,
         current_hint_coordinates_.y,
         current_hint_coordinates_.z
