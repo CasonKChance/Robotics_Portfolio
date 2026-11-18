@@ -138,9 +138,9 @@ class ImageDecoder(Node):
     def publish_coordinates(self, x, y):
         msg = Point()
 
-        msg.x = x
-        msg.y = y
-        msg.z = 0
+        msg.x = float(x)
+        msg.y = float(y)
+        msg.z = float(0)
 
         self.get_logger().info(
             f"Publishing coordinates (x, y): {x, y}"
