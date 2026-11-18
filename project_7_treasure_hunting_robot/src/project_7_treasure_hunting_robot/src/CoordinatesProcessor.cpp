@@ -21,7 +21,7 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
 
     visualization_marker_publisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
         "visualization_marker",
-        rclcpp::QoS(10).transient_local()
+        rclcpp::QoS(1).transient_local()
     );
 }
 
