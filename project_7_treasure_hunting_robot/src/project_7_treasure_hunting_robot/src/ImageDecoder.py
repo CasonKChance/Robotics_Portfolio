@@ -38,11 +38,12 @@ class ImageDecoder(Node):
         if self.image is None:
             return
 
-        dominant_color = self.pull_dominant_color()
+        dominant_color, dominance = self.pull_dominant_color()
 
         if dominant_color is not None:
             self.get_logger().info(
-                f"Dominant BGR: {dominant_color}"
+                f"Dominant color: {dominant_color}, "
+                f"Coverage: {dominance:.1%}"
             )
 
     def pull_dominant_color(self):
@@ -84,7 +85,13 @@ class ImageDecoder(Node):
         # Return dominant color as a BGR tuple
         dominant_color = centers[dominant_cluster]
 
-        return tuple(int(channel) for channel in dominant_color)
+        # Percentage of image dominated by color
+        dominance = counts[dominant_cluster] / len(pixels)
+
+        return (
+            tuple(int(channel) for channel in dominant_color),
+            float(dominance)
+        )
 
 def main(args=None):
     rclpy.init(args=args)
