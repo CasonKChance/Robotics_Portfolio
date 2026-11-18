@@ -8,7 +8,7 @@ static constexpr double kHintMarkerHeight = 3.0;
 /* Public Member Functions */
 
 CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
-: rclcpp::Node('coords_processor', options)
+: rclcpp::Node("coordinates_processor", options)
 {
     current_hint_coordinates_ = Coordinates{0.0, 0.0, 0.0};
     found_hints_.insert(current_hint_coordinates_);
@@ -22,7 +22,7 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
     visualization_marker_publisher_ = this->create_publisher<visualization_msgs::msg::VisualizationMarker>(
         "visualization_marker",
         rclcpp::QoS(10).transient_local()
-    )
+    );
 }
 
 /* Private Member Functions */
