@@ -35,6 +35,17 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(geometry_msgs::msg::Poin
         return;
     }
 
+    RCLCPP_INFO(
+        this->get_logger(), 
+        "\n\tNew hint coordinates found at: \n"
+        "\t\tx: %.2f\n"
+        "\t\ty: %.2f\n"
+        "\t\tz: %.2f\n",
+        new_coordinates.x,
+        new_coordinates.y,
+        new_coordinates.z
+    );
+
     current_hint_coordinates_ = new_coordinates;
     found_hints_.insert(current_hint_coordinates_);
 
@@ -70,6 +81,17 @@ void CoordinatesProcessor::publishVisualizationMarker()
     marker.color.a = 1.0f;
 
     marker.lifetime = rclcpp::Duration::from_seconds(0.0);
+
+    RCLCPP_DEBUG(
+        this->get_logger(), 
+        "\n\tPublishing marker at: \n"
+        "\t\tx: %.2f\n"
+        "\t\ty: %.2f\n"
+        "\t\tz: %.2f\n",
+        current_hint_coordinates_.x,
+        current_hint_coordinates_.y,
+        current_hint_coordinates_.z
+    );
 
     visualization_marker_publisher_->publish(marker);
 }
