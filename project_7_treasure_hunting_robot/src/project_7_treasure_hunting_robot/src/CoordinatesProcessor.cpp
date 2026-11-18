@@ -19,7 +19,7 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
         std::bind(&CoordinatesProcessor::hintCoordinatesTopicCallback, this, _1)
     );
 
-    visualization_marker_publisher_ = this->create_publisher<visualization_msgs::msg::VisualizationMarker>(
+    visualization_marker_publisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
         "visualization_marker",
         rclcpp::QoS(10).transient_local()
     );
