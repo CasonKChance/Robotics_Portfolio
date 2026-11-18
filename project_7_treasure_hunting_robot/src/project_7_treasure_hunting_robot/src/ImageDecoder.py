@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from geometry_msgs.msg import Point
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
@@ -15,7 +16,7 @@ class ImageDecoder(Node):
         self.bridge = CvBridge()
         self.image = None
 
-        self.subscription = self.create_subscription(
+        self.image_subscription = self.create_subscription(
             Image,
             '/camera/image_raw',
             self.image_topic_callback,
@@ -26,6 +27,12 @@ class ImageDecoder(Node):
         self.processing_timer = self.create_timer(
             0.2,
             self.decode_image
+        )
+
+        self.coordinates_publisher = self.create_publisher(
+            Point,
+            'hint_coordinates',
+            10
         )
 
     def image_topic_callback(self, msg: Image):
@@ -40,11 +47,46 @@ class ImageDecoder(Node):
 
         dominant_color, dominance = self.pull_dominant_color()
 
-        if dominant_color is not None:
-            self.get_logger().info(
-                f"Dominant color: {dominant_color}, "
-                f"Coverage: {dominance:.1%}"
-            )
+        if dominant_color is not None and dominance >= 0.75:
+            is_blue_channel_present = dominant_color[0] >= 253
+            is_green_channel_present = dominant_color[1] >= 253
+            is_red_channel_present = dominant_color[2] >= 253
+
+            if is_blue_channel_present and is_green_channel_present and is_red_channel_present:
+                # White is the floor's color and gives us no information
+                return
+            elif is_blue_channel_present and is_green_channel_present:
+                # Cyan circle is hint #1 and gives us the location of the blue circle at (3.0, -2.5)
+                coordinates = (3.0, -2.5)
+                self.publish_coordinates(*coordinates)
+                return
+            elif is_blue_channel_present and is_red_channel_present:
+                # Purple circle is hint #3 and gives us the location of the yellow circle at (-3.5, 3.0)
+                coordinates = (-3.5, 3.0)
+                self.publish_coordinates(*coordinates)
+                return
+            elif is_green_channel_present and is_red_channel_present:
+                # Yellow circle is hint #4 and gives us the location of the red circle at (4.0, 3.5)
+                coordinates = (4.0, 3.5)
+                self.publish_coordinates(*coordinates)
+                return
+            elif is_blue_channel_present:
+                # Blue circle is hint #2 and gives us the location of the purple circle at (-3.0, -4.0)
+                coordinates = (-3.0, -4.0)
+                self.publish_coordinates(*coordinates)
+                return
+            elif is_green_channel_present:
+                # Green circle is hint #0 and gives us the location of the cyan circle at (-0.5, -1.0)
+                coordinates = (-0.5, -1.0)
+                self.publish_coordinates(*coordinates)
+                return
+            elif is_red_channel_present:
+                # The red circle contains the treasure
+                self.get_logger().info(
+                    f"Treasure found!"
+                )
+                return
+    
 
     def pull_dominant_color(self):
         if self.image is None:
@@ -93,6 +135,19 @@ class ImageDecoder(Node):
             float(dominance)
         )
 
+    def publish_coordinates(self, x, y):
+        msg = Point()
+
+        msg.x = x
+        msg.y = y
+        msg.z = 0
+
+        self.get_logger().info(
+            f"Publishing coordinates (x, y): {x, y}"
+        )
+
+        self.coordinates_publisher.publish(msg)
+        
 def main(args=None):
     rclpy.init(args=args)
 
