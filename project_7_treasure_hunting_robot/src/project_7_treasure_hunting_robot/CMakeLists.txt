@@ -14,6 +14,8 @@ find_package(nav_msgs REQUIRED)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
 find_package(SDL2_ttf REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(rclpy REQUIRED)
+find_package(cv_bridge REQUIRED)
 
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
@@ -68,6 +70,13 @@ install(
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  PROGRAMS
+    src/ImageDecoder.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME ImageDecoder
 )
 
 install(DIRECTORY

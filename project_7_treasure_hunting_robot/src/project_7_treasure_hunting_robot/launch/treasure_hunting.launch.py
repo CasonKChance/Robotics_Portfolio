@@ -127,6 +127,15 @@ def generate_launch_description():
         prefix='xterm -title "Velocity Logger" -geometry 48x5 -e'
     )
 
+    # Image Decoder
+    image_decoder = Node(
+        package='project_7_treasure_hunting_robot',
+        executable='ImageDecoder',
+        name='ImageDecoder',
+        output='screen',
+        emulate_tty=True
+    )
+
     return LaunchDescription([
         gz_bridge,
         gz_image_bridge,
@@ -136,4 +145,5 @@ def generate_launch_description():
         rviz,
         robot_controller,
         velocity_logger,
+        image_decoder
     ])
