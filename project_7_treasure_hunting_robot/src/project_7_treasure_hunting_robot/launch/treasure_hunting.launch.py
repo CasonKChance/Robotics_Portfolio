@@ -136,6 +136,15 @@ def generate_launch_description():
         emulate_tty=True
     )
 
+    # Coordinates Processor
+    coordinates_processor = Node(
+        package='project_7_treasure_hunting_robot',
+        executable='CoordinatesProcessor',
+        name='CoordinatesProcessor',
+        output='screen',
+        emulate_tty=True
+    )
+
     return LaunchDescription([
         gz_bridge,
         gz_image_bridge,
@@ -145,5 +154,6 @@ def generate_launch_description():
         rviz,
         robot_controller,
         velocity_logger,
-        image_decoder
+        image_decoder,
+        coordinates_processor
     ])

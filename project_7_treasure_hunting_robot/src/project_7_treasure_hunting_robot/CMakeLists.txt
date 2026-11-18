@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2)
 find_package(SDL2_ttf REQUIRED)
 find_package(ament_index_cpp REQUIRED)
@@ -21,6 +22,7 @@ find_package(cv_bridge REQUIRED)
 add_library(${PROJECT_NAME}_lib
   src/RobotController.cpp
   src/VelocityLogger.cpp
+  src/CoordinatesProcessor.cpp
 )
 
 # Export include directories
@@ -53,6 +55,12 @@ target_link_libraries(VelocityLogger
     ${PROJECT_NAME}_lib
 )
 
+add_executable(CoordinatesProcessor src/CoordinatesProcessorMain.cpp)
+target_link_libraries(CoordinatesProcessor
+  PUBLIC
+    ${PROJECT_NAME}_lib
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
@@ -66,6 +74,7 @@ install(
     ${PROJECT_NAME}_lib
     RobotController
     VelocityLogger
+    CoordinatesProcessor
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
