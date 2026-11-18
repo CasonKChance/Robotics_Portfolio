@@ -2,8 +2,8 @@
 
 using namespace std::placeholders;
 
-static constexpr double kHintMarkerRadius = 0.5;
-static constexpr double kHintMarkerHeight = 3.0;
+static constexpr double kHintMarkerRadius = 0.05;
+static constexpr double kHintMarkerHeight = 1.0;
 
 /* Public Member Functions */
 
@@ -72,7 +72,7 @@ void CoordinatesProcessor::publishVisualizationMarker()
     marker.pose.orientation.w = 1.0;
 
     marker.scale.x = kHintMarkerRadius * 2;
-    marker.scale.y = kHintMarkerHeight * 2;
+    marker.scale.y = kHintMarkerRadius * 2;
     marker.scale.z = kHintMarkerHeight;
 
     marker.color.r = 0.0f;
