@@ -13,7 +13,7 @@ struct Coordinates
     double x{0.0};
     double y{0.0};
     double z{0.0};
-}
+};
 
 class CoordinatesProcessor: public rclcpp::Node
 {
