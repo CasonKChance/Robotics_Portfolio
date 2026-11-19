@@ -101,19 +101,19 @@
 
     <!-- Drive-wheel traction -->
     <gazebo reference="left_wheel_link">
-        <mu1>1.0</mu1>
-        <mu2>1.0</mu2>
+        <mu1>2.0</mu1>
+        <mu2>2.0</mu2>
     </gazebo>
 
     <gazebo reference="right_wheel_link">
-        <mu1>1.0</mu1>
-        <mu2>1.0</mu2>
+        <mu1>2.0</mu1>
+        <mu2>2.0</mu2>
     </gazebo>
 
     <!-- Give the caster wheel low friction so it can slide -->
     <gazebo reference="caster_wheel_link">
-        <mu1>0.01</mu1>
-        <mu2>0.01</mu2>
+        <mu1>0.0</mu1>
+        <mu2>0.0</mu2>
     </gazebo>
 
     <!-- IMU Sensor -->
