@@ -146,7 +146,7 @@ def generate_launch_description():
             '--z', '0.0',
             '--roll', '0.0',
             '--pitch', '0.0',
-            '--yaw', '-1.57',
+            '--yaw', '1.57',
             '--frame-id', 'map',
             '--child-frame-id', 'odom',
         ],
