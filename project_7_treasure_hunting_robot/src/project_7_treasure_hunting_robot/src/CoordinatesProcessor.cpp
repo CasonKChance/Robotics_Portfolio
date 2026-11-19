@@ -13,7 +13,7 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
     current_hint_coordinates_ = Coordinates{0.0, 0.0, 0.0};
     found_hints_.insert(current_hint_coordinates_);
 
-    hint_coordinates_subscription_ = this->create_subscription<geometry_msgs::msg::Point>(
+    hint_coordinates_subscription_ = this->create_subscription<HintCoordinates>(
         "hint_coordinates",
         10,
         std::bind(&CoordinatesProcessor::hintCoordinatesTopicCallback, this, _1)
@@ -27,9 +27,10 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
 
 /* Private Member Functions */
 
-void CoordinatesProcessor::hintCoordinatesTopicCallback(geometry_msgs::msg::Point::UniquePtr msg)
+void CoordinatesProcessor::hintCoordinatesTopicCallback(HintCoordinates::UniquePtr msg)
 {
-    Coordinates new_coordinates = Coordinates{msg->x, msg->y, msg->z};
+    Coordinates new_coordinates = Coordinates{msg->next_hint_x, msg->next_hint_y, msg->next_hint_z};
+    Coordinates current_coordinates = Coordinates{msg->current_hint_x, msg->current_hint_y, msg->current_hint_z};
 
     if (found_hints_.contains(new_coordinates)) {
         return;
@@ -44,6 +45,17 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(geometry_msgs::msg::Poin
         new_coordinates.x,
         new_coordinates.y,
         new_coordinates.z
+    );
+
+    RCLCPP_INFO(
+        this->get_logger(), 
+        "\n\tCurrent hint coordinates given: \n"
+        "\t\tx: %.2f\n"
+        "\t\ty: %.2f\n"
+        "\t\tz: %.2f",
+        current_coordinates.x,
+        current_coordinates.y,
+        current_coordinates.z
     );
 
     current_hint_coordinates_ = new_coordinates;

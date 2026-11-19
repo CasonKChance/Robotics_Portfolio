@@ -2,11 +2,13 @@
 #define COORDINATES_PROCESSOR_H
 
 #include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/point.hpp"
+#include "project_7_treasure_hunting_robot_interfaces/msg/hint_coordinates.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 
 #include <memory>
 #include <unordered_set>
+
+using HintCoordinates = project_7_treasure_hunting_robot_interfaces::msg::HintCoordinates;
 
 struct Coordinates
 {
@@ -44,10 +46,10 @@ private:
     Coordinates current_hint_coordinates_;
     std::unordered_set<Coordinates, CoordinatesHash> found_hints_{};
 
-    rclcpp::Subscription < geometry_msgs::msg::Point > ::SharedPtr hint_coordinates_subscription_;
+    rclcpp::Subscription < HintCoordinates > ::SharedPtr hint_coordinates_subscription_;
     rclcpp::Publisher < visualization_msgs::msg::Marker > ::SharedPtr visualization_marker_publisher_;
 
-    void hintCoordinatesTopicCallback(geometry_msgs::msg::Point::UniquePtr msg);
+    void hintCoordinatesTopicCallback(HintCoordinates::UniquePtr msg);
 
     void publishVisualizationMarker();
 };

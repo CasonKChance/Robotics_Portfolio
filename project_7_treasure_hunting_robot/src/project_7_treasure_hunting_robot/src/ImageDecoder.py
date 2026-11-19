@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Point
+from project_7_treasure_hunting_robot_interfaces import HintCoordinates
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
@@ -30,7 +30,7 @@ class ImageDecoder(Node):
         )
 
         self.coordinates_publisher = self.create_publisher(
-            Point,
+            HintCoordinates,
             'hint_coordinates',
             10
         )
@@ -57,28 +57,33 @@ class ImageDecoder(Node):
                 return
             elif is_blue_channel_present and is_green_channel_present:
                 # Cyan circle is hint #1 and gives us the location of the blue circle at (3.0, -2.5)
-                coordinates = (3.0, -2.5)
-                self.publish_coordinates(*coordinates)
+                next_coordinates = (3.0, -2.5)
+                current_coordinates = (-0.5, -1.0)
+                self.publish_coordinates(*next_coordinates, *current_coordinates)
                 return
             elif is_blue_channel_present and is_red_channel_present:
                 # Purple circle is hint #3 and gives us the location of the yellow circle at (-3.5, 3.0)
-                coordinates = (-3.5, 3.0)
-                self.publish_coordinates(*coordinates)
+                next_coordinates = (-3.5, 3.0)
+                current_coordinates = (-3.0, -4.0)
+                self.publish_coordinates(*next_coordinates, *current_coordinates)
                 return
             elif is_green_channel_present and is_red_channel_present:
                 # Yellow circle is hint #4 and gives us the location of the red circle at (4.0, 3.5)
-                coordinates = (4.0, 3.5)
-                self.publish_coordinates(*coordinates)
+                next_coordinates = (4.0, 3.5)
+                current_coordinates = (-3.5, 3.0)
+                self.publish_coordinates(*next_coordinates, *current_coordinates)
                 return
             elif is_blue_channel_present:
                 # Blue circle is hint #2 and gives us the location of the purple circle at (-3.0, -4.0)
-                coordinates = (-3.0, -4.0)
-                self.publish_coordinates(*coordinates)
+                next_coordinates = (-3.0, -4.0)
+                current_coordinates = (3.0, -2.5)
+                self.publish_coordinates(*next_coordinates, *current_coordinates)
                 return
             elif is_green_channel_present:
                 # Green circle is hint #0 and gives us the location of the cyan circle at (-0.5, -1.0)
-                coordinates = (-0.5, -1.0)
-                self.publish_coordinates(*coordinates)
+                next_coordinates = (-0.5, -1.0)
+                current_coordinates = (0.0, 0.0)
+                self.publish_coordinates(*next_coordinates, *current_coordinates)
                 return
             elif is_red_channel_present:
                 # The red circle contains the treasure
@@ -136,15 +141,18 @@ class ImageDecoder(Node):
             float(dominance)
         )
 
-    def publish_coordinates(self, x, y):
-        msg = Point()
+    def publish_coordinates(self, next_x, next_y, current_x, current_y):
+        msg = HintCoordinates()
 
-        msg.x = float(x)
-        msg.y = float(y)
-        msg.z = float(0)
+        msg.next_hint_x = float(next_x)
+        msg.next_hint_y = float(next_y)
+        msg.next_hint_z = float(0)
+        msg.current_hint_x = float(current_x)
+        msg.current_hint_y = float(current_y)
+        msg.current_hint_z = float(0)
 
         self.get_logger().debug(
-            f"Publishing coordinates (x, y): {x, y}"
+            f"Publishing coordinates (x, y): {next_x, next_y}"
         )
 
         self.coordinates_publisher.publish(msg)

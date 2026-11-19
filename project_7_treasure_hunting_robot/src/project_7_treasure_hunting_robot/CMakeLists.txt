@@ -17,6 +17,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(project_7_treasure_hunting_robot_interfaces REQUIRED)
 
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
@@ -42,6 +43,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     SDL2::SDL2
     SDL2_ttf::SDL2_ttf
     ament_index_cpp::ament_index_cpp
+    ${project_7_treasure_hunting_robot_interfaces_TARGETS}
 )
 
 add_executable(RobotController src/RobotControllerMain.cpp)

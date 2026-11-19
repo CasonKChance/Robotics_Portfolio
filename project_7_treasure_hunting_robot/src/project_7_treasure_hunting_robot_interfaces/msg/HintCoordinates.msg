@@ -1,0 +1,6 @@
+float64 next_hint_x
+float64 next_hint_y
+float64 next_hint_z
+float64 current_hint_x
+float64 current_hint_y
+float64 current_hint_z
