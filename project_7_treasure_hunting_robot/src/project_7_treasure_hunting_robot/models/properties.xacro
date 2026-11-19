@@ -42,7 +42,7 @@
     <xacro:property name="camera_mass" value="0.03"/>
 
     <!-- Lidar -->
-    <xacro:property name="lidar_radius" value="0.035"/>
+    <xacro:property name="lidar_radius" value="0.7"/>
     <xacro:property name="lidar_length" value="0.04"/>
-    <xacro:property name="lidar_mass" value="0.2"/>
+    <xacro:property name="lidar_mass" value="0.25"/>
 </robot>
