@@ -79,7 +79,7 @@
                 <visual name="visual">
                     <geometry>
                         <cylinder>
-                            <radius>0.1</radius>
+                            <radius>0.2</radius>
                             <length>0.002</length>
                         </cylinder>
                     </geometry>
@@ -97,7 +97,7 @@
                 <visual name="visual">
                     <geometry>
                         <cylinder>
-                            <radius>0.1</radius>
+                            <radius>0.2</radius>
                             <length>0.002</length>
                         </cylinder>
                     </geometry>
@@ -115,7 +115,7 @@
                 <visual name="visual">
                     <geometry>
                         <cylinder>
-                            <radius>0.1</radius>
+                            <radius>0.2</radius>
                             <length>0.002</length>
                         </cylinder>
                     </geometry>
@@ -133,7 +133,7 @@
                 <visual name="visual">
                     <geometry>
                         <cylinder>
-                            <radius>0.1</radius>
+                            <radius>0.2</radius>
                             <length>0.002</length>
                         </cylinder>
                     </geometry>
@@ -151,7 +151,7 @@
                 <visual name="visual">
                     <geometry>
                         <cylinder>
-                            <radius>0.1</radius>
+                            <radius>0.2</radius>
                             <length>0.002</length>
                         </cylinder>
                     </geometry>
@@ -169,7 +169,7 @@
                 <visual name="visual">
                     <geometry>
                         <cylinder>
-                            <radius>0.1</radius>
+                            <radius>0.2</radius>
                             <length>0.002</length>
                         </cylinder>
                     </geometry>
