@@ -8,8 +8,8 @@
 
 using namespace std::chrono_literals;
 
-static const double kMaximumLinearSpeed = 2.0;
-static const double kMaximumAngularSpeed = 4.0;
+static const double kMaximumLinearSpeed = 1.2;
+static const double kMaximumAngularSpeed = 2.5;
 
 /* Public Member Functions */
 
