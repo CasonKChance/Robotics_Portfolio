@@ -111,7 +111,6 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
         return;
     }
 
-    double odom_yaw = tf2::getYaw(odom_to_base_tf.transform.rotation);
     double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
 
     tf2::Transform desired_map_to_base;
