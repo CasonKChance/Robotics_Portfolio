@@ -69,7 +69,7 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
 
     try {
       existing_tf = tf_buffer_->lookupTransform(
-          "map", "odom", tf2::TimePointZero);
+          "odom", "map", tf2::TimePointZero);
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
           this->get_logger(), *this->get_clock(), 1000,
