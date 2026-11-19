@@ -9,6 +9,7 @@
 #include "project_7_treasure_hunting_robot_interfaces/msg/hint_coordinates.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "sensor_msgs/msg/imu.hpp"
 
 #include <memory>
 #include <unordered_set>
@@ -55,11 +56,14 @@ private:
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     rclcpp::Subscription < HintCoordinates > ::SharedPtr hint_coordinates_subscription_;
+    rclcpp::Subscription < sensor_msgs::msg::Imu > ::SharedPtr imu_subscription_;
     rclcpp::Publisher < visualization_msgs::msg::Marker > ::SharedPtr visualization_marker_publisher_;
     geometry_msgs::msg::TransformStamped map_to_odom_tf_;
     rclcpp::TimerBase::SharedPtr tf_timer_;
 
     void hintCoordinatesTopicCallback(HintCoordinates::UniquePtr msg);
+
+    void imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg);
 
     void correctOdometryPositioning(const Coordinates& current_coordinates);
 

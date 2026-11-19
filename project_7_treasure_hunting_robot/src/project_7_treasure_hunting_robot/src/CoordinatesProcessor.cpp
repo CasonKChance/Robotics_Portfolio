@@ -85,6 +85,33 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(HintCoordinates::UniqueP
     publishVisualizationMarker();
 }
 
+void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
+{
+    // Use IMU data to correct odom heading drift
+    geometry_msgs::msg::TransformStamped odom_to_base;
+
+    try {
+        map_to_base = tf_buffer_->lookupTransform(
+            "map", "base_footprint", tf2::TimePointZero);
+    } catch (const tf2::TransformException &ex) {
+      RCLCPP_WARN_THROTTLE(
+          this->get_logger(), *this->get_clock(), 1000,
+          "Could not transform: %s", ex.what());
+      return;
+    }
+    
+    double odom_yaw = tf2::getYaw(odom_to_base.transform.rotation);
+    double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
+
+    // Set map -> odom rotation so: map_to_odom_yaw + odom_yaw == imu_yaw
+    double map_to_odom_yaw = imu_yaw - odom_yaw;
+
+    tf2::Quaternion q;
+    q.setRPY(0.0, 0.0, map_to_odom_yaw);
+    
+    map_to_odom_tf_.transform.rotation = tf2::toMsg(q);
+}
+
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
 {
     geometry_msgs::msg::TransformStamped map_to_base;
