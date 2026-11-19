@@ -86,7 +86,7 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(HintCoordinates::UniqueP
 
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
 {
-    geometry_msgs::msg::TransformStamped existing_tf;
+    geometry_msgs::msg::TransformStamped map_to_base;
 
     try {
         map_to_base = tf_buffer_->lookupTransform(
@@ -118,7 +118,7 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
     );
 
     map_to_odom_tf_.header.stamp = this->get_clock()->now();
-    tf_broadcaster_->sendTransform(tf);
+    tf_broadcaster_->sendTransform(map_to_odom_tf_);
 }
 
 void CoordinatesProcessor::publishVisualizationMarker()
