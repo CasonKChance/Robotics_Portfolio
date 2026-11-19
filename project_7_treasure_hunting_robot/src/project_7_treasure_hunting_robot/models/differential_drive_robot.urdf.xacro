@@ -261,22 +261,26 @@
         <child link="lidar_housing_link"/>
         <origin xyz="0 0 ${(base_height/2) + (lidar_length/2)}" rpy="0 0 0"/>
     </joint>
-    <gazebo>
-        <sensor name='gpu_lidar' type='gpu_lidar'>"
-            <pose relative_to='lidar_housing_link'>0 0 0 0 0 0</pose>
-            <topic>lidar</topic>
+    <gazebo reference="lidar_housing_link">
+        <sensor name="gpu_lidar" type="gpu_lidar">
+            <pose>0 0 0 0 0 0</pose>
+            <always_on>true</always_on>
+            <visualize>true</visualize>
             <update_rate>10</update_rate>
+            <topic>lidar</topic>
+            <gz_frame_id>lidar_housing_link</gz_frame_id>
+
             <ray>
                 <scan>
                     <horizontal>
                         <samples>640</samples>
                         <resolution>1</resolution>
-                        <min_angle>-1.396263</min_angle>
-                        <max_angle>1.396263</max_angle>
+                        <min_angle>-${pi}</min_angle>
+                        <max_angle>${pi}</max_angle>
                     </horizontal>
                     <vertical>
                         <samples>1</samples>
-                        <resolution>0.01</resolution>
+                        <resolution>1</resolution>
                         <min_angle>0</min_angle>
                         <max_angle>0</max_angle>
                     </vertical>
