@@ -51,8 +51,8 @@ private:
     std::unordered_set<Coordinates, CoordinatesHash> found_hints_{};
 
     std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;pp
-    std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+    std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     rclcpp::Subscription < HintCoordinates > ::SharedPtr hint_coordinates_subscription_;
     rclcpp::Publisher < visualization_msgs::msg::Marker > ::SharedPtr visualization_marker_publisher_;
 
