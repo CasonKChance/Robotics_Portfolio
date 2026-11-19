@@ -236,13 +236,13 @@
     <link name="lidar_housing_link">
         <visual>
             <geometry>
-                <cylinder radius="${lidar_radius}" length="${lidar_length}">
+                <cylinder radius="${lidar_radius}" length="${lidar_length}"/>
             </geometry>
             <material name="blue"/>
         </visual>
         <collision>
             <geometry>
-                <cylinder radius="${lidar_radius}" length="${lidar_length}">
+                <cylinder radius="${lidar_radius}" length="${lidar_length}"/>
             </geometry>
         </collision>
         <inertial>
