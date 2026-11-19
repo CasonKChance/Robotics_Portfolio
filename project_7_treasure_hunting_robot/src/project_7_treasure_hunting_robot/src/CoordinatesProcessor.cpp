@@ -100,7 +100,11 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
 
     try {
         odom_to_base = tf_buffer_->lookupTransform(
-            "odom", "base_footprint", tf2::TimePointZero);
+            "odom", 
+            "base_footprint",
+            msg->header.stamp,
+            rclcpp::Duration::from_seconds(0.1)
+        );
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
           this->get_logger(), *this->get_clock(), 1000,
