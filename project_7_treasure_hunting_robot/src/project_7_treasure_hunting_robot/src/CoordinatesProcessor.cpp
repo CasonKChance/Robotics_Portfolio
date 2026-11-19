@@ -2,6 +2,7 @@
 
 #include "tf2/exceptions.hpp"
 #include "tf2/LinearMath/Quaternion.hpp"
+#include "tf2/utils.hpp"
 
 using namespace std::placeholders;
 
@@ -26,7 +27,7 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
     imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
         "imu",
         10,
-        std::bind(&VelocityLogger::imuTopicCallback, this, _1)
+        std::bind(&CoordinatesProcessor::imuTopicCallback, this, _1)
     );
 
     visualization_marker_publisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
