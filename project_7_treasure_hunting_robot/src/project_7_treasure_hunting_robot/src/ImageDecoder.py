@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from project_7_treasure_hunting_robot_interfaces import HintCoordinates
+from project_7_treasure_hunting_robot_interfaces.msg import HintCoordinates
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
