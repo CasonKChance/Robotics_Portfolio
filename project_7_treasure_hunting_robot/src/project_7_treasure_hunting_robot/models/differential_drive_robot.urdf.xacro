@@ -264,7 +264,7 @@
     <gazebo>
         <sensor name='gpu_lidar' type='gpu_lidar'>"
             <pose relative_to='lidar_housing_link'>0 0 0 0 0 0</pose>
-            <topic>scan</topic>
+            <topic>lidar</topic>
             <update_rate>10</update_rate>
             <ray>
                 <scan>
