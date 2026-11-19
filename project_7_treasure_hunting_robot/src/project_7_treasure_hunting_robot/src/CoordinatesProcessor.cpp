@@ -116,7 +116,7 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
     double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
 
     // Set map -> odom rotation so: map_to_odom_yaw + odom_yaw == imu_yaw
-    double map_to_odom_yaw = imu_yaw - odom_yaw;
+    double map_to_odom_yaw = normalizeAngle(imu_yaw - odom_yaw);
 
     tf2::Quaternion q;
     q.setRPY(0.0, 0.0, map_to_odom_yaw);
@@ -212,4 +212,8 @@ void CoordinatesProcessor::publishVisualizationMarker()
     );
 
     visualization_marker_publisher_->publish(marker);
+}
+
+double CoordinatesProcessor::normalizeAngle(double angle) const {
+    return std::atan2(std::sin(angle), std::cos(angle));
 }

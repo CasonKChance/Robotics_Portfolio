@@ -68,6 +68,8 @@ private:
     void correctOdometryPositioning(const Coordinates& current_coordinates);
 
     void publishVisualizationMarker();
+
+    double CoordinatesProcessor::normalizeAngle(double angle) const;
 };
 
 #endif
