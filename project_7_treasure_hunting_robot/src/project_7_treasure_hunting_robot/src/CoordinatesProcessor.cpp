@@ -1,6 +1,7 @@
 #include <project_7_treasure_hunting_robot/CoordinatesProcessor.h>
 
 #include "tf2/exceptions.hpp"
+#include "tf2/LinearMath/Quaternion.hpp"
 
 using namespace std::placeholders;
 
