@@ -23,6 +23,12 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
         std::bind(&CoordinatesProcessor::hintCoordinatesTopicCallback, this, _1)
     );
 
+    imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
+        "imu",
+        10,
+        std::bind(&VelocityLogger::imuTopicCallback, this, _1)
+    );
+
     visualization_marker_publisher_ = this->create_publisher<visualization_msgs::msg::Marker>(
         "visualization_marker",
         rclcpp::QoS(1).transient_local()
@@ -108,7 +114,7 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
 
     tf2::Quaternion q;
     q.setRPY(0.0, 0.0, map_to_odom_yaw);
-    
+
     map_to_odom_tf_.transform.rotation = tf2::toMsg(q);
 }
 
