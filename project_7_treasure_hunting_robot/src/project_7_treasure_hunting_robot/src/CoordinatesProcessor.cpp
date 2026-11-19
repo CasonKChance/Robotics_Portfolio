@@ -152,8 +152,6 @@ void CoordinatesProcessor::publishVisualizationMarker()
 
     marker.lifetime = rclcpp::Duration::from_seconds(0.0);
 
-    marker.frame_locked = true;
-
     RCLCPP_DEBUG(
         this->get_logger(), 
         "\n\tPublishing marker at: \n"
