@@ -2,12 +2,11 @@
 
 #include "tf2/exceptions.hpp"
 
-#include "geometry_msgs/msg/transform_stamped.hpp"
-
 using namespace std::placeholders;
 
 static constexpr double kHintMarkerRadius = 0.05;
 static constexpr double kHintMarkerHeight = 1.0;
+static constexpr double kRobotSpawnYaw = 1.57;
 
 /* Public Member Functions */
 
@@ -31,6 +30,28 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+
+    // Set up map->odom transform
+    map_to_odom_tf_.header.frame_id = "map";
+    map_to_odom_tf_.child_frame_id = "odom";
+    map_to_odom_tf_.transform.translation.x = 0.0;
+    map_to_odom_tf_.transform.translation.y = 0.0;
+    map_to_odom_tf_.transform.translation.z = 0.0;
+
+    tf2::Quaternion q;
+    q.setRPY(0.0, 0.0, kRobotSpawnYaw);
+    map_to_odom_tf_.transform.rotation.x = q.x();
+    map_to_odom_tf_.transform.rotation.y = q.y();
+    map_to_odom_tf_.transform.rotation.z = q.z();
+    map_to_odom_tf_.transform.rotation.w = q.w();
+
+    tf_timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(50),
+        [this]() {
+            map_to_odom_tf_.header.stamp = this->get_clock()->now();
+            tf_broadcaster_->sendTransform(map_to_odom_tf_);
+        }
+    );
 }
 
 /* Private Member Functions */
@@ -68,8 +89,8 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
     geometry_msgs::msg::TransformStamped existing_tf;
 
     try {
-      existing_tf = tf_buffer_->lookupTransform(
-          "map", "odom", tf2::TimePointZero);
+        map_to_base = tf_buffer_->lookupTransform(
+            "map", "base_footprint", tf2::TimePointZero);
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
           this->get_logger(), *this->get_clock(), 1000,
@@ -77,19 +98,15 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
       return;
     }
 
-    geometry_msgs::msg::TransformStamped tf;
+    double error_x = current_coordinates.x - map_to_base.transform.translation.x;
+    double error_y = current_coordinates.y - map_to_base.transform.translation.y;
+    double error_z = current_coordinates.z - map_to_base.transform.translation.z;
 
-    tf.header.stamp = this->get_clock()->now();
-    tf.header.frame_id = "map";
-    tf.child_frame_id = "odom";
+    map_to_odom_tf_.transform.translation.x += error_x;
+    map_to_odom_tf_.transform.translation.y += error_y;
+    map_to_odom_tf_.transform.translation.z += error_z;
 
-    tf.transform.translation.x = current_coordinates.x;
-    tf.transform.translation.y = current_coordinates.y;
-    tf.transform.translation.z = current_coordinates.z;
-
-    tf.transform.rotation = existing_tf.transform.rotation;
-
-    RCLCPP_INFO(
+    RCLCPP_DEBUG(
         this->get_logger(), 
         "\n\tCorrecting robot odometry position to: \n"
         "\t\tx: %.2f\n"
@@ -100,6 +117,7 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
         current_coordinates.z
     );
 
+    map_to_odom_tf_.header.stamp = this->get_clock()->now();
     tf_broadcaster_->sendTransform(tf);
 }
 
