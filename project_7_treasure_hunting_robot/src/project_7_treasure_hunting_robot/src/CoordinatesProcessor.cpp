@@ -98,8 +98,8 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
     geometry_msgs::msg::TransformStamped odom_to_base;
 
     try {
-        map_to_base = tf_buffer_->lookupTransform(
-            "map", "base_footprint", tf2::TimePointZero);
+        odom_to_base = tf_buffer_->lookupTransform(
+            "odom", "base_footprint", tf2::TimePointZero);
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
           this->get_logger(), *this->get_clock(), 1000,
@@ -115,8 +115,10 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
 
     tf2::Quaternion q;
     q.setRPY(0.0, 0.0, map_to_odom_yaw);
-
-    map_to_odom_tf_.transform.rotation = tf2::toMsg(q);
+    map_to_odom_tf_.transform.rotation.x = q.x();
+    map_to_odom_tf_.transform.rotation.y = q.y();
+    map_to_odom_tf_.transform.rotation.z = q.z();
+    map_to_odom_tf_.transform.rotation.w = q.w();
 }
 
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
