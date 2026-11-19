@@ -89,7 +89,7 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
 
     tf.transform.rotation = existing_tf.transform.rotation;
 
-    broadcaster_->sendTransform(tf);
+    tf_broadcaster_->sendTransform(tf);
 }
 
 void CoordinatesProcessor::publishVisualizationMarker()
