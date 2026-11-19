@@ -16,6 +16,7 @@
   <depend>project_7_treasure_hunting_robot_interfaces</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

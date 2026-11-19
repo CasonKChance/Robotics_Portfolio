@@ -20,6 +20,7 @@ find_package(cv_bridge REQUIRED)
 find_package(project_7_treasure_hunting_robot_interfaces REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
@@ -48,6 +49,7 @@ target_link_libraries(${PROJECT_NAME}_lib
     ${project_7_treasure_hunting_robot_interfaces_TARGETS}
     tf2::tf2
     tf2_ros::tf2_ros
+    tf2_geometry_msgs::tf2_geometry_msgs
 )
 
 add_executable(RobotController src/RobotControllerMain.cpp)

@@ -115,10 +115,7 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
 
     tf2::Quaternion q;
     q.setRPY(0.0, 0.0, map_to_odom_yaw);
-    map_to_odom_tf_.transform.rotation.x = q.x();
-    map_to_odom_tf_.transform.rotation.y = q.y();
-    map_to_odom_tf_.transform.rotation.z = q.z();
-    map_to_odom_tf_.transform.rotation.w = q.w();
+    map_to_odom_tf_.transform.rotation = tf2::toMsg(q);
 }
 
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
