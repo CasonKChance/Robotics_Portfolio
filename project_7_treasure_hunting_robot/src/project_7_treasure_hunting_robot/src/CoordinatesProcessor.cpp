@@ -214,6 +214,7 @@ void CoordinatesProcessor::publishVisualizationMarker()
     visualization_marker_publisher_->publish(marker);
 }
 
-double CoordinatesProcessor::normalizeAngle(double angle) const {
+double CoordinatesProcessor::normalizeAngle(double angle) const
+{
     return std::atan2(std::sin(angle), std::cos(angle));
 }

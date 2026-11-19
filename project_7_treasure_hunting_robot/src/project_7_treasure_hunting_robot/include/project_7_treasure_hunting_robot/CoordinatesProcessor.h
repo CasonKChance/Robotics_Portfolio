@@ -69,7 +69,7 @@ private:
 
     void publishVisualizationMarker();
 
-    double CoordinatesProcessor::normalizeAngle(double angle) const;
+    double normalizeAngle(double angle) const;
 };
 
 #endif
