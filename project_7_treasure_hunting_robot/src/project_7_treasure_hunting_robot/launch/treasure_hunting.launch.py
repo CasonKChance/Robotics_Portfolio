@@ -136,6 +136,22 @@ def generate_launch_description():
         emulate_tty=True
     )
 
+    # Map -> odom transform
+    map_odom_transform = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=[
+            '--x', '0.0',
+            '--y', '0.0',
+            '--z', '0.0',
+            '--roll', '0.0',
+            '--pitch', '0.0',
+            '--yaw', '-1.57',
+            '--frame-id', 'map',
+            '--child-frame-id', 'odom',
+        ],
+    )
+
     # Coordinates Processor
     coordinates_processor = Node(
         package='project_7_treasure_hunting_robot',
@@ -155,5 +171,6 @@ def generate_launch_description():
         robot_controller,
         velocity_logger,
         image_decoder,
+        map_odom_transform,
         coordinates_processor
     ])

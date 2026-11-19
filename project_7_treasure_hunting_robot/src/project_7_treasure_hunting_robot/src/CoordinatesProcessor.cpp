@@ -56,7 +56,7 @@ void CoordinatesProcessor::publishVisualizationMarker()
 {
     visualization_msgs::msg::Marker marker;
 
-    marker.header.frame_id = "odom";
+    marker.header.frame_id = "map";
     marker.header.stamp = this->get_clock()->now();
 
     marker.ns = "hint_marker";
