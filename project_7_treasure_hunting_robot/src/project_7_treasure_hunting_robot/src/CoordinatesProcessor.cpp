@@ -7,8 +7,8 @@
 
 using namespace std::placeholders;
 
-static constexpr double kHintMarkerRadius = 0.05;
-static constexpr double kHintMarkerHeight = 1.0;
+static constexpr double kHintMarkerRadius = 0.4;
+static constexpr double kHintMarkerLineWidth = 0.03;
 static constexpr double kRobotSpawnYaw = 1.57;
 
 /* Public Member Functions */
@@ -166,18 +166,16 @@ void CoordinatesProcessor::publishVisualizationMarker()
     marker.ns = "hint_marker";
     marker.id = 0;
 
-    marker.type = visualization_msgs::msg::Marker::CYLINDER;
+    marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
     marker.action = visualization_msgs::msg::Marker::ADD;
 
     marker.pose.position.x = current_hint_coordinates_.x;
     marker.pose.position.y = current_hint_coordinates_.y;
-    marker.pose.position.z = current_hint_coordinates_.z + (kHintMarkerHeight / 2);
+    marker.pose.position.z = current_hint_coordinates_.z;
 
     marker.pose.orientation.w = 1.0;
 
-    marker.scale.x = kHintMarkerRadius * 2;
-    marker.scale.y = kHintMarkerRadius * 2;
-    marker.scale.z = kHintMarkerHeight;
+    marker.scale.x = kHintMarkerLineWidth;
 
     marker.color.r = 0.0f;
     marker.color.g = 1.0f;
@@ -185,6 +183,18 @@ void CoordinatesProcessor::publishVisualizationMarker()
     marker.color.a = 1.0f;
 
     marker.lifetime = rclcpp::Duration::from_seconds(0.0);
+
+    constexpr int kSegments = 48;
+    marker.points.reserve(kSegments + 1);
+
+    for (int i = 0; i <= kSegments; ++i) {
+        double theta = (2.0 * M_PI * i) / kSegments;
+        geometry_msgs::msg::Point p;
+        p.x = kHintMarkerRadius * std::cos(theta);
+        p.y = kHintMarkerRadius * std::sin(theta);
+        p.z = 0.0;
+        marker.points.push_back(p);
+    }
 
     RCLCPP_DEBUG(
         this->get_logger(), 
