@@ -2,6 +2,10 @@
 #define COORDINATES_PROCESSOR_H
 
 #include "rclcpp/rclcpp.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_broadcaster.h"
+#include "tf2_ros/transform_listener.h"
+
 #include "project_7_treasure_hunting_robot_interfaces/msg/hint_coordinates.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 
@@ -46,10 +50,15 @@ private:
     Coordinates current_hint_coordinates_;
     std::unordered_set<Coordinates, CoordinatesHash> found_hints_{};
 
+    std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+    std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_
     rclcpp::Subscription < HintCoordinates > ::SharedPtr hint_coordinates_subscription_;
     rclcpp::Publisher < visualization_msgs::msg::Marker > ::SharedPtr visualization_marker_publisher_;
 
     void hintCoordinatesTopicCallback(HintCoordinates::UniquePtr msg);
+
+    void correctOdometryPositioning(const Coordinates& current_coordinates);
 
     void publishVisualizationMarker();
 };
