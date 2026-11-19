@@ -259,7 +259,7 @@
     <joint name="lidar_housing_joint" type="fixed">
         <parent link="base_link"/>
         <child link="lidar_housing_link"/>
-        <origin xyz="-${base_length/2} 0 ${(base_height/2) + (lidar_height/2)}" rpy="0 0 0"/>
+        <origin xyz="-${base_length/2} 0 ${(base_height/2) + (lidar_length/2)}" rpy="0 0 0"/>
     </joint>
     
     <gazebo>
