@@ -48,13 +48,13 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(HintCoordinates::UniqueP
 
     RCLCPP_INFO(
         this->get_logger(), 
-        "\n\tCurrent hint coordinates given: \n"
+        "\n\tNew hint coordinates given: \n"
         "\t\tx: %.2f\n"
         "\t\ty: %.2f\n"
         "\t\tz: %.2f",
-        current_coordinates.x,
-        current_coordinates.y,
-        current_coordinates.z
+        new_coordinates.x,
+        new_coordinates.y,
+        new_coordinates.z
     );
 
     current_hint_coordinates_ = new_coordinates;
@@ -69,7 +69,7 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
 
     try {
       existing_tf = tf_buffer_->lookupTransform(
-          "map", "odom", tf2::TimePointZero);
+          "odom", "map", tf2::TimePointZero);
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
           this->get_logger(), *this->get_clock(), 1000,
@@ -88,6 +88,17 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
     tf.transform.translation.z = current_coordinates.z;
 
     tf.transform.rotation = existing_tf.transform.rotation;
+
+    RCLCPP_INFO(
+        this->get_logger(), 
+        "\n\tCorrecting robot odometry position to: \n"
+        "\t\tx: %.2f\n"
+        "\t\ty: %.2f\n"
+        "\t\tz: %.2f",
+        current_coordinates.x,
+        current_coordinates.y,
+        current_coordinates.z
+    );
 
     tf_broadcaster_->sendTransform(tf);
 }
