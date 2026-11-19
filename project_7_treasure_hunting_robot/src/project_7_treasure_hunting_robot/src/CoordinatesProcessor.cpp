@@ -7,7 +7,7 @@
 
 using namespace std::placeholders;
 
-static constexpr double kHintMarkerRadius = 0.2;
+static constexpr double kHintMarkerRadius = 0.05;
 static constexpr double kHintMarkerHeight = 1.0;
 static constexpr double kRobotSpawnYaw = 1.57;
 
@@ -96,39 +96,27 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(HintCoordinates::UniqueP
 void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 {
     // Use IMU data to correct odom heading drift
-    geometry_msgs::msg::TransformStamped odom_to_base_tf;
-    geometry_msgs::msg::TransformStamped map_to_base_tf;
+    geometry_msgs::msg::TransformStamped odom_to_base;
 
     try {
-        odom_to_base_tf = tf_buffer_->lookupTransform(
+        odom_to_base = tf_buffer_->lookupTransform(
             "odom", "base_footprint", tf2::TimePointZero);
-        map_to_base_tf = tf_buffer_->lookupTransform(
-            "map", "base_footprint", tf2::TimePointZero);
     } catch (const tf2::TransformException &ex) {
-        RCLCPP_WARN_THROTTLE(
-            this->get_logger(), *this->get_clock(), 1000,
-            "Could not transform: %s", ex.what());
-        return;
+      RCLCPP_WARN_THROTTLE(
+          this->get_logger(), *this->get_clock(), 1000,
+          "Could not transform: %s", ex.what());
+      return;
     }
-
+    
+    double odom_yaw = tf2::getYaw(odom_to_base.transform.rotation);
     double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
 
-    tf2::Transform desired_map_to_base;
-    desired_map_to_base.setOrigin(tf2::Vector3(
-        map_to_base_tf.transform.translation.x,
-        map_to_base_tf.transform.translation.y,
-        map_to_base_tf.transform.translation.z));
+    // Set map -> odom rotation so: map_to_odom_yaw + odom_yaw == imu_yaw
+    double map_to_odom_yaw = imu_yaw - odom_yaw;
 
-    tf2::Quaternion desired_q;
-    desired_q.setRPY(0.0, 0.0, imu_yaw);
-    desired_map_to_base.setRotation(desired_q);
-
-    tf2::Transform odom_to_base;
-    tf2::fromMsg(odom_to_base_tf.transform, odom_to_base);
-
-    tf2::Transform new_map_to_odom = desired_map_to_base * odom_to_base.inverse();
-
-    map_to_odom_tf_.transform = tf2::toMsg(new_map_to_odom);
+    tf2::Quaternion q;
+    q.setRPY(0.0, 0.0, map_to_odom_yaw);
+    map_to_odom_tf_.transform.rotation = tf2::toMsg(q);
 }
 
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
