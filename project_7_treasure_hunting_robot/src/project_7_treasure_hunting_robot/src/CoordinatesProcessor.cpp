@@ -7,7 +7,7 @@
 
 using namespace std::placeholders;
 
-static constexpr double kHintMarkerRadius = 0.4;
+static constexpr double kHintMarkerRadius = 0.6;
 static constexpr double kHintMarkerLineWidth = 0.03;
 static constexpr double kRobotSpawnYaw = 1.57;
 
