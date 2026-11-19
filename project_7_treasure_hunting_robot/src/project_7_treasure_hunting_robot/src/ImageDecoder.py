@@ -47,7 +47,7 @@ class ImageDecoder(Node):
 
         dominant_color, dominance = self.pull_dominant_color()
 
-        if dominant_color is not None and dominance >= 0.75:
+        if dominant_color is not None and dominance >= 0.95:
             is_blue_channel_present = dominant_color[0] >= 253
             is_green_channel_present = dominant_color[1] >= 253
             is_red_channel_present = dominant_color[2] >= 253
