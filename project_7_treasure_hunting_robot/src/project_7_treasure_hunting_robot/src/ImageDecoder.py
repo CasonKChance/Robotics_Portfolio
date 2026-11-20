@@ -10,7 +10,15 @@ import numpy as np
 
 
 class ImageDecoder(Node):
+    """
+    @brief Processes camera images to identify colored hints and decode their coordinates.
+    """
+
     def __init__(self):
+        """
+        @brief Constructs the image decoder and initializes ROS interfaces and image processing.
+        """
+
         super().__init__('image_decoder')
 
         self.bridge = CvBridge()
@@ -36,12 +44,21 @@ class ImageDecoder(Node):
         )
 
     def image_topic_callback(self, msg: Image):
+        """
+        @brief Converts a received ROS image into an OpenCV image for processing.
+        @param msg ROS image message received from the camera
+        """
+
         self.image = self.bridge.imgmsg_to_cv2(
             msg,
             desired_encoding='bgr8'
         )
 
     def decode_image(self):
+        """
+        @brief Identifies colored hints in the current image and publishes their associated coordinates.
+        """
+
         if self.image is None:
             return
 
@@ -95,6 +112,11 @@ class ImageDecoder(Node):
     
 
     def pull_dominant_color(self):
+        """
+        @brief Determines the dominant BGR color in the current image using K-means clustering.
+        @return Tuple containing the dominant BGR color and its proportion of the image, or None if no image is available
+        """
+
         if self.image is None:
             return None
 
@@ -142,6 +164,14 @@ class ImageDecoder(Node):
         )
 
     def publish_coordinates(self, next_x, next_y, current_x, current_y):
+        """
+        @brief Publishes the current hint coordinates and the location of the next hint.
+        @param next_x X coordinate of the next hint
+        @param next_y Y coordinate of the next hint
+        @param current_x X coordinate of the current hint (the robot's current approximate x position)
+        @param current_y Y coordinate of the current hint (the robot's current approximate y position)
+        """
+
         msg = HintCoordinates()
 
         msg.next_hint_x = float(next_x)
