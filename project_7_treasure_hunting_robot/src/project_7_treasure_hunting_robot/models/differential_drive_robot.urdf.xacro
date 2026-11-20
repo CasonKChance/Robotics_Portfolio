@@ -248,12 +248,12 @@
         <inertial>
             <mass value="${lidar_mass}"/>
                 <inertia
-                    ixx="${lidar_mass * ((3*lidar_radius*lidar_radius) + (lidar_length*lidar_length)) / 12.0}"
+                    ixx="${lidar_mass * (3*lidar_radius*lidar_radius + lidar_length*lidar_length) / 12.0}"
                     ixy="0"
                     ixz="0"
-                    iyy="${lidar_mass * (lidar_radius*lidar_radius / 2.0)}"
+                    iyy="${lidar_mass * (3*lidar_radius*lidar_radius + lidar_length*lidar_length) / 12.0}"
                     iyz="0"
-                    izz="${lidar_mass * ((3*lidar_radius*lidar_radius) + (lidar_length*lidar_length)) / 12.0}"/>
+                    izz="${lidar_mass * lidar_radius*lidar_radius / 2.0}"/>
         </inertial>
     </link> 
     <joint name="lidar_housing_joint" type="fixed">
