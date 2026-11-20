@@ -12,25 +12,25 @@ static constexpr double kZeroVelocityThreshold = 1e-2;
 
 /* Public Member Functions */
 
-VelocityLogger::VelocityLogger(const rclcpp::NodeOptions & options)
+Velocimeter::Velocimeter(const rclcpp::NodeOptions & options)
 : rclcpp::Node("velocity_logger", options)
 {
     imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
         "imu",
         10,
-        std::bind(&VelocityLogger::imuTopicCallback, this, _1)
+        std::bind(&Velocimeter::imuTopicCallback, this, _1)
     );
 
     odom_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "odom",
         10,
-        std::bind(&VelocityLogger::odomTopicCallback, this, _1)
+        std::bind(&Velocimeter::odomTopicCallback, this, _1)
     );
 }
 
 /* Private Member Functions */
 
-void VelocityLogger::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
+void Velocimeter::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 {
     rclcpp::Time current_time(msg->header.stamp);
 
@@ -38,7 +38,7 @@ void VelocityLogger::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
         last_imu_time_ = current_time;
         has_received_imu_data_ = true;
 
-        logCurrentTwist();
+        printTwist();
 
         return;
     }
@@ -59,22 +59,23 @@ void VelocityLogger::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
     current_twist_.angular_velocity_y = msg->angular_velocity.y;
     current_twist_.angular_velocity_z = msg->angular_velocity.z;
 
-    logCurrentTwist();
+    printTwist();
 }
 
-void VelocityLogger::odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
+void Velocimeter::odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
 {
     if (std::abs(msg->twist.twist.linear.x) <= kLinearVelocityTolerance &&
         std::abs(msg->twist.twist.linear.y) <= kLinearVelocityTolerance &&
+        std::abs(msg->twist.twist.linear.z) <= kLinearVelocityTolerance &&
+        std::abs(msg->twist.twist.angular.x) <= kAngularVelocityTolerance &&
+        std::abs(msg->twist.twist.angular.y) <= kAngularVelocityTolerance &&
         std::abs(msg->twist.twist.angular.z) <= kAngularVelocityTolerance)
     {
-        current_twist_.linear_velocity_x = 0.0;
-        current_twist_.linear_velocity_y = 0.0;
-        current_twist_.linear_velocity_z = 0.0;
+        current_twist_ = Twist{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
     }
 }
 
-void VelocityLogger::logCurrentTwist()
+void Velocimeter::printTwist()
 {
     RCLCPP_DEBUG(
         this->get_logger(),
@@ -97,23 +98,36 @@ void VelocityLogger::logCurrentTwist()
     static bool initialized = false;
 
     if (!initialized) {
-        // Clear the screen and move cursor to top-left (1,1)
-        // Set scroll region from row 5 to the bottom of the terminal (\033[5;999r)
-        // Move cursor to row 5 so subsequent ROS logs start below the speedometer
-        std::cout << "\033[?25l\033[2J\033[1;1H\033[5;999r\033[5;1H";
+        // Hide the cursor (\033[?25l)
+        // Erase display (\033[2J)
+        // Move cursor to top-left (1,1) (\033[1;1H)
+        std::cout << "\033[?25l\033[2J\033[1;1H";
         initialized = true;
     }
 
     char buffer[256];
     std::snprintf(
         buffer, sizeof(buffer),
-        "\n\tLinear Velocity (m/s): %7.2f\033[K\n"
-        "\tAngular Velocity (rad/s): %7.2f\033[K\n",
+        "\n\tLinear Velocity (m/s):\n"
+        "\t\tx: %5.2f\033[K\n"
+        "\t\ty: %5.2f\033[K\n"
+        "\t\tz: %5.2f\033[K\n"
+        "\tAngular Velocity (rad/s):\n"
+        "\t\tx: %5.2f\033[K\n"
+        "\t\ty: %5.2f\033[K\n"
+        "\t\tz: %5.2f\033[K\n",
         std::abs(current_twist_.linear_velocity_x) > kZeroVelocityThreshold ? current_twist_.linear_velocity_x : 0.00,
+        std::abs(current_twist_.linear_velocity_y) > kZeroVelocityThreshold ? current_twist_.linear_velocity_y : 0.00,
+        std::abs(current_twist_.linear_velocity_z) > kZeroVelocityThreshold ? current_twist_.linear_velocity_z : 0.00,
+        std::abs(current_twist_.angular_velocity_x) > kZeroVelocityThreshold ? current_twist_.angular_velocity_x : 0.00,
+        std::abs(current_twist_.angular_velocity_y) > kZeroVelocityThreshold ? current_twist_.angular_velocity_y : 0.00,
         std::abs(current_twist_.angular_velocity_z) > kZeroVelocityThreshold ? current_twist_.angular_velocity_z : 0.00
     );
 
-    // Save current cursor position (\033[s), jump to top-left (\033[1;1H),
-    // print speedometer, then restore cursor position (\033[u)
+    // Save current cursor position (\033[s)
+    // Jump to top-left (\033[1;1H)
+    // Print velocity data
+    // Restore cursor position (\033[u)
+    // Flush the buffer
     std::cout << "\033[s\033[1;1H" << buffer << "\033[u" << std::flush;
 }

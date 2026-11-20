@@ -25,7 +25,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 # Declare C++ library for core classes
 add_library(${PROJECT_NAME}_lib
   src/RobotController.cpp
-  src/VelocityLogger.cpp
+  src/Velocimeter.cpp
   src/CoordinatesProcessor.cpp
 )
 
@@ -58,8 +58,8 @@ target_link_libraries(RobotController
     ${PROJECT_NAME}_lib
 )
 
-add_executable(VelocityLogger src/VelocityLoggerMain.cpp)
-target_link_libraries(VelocityLogger
+add_executable(Velocimeter src/VelocimeterMain.cpp)
+target_link_libraries(Velocimeter
   PUBLIC
     ${PROJECT_NAME}_lib
 )
@@ -82,7 +82,7 @@ install(
   TARGETS
     ${PROJECT_NAME}_lib
     RobotController
-    VelocityLogger
+    Velocimeter
     CoordinatesProcessor
   EXPORT ${PROJECT_NAME}_libTargets
   ARCHIVE DESTINATION lib

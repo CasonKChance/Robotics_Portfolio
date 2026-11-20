@@ -117,14 +117,14 @@ def generate_launch_description():
         emulate_tty=True
     )
 
-    # Velocity Logger
-    velocity_logger = Node(
+    # Velocimeter
+    velocimeter = Node(
         package='project_7_treasure_hunting_robot',
-        executable='VelocityLogger',
-        name='VelocityLogger',
+        executable='Velocimeter',
+        name='Velocimeter',
         output='screen',
         emulate_tty=True,
-        prefix='xterm -title "Velocity Logger" -geometry 48x5 -e'
+        prefix='xterm -title "Velocimeter" -geometry 48x10 -e'
     )
 
     # Image Decoder
@@ -154,7 +154,7 @@ def generate_launch_description():
         spawn_robot,
         rviz,
         robot_controller,
-        velocity_logger,
+        velocimeter,
         image_decoder,
         coordinates_processor
     ])
