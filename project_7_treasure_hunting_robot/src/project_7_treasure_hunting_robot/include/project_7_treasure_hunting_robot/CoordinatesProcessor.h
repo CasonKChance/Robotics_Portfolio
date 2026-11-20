@@ -16,12 +16,20 @@
 
 using HintCoordinates = project_7_treasure_hunting_robot_interfaces::msg::HintCoordinates;
 
+/**
+ * @brief Stores the 3D coordinates of a hint.
+ */
 struct Coordinates
 {
     double x{0.0};
     double y{0.0};
     double z{0.0};
 
+    /**
+     * @brief Compares two coordinate sets for equality.
+     * @param other Coordinates to compare against
+     * @return True if all coordinate components are equal, false otherwise
+     */
     bool operator==(const Coordinates& other) const
     {
         return x == other.x &&
@@ -30,8 +38,16 @@ struct Coordinates
     }
 };
 
+/**
+ * @brief Provides a hash function for storing coordinates in an unordered set.
+ */
 struct CoordinatesHash
 {
+    /**
+     * @brief Computes a combined hash of the coordinate components.
+     * @param c Coordinates to hash
+     * @return Hash value representing the coordinates
+     */
     std::size_t operator()(const Coordinates& c) const
     {
         std::size_t h1 = std::hash<double>{}(c.x);
@@ -42,10 +58,17 @@ struct CoordinatesHash
     }
 };
 
+/**
+ * @brief Processes hint coordinates, corrects robot odometry drift, and publishes visualization markers.
+ */
 class CoordinatesProcessor: public rclcpp::Node
 {
 public:
 
+    /**
+     * @brief Constructs the coordinates processor and initializes ROS interfaces and TF2 transformations.
+     * @param options Configuration options for Node initialization
+     */
     explicit CoordinatesProcessor(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
 private:
@@ -61,14 +84,34 @@ private:
     geometry_msgs::msg::TransformStamped map_to_odom_tf_;
     rclcpp::TimerBase::SharedPtr tf_timer_;
 
+    /**
+     * @brief Processes received hint coordinates and corrects robot positioning data.
+     * @param msg Message containing the robot's current position and next hint coordinates
+     */
     void hintCoordinatesTopicCallback(HintCoordinates::UniquePtr msg);
 
+    /**
+     * @brief Processes IMU orientation data to correct odometry heading drift.
+     * @param msg Message containing the robot's IMU measurements
+     */
     void imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg);
 
+    /**
+     * @brief Corrects odometry position drift using known location coordinates.
+     * @param current_coordinates Known robot coordinates in the map frame
+     */
     void correctOdometryPositioning(const Coordinates& current_coordinates);
 
+    /**
+     * @brief Publishes a circular visualization marker at the new hint coordinates.
+     */
     void publishVisualizationMarker();
 
+    /**
+     * @brief Normalizes an angle to the range [-pi, pi].
+     * @param angle Angle to normalize in radians
+     * @return Normalized angle in radians
+     */
     double normalizeAngle(double angle) const;
 };
 

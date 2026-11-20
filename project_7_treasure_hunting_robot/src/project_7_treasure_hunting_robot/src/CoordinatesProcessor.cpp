@@ -47,6 +47,7 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
     map_to_odom_tf_.transform.translation.y = 0.0;
     map_to_odom_tf_.transform.translation.z = 0.0;
 
+    // Robot is spawned with a yaw of 1.57 rads
     tf2::Quaternion q;
     q.setRPY(0.0, 0.0, kRobotSpawnYaw);
     map_to_odom_tf_.transform.rotation.x = q.x();
