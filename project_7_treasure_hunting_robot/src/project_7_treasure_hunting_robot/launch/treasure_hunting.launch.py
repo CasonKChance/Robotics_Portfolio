@@ -124,7 +124,8 @@ def generate_launch_description():
         name='Velocimeter',
         output='screen',
         emulate_tty=True,
-        prefix='xterm -title "Velocimeter" -geometry 48x10 -e'
+        prefix='xterm -title "Velocimeter" -geometry 48x10 -e',
+        parameters=[{'use_sim_time': True}]
     )
 
     # Image Decoder
