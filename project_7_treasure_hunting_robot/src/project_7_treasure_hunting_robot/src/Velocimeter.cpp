@@ -1,4 +1,4 @@
-#include <project_7_treasure_hunting_robot/VelocityLogger.h>
+#include <project_7_treasure_hunting_robot/Velocimeter.h>
 
 #include <functional>
 #include <cmath>
@@ -71,7 +71,7 @@ void Velocimeter::odomTopicCallback(nav_msgs::msg::Odometry::UniquePtr msg)
         std::abs(msg->twist.twist.angular.y) <= kAngularVelocityTolerance &&
         std::abs(msg->twist.twist.angular.z) <= kAngularVelocityTolerance)
     {
-        current_twist_ = Twist{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+        current_twist_ = Twist{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     }
 }
 
