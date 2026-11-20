@@ -11,7 +11,7 @@ def generate_launch_description():
     launch_gz_gui = LaunchConfiguration('launch_gz_gui')
     launch_gz_gui_arg = DeclareLaunchArgument(
         'launch_gz_gui',
-        default_value=False,
+        default_value='false',
         description='Boolean for launching the Gazebo GUI'
     )
 
