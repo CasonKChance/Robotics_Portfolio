@@ -1,12 +1,20 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, PathJoinSubstitution
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
+    launch_gz_gui = LaunchConfiguration('launch_gz_gui')
+    launch_gz_gui_arg = DeclareLaunchArgument(
+        'launch_gz_gui',
+        default_value=False,
+        description='Boolean for launching the Gazebo GUI'
+    )
+
     package_share = FindPackageShare('project_7_treasure_hunting_robot')
     gz_package_share = FindPackageShare('ros_gz_sim')
 
@@ -48,7 +56,8 @@ def generate_launch_description():
         'treasure_hunting_world.sdf'
     ])
 
-    gazebo = IncludeLaunchDescription(
+    # Gazebo with GUI
+    gazebo_gui = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([
                 gz_package_share,
@@ -58,7 +67,23 @@ def generate_launch_description():
         ),
         launch_arguments={
             'gz_args': ['-r ', treasure_hunting_world_file]
-        }.items()
+        }.items(),
+        condition=IfCondition(launch_gz_gui)
+    )
+
+    # Gazebo server only
+    gazebo_server = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([
+                gz_package_share,
+                'launch',
+                'gz_sim.launch.py'
+            ])
+        ),
+        launch_arguments={
+            'gz_args': ['-s -r ', treasure_hunting_world_file]
+        }.items(),
+        condition=UnlessCondition(launch_gz_gui)
     )
 
     # Publish robot transforms
@@ -150,7 +175,8 @@ def generate_launch_description():
     return LaunchDescription([
         gz_bridge,
         gz_image_bridge,
-        gazebo,
+        gazebo_gui,
+        gazebo_server,
         robot_state_publisher,
         spawn_robot,
         rviz,
