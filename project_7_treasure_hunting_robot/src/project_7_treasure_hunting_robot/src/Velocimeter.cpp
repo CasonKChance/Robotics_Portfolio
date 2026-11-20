@@ -1,4 +1,4 @@
-#include <project_7_treasure_hunting_robot/VelocityLogger.h>
+#include <project_7_treasure_hunting_robot/Velocimeter.h>
 
 #include <functional>
 #include <cmath>
