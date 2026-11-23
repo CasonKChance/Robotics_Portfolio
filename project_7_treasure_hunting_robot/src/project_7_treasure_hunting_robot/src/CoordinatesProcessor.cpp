@@ -41,25 +41,25 @@ CoordinatesProcessor::CoordinatesProcessor(const rclcpp::NodeOptions & options)
     tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
     // Set up map->odom transform
-    map_to_odom_tf_.header.frame_id = "map";
-    map_to_odom_tf_.child_frame_id = "odom";
-    map_to_odom_tf_.transform.translation.x = 0.0;
-    map_to_odom_tf_.transform.translation.y = 0.0;
-    map_to_odom_tf_.transform.translation.z = 0.0;
+    T_map_odom_.header.frame_id = "map";
+    T_map_odom_.child_frame_id = "odom";
+    T_map_odom_.transform.translation.x = 0.0;
+    T_map_odom_.transform.translation.y = 0.0;
+    T_map_odom_.transform.translation.z = 0.0;
 
     // Robot is spawned with a yaw of 1.57 rads
     tf2::Quaternion q;
     q.setRPY(0.0, 0.0, kRobotSpawnYaw);
-    map_to_odom_tf_.transform.rotation.x = q.x();
-    map_to_odom_tf_.transform.rotation.y = q.y();
-    map_to_odom_tf_.transform.rotation.z = q.z();
-    map_to_odom_tf_.transform.rotation.w = q.w();
+    T_map_odom_.transform.rotation.x = q.x();
+    T_map_odom_.transform.rotation.y = q.y();
+    T_map_odom_.transform.rotation.z = q.z();
+    T_map_odom_.transform.rotation.w = q.w();
 
     tf_timer_ = this->create_wall_timer(
         std::chrono::milliseconds(50),
         [this]() {
-            map_to_odom_tf_.header.stamp = this->get_clock()->now();
-            tf_broadcaster_->sendTransform(map_to_odom_tf_);
+            T_map_odom_.header.stamp = this->get_clock()->now();
+            tf_broadcaster_->sendTransform(T_map_odom_);
         }
     );
 }
@@ -97,11 +97,18 @@ void CoordinatesProcessor::hintCoordinatesTopicCallback(HintCoordinates::UniqueP
 void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg)
 {
     // Use IMU data to correct odom heading drift
-    geometry_msgs::msg::TransformStamped odom_to_base;
+    geometry_msgs::msg::TransformStamped T_odom_base_msg;
+    geometry_msgs::msg::TransformStamped T_map_base_msg;
 
     try {
-        odom_to_base = tf_buffer_->lookupTransform(
+        T_odom_base_msg = tf_buffer_->lookupTransform(
             "odom", 
+            "base_footprint",
+            msg->header.stamp,
+            rclcpp::Duration::from_seconds(0.1)
+        );
+        T_map_base_msg = tf_buffer_->lookupTransform(
+            "map",
             "base_footprint",
             msg->header.stamp,
             rclcpp::Duration::from_seconds(0.1)
@@ -113,24 +120,48 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
       return;
     }
     
-    double odom_yaw = tf2::getYaw(odom_to_base.transform.rotation);
-    double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
+    geometry_msgs::msg::TransformStamped T_map_base_estimate_msg;
 
-    // Set map -> odom rotation so: map_to_odom_yaw + odom_yaw == imu_yaw
-    double map_to_odom_yaw = normalizeAngle(imu_yaw - odom_yaw);
+    T_map_base_estimate_msg.header.frame_id = "map";
+    T_map_base_estimate_msg.child_frame_id = "base_footprint";
+
+    // Preserve current map position.
+    T_map_base_estimate_msg.transform.translation = T_map_base_msg.transform.translation;
+
+    // IMU gives us our better estimate of robot heading in map.
+    const double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
 
     tf2::Quaternion q;
-    q.setRPY(0.0, 0.0, map_to_odom_yaw);
-    map_to_odom_tf_.transform.rotation = tf2::toMsg(q);
+    q.setRPY(
+        0.0,
+        0.0,
+        normalizeAngle(imu_yaw)
+    );
+    q.normalize();
+
+    T_map_base_estimate_msg.transform.rotation = tf2::toMsg(q);
+
+    tf2::Transform T_odom_base;
+    tf2::Transform T_map_base_estimate;
+    
+    tf2::fromMsg(T_odom_base_msg.transform, T_odom_base);
+    tf2::fromMsg(T_map_base_estimate_msg.transform, T_map_base_estimate);
+    
+    updateMapToOdomTransform(T_odom_base, T_map_base_estimate);
 }
 
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
 {
-    geometry_msgs::msg::TransformStamped map_to_base;
+    geometry_msgs::msg::TransformStamped T_map_base_msg;
+    geometry_msgs::msg::TransformStamped T_odom_base_msg;
 
     try {
-        map_to_base = tf_buffer_->lookupTransform(
-            "map", "base_footprint", tf2::TimePointZero);
+        T_map_base_msg = tf_buffer_->lookupTransform(
+            "map", "base_footprint", tf2::TimePointZero
+        );
+        T_odom_base_msg = tf_buffer_->lookupTransform(
+            "odom", "base_footprint", tf2::TimePointZero
+        );
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
           this->get_logger(), *this->get_clock(), 1000,
@@ -138,13 +169,18 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
       return;
     }
 
-    double error_x = current_coordinates.x - map_to_base.transform.translation.x;
-    double error_y = current_coordinates.y - map_to_base.transform.translation.y;
-    double error_z = current_coordinates.z - map_to_base.transform.translation.z;
+    geometry_msgs::msg::TransformStamped T_map_base_estimate_msg;
 
-    map_to_odom_tf_.transform.translation.x += error_x;
-    map_to_odom_tf_.transform.translation.y += error_y;
-    map_to_odom_tf_.transform.translation.z += error_z;
+    T_map_base_estimate_msg.header.frame_id = "map";
+    T_map_base_estimate_msg.child_frame_id = "base_footprint";
+
+    // Landmark tells us the robot's known map coordinates
+    T_map_base_estimate_msg.transform.translation.x = current_coordinates.x;
+    T_map_base_estimate_msg.transform.translation.y = current_coordinates.y;
+    T_map_base_estimate_msg.transform.translation.z = current_coordinates.z;
+
+    // Preserve T_map_base orientation
+    T_map_base_estimate_msg.transform.rotation = T_map_base_msg.transform.rotation;
 
     RCLCPP_DEBUG(
         this->get_logger(), 
@@ -157,8 +193,23 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
         current_coordinates.z
     );
 
-    map_to_odom_tf_.header.stamp = this->get_clock()->now();
-    tf_broadcaster_->sendTransform(map_to_odom_tf_);
+    tf2::Transform T_odom_base;
+    tf2::Transform T_map_base_estimate;
+    
+    tf2::fromMsg(T_odom_base_msg.transform, T_odom_base);
+    tf2::fromMsg(T_map_base_estimate_msg.transform, T_map_base_estimate);
+
+    updateMapToOdomTransform(T_odom_base, T_map_base_estimate);
+}
+
+void CoordinatesProcessor::updateMapToOdomTransform(const tf2::Transform& T_odom_base, const tf2::Transform& T_map_base_estimate)
+{
+    T_map_odom_.header.frame_id = "map";
+    T_map_odom_.child_frame_id = "odom";
+    T_map_odom_.header.stamp = this->get_clock()->now();
+    T_map_odom_.transform = tf2::toMsg(T_map_base_estimate * T_odom_base.inverse());
+
+    tf_broadcaster_->sendTransform(T_map_odom_);
 }
 
 void CoordinatesProcessor::publishVisualizationMarker()

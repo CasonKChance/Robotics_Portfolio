@@ -81,7 +81,7 @@ private:
     rclcpp::Subscription < HintCoordinates > ::SharedPtr hint_coordinates_subscription_;
     rclcpp::Subscription < sensor_msgs::msg::Imu > ::SharedPtr imu_subscription_;
     rclcpp::Publisher < visualization_msgs::msg::Marker > ::SharedPtr visualization_marker_publisher_;
-    geometry_msgs::msg::TransformStamped map_to_odom_tf_;
+    geometry_msgs::msg::TransformStamped T_map_odom_;
     rclcpp::TimerBase::SharedPtr tf_timer_;
 
     /**
@@ -95,6 +95,14 @@ private:
      * @param msg Message containing the robot's IMU measurements
      */
     void imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg);
+
+    /**
+     * @brief Updates T_map_odom as a function of T_odom_base and T_map_base
+     * 
+     * @param T_odom_base Transform describing base_footprint in the odom frame
+     * @param T_map_base Transform describing base_footprint in the map frame
+     */
+    void updateMapToOdomTransform(const tf2::Transform& T_odom_base, const tf2::Transform& T_map_base);
 
     /**
      * @brief Corrects odometry position drift using known location coordinates.
