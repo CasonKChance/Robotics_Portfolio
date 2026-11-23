@@ -104,7 +104,7 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
             "odom", 
             "base_footprint",
             msg->header.stamp,
-            rclcpp::Duration::from_seconds(0.1)
+            rclcpp::Duration::from_seconds(0.15)
         );
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
