@@ -98,20 +98,13 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
 {
     // Use IMU data to correct odom heading drift
     geometry_msgs::msg::TransformStamped T_odom_base_msg;
-    geometry_msgs::msg::TransformStamped T_map_base_msg;
 
     try {
         T_odom_base_msg = tf_buffer_->lookupTransform(
             "odom", 
             "base_footprint",
             msg->header.stamp,
-            rclcpp::Duration::from_seconds(0.15)
-        );
-        T_map_base_msg = tf_buffer_->lookupTransform(
-            "map",
-            "base_footprint",
-            msg->header.stamp,
-            rclcpp::Duration::from_seconds(0.15)
+            rclcpp::Duration::from_seconds(0.1)
         );
     } catch (const tf2::TransformException &ex) {
       RCLCPP_WARN_THROTTLE(
@@ -119,46 +112,35 @@ void CoordinatesProcessor::imuTopicCallback(sensor_msgs::msg::Imu::UniquePtr msg
           "Could not transform: %s", ex.what());
       return;
     }
-    
-    geometry_msgs::msg::TransformStamped T_map_base_estimate_msg;
 
-    T_map_base_estimate_msg.header.frame_id = "map";
-    T_map_base_estimate_msg.child_frame_id = "base_footprint";
+    tf2::Transform T_odom_base;
+    tf2::Transform T_map_odom;
 
-    // Preserve current map position.
-    T_map_base_estimate_msg.transform.translation = T_map_base_msg.transform.translation;
+    tf2::fromMsg(T_odom_base_msg.transform, T_odom_base);
+    tf2::fromMsg(T_map_odom_.transform, T_map_odom);
 
-    // IMU gives us our better estimate of robot heading in map.
-    const double imu_yaw = tf2::getYaw(msg->orientation) + kRobotSpawnYaw;
+    tf2::Transform T_map_base_estimate = T_map_odom * T_odom_base;
+
+    const double imu_yaw = normalizeAngle(tf2::getYaw(msg->orientation) + kRobotSpawnYaw);
 
     tf2::Quaternion q;
     q.setRPY(
         0.0,
         0.0,
-        normalizeAngle(imu_yaw)
+        imu_yaw
     );
     q.normalize();
 
-    T_map_base_estimate_msg.transform.rotation = tf2::toMsg(q);
-
-    tf2::Transform T_odom_base;
-    tf2::Transform T_map_base_estimate;
-    
-    tf2::fromMsg(T_odom_base_msg.transform, T_odom_base);
-    tf2::fromMsg(T_map_base_estimate_msg.transform, T_map_base_estimate);
+    T_map_base_estimate.setRotation(q);
     
     updateMapToOdomTransform(T_odom_base, T_map_base_estimate);
 }
 
 void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current_coordinates)
 {
-    geometry_msgs::msg::TransformStamped T_map_base_msg;
     geometry_msgs::msg::TransformStamped T_odom_base_msg;
 
     try {
-        T_map_base_msg = tf_buffer_->lookupTransform(
-            "map", "base_footprint", tf2::TimePointZero
-        );
         T_odom_base_msg = tf_buffer_->lookupTransform(
             "odom", "base_footprint", tf2::TimePointZero
         );
@@ -169,18 +151,22 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
       return;
     }
 
-    geometry_msgs::msg::TransformStamped T_map_base_estimate_msg;
+    tf2::Transform T_odom_base;
+    tf2::Transform T_map_odom;
 
-    T_map_base_estimate_msg.header.frame_id = "map";
-    T_map_base_estimate_msg.child_frame_id = "base_footprint";
+    tf2::fromMsg(T_odom_base_msg.transform, T_odom_base);
+    tf2::fromMsg(T_map_odom_.transform, T_map_odom);
 
-    // Landmark tells us the robot's known map coordinates
-    T_map_base_estimate_msg.transform.translation.x = current_coordinates.x;
-    T_map_base_estimate_msg.transform.translation.y = current_coordinates.y;
-    T_map_base_estimate_msg.transform.translation.z = current_coordinates.z;
+    tf2::Transform T_map_base_estimate = T_map_odom * T_odom_base;
 
-    // Preserve T_map_base orientation
-    T_map_base_estimate_msg.transform.rotation = T_map_base_msg.transform.rotation;
+    // Landmark gives us a known map position. Replace position but preserve orientation.
+    T_map_base_estimate.setOrigin(
+        tf2::Vector3(
+            current_coordinates.x,
+            current_coordinates.y,
+            current_coordinates.z
+        )
+    );
 
     RCLCPP_DEBUG(
         this->get_logger(), 
@@ -192,12 +178,6 @@ void CoordinatesProcessor::correctOdometryPositioning(const Coordinates& current
         current_coordinates.y,
         current_coordinates.z
     );
-
-    tf2::Transform T_odom_base;
-    tf2::Transform T_map_base_estimate;
-    
-    tf2::fromMsg(T_odom_base_msg.transform, T_odom_base);
-    tf2::fromMsg(T_map_base_estimate_msg.transform, T_map_base_estimate);
 
     updateMapToOdomTransform(T_odom_base, T_map_base_estimate);
 }
